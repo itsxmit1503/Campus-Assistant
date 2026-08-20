@@ -151,11 +151,17 @@ export class KnowledgeService {
     const matchedLocations = this.locations.filter(l => {
       const name = l.name.toLowerCase();
       const code = l.id.replace('loc-', '').toLowerCase();
-      const keywords = [name, code, l.building?.toLowerCase() || ''];
+      const keywords = [name, code, l.building?.toLowerCase() || '', l.type.toLowerCase()];
 
-      if (code === 'central-library') keywords.push('library', 'pustakalaya', 'granthalaya', 'লাইব্রেরি', 'लायब्ररी');
-      else if (code === 'admin-block') keywords.push('admin block', 'administrative block', 'prashasnik bhawan');
-      else if (code === 'pariksha-bhawan') keywords.push('pariksha bhawan', 'exam building');
+      if (code === 'central-library' || l.type === 'library') {
+        keywords.push('library', 'pustakalaya', 'granthalaya', 'libraries', 'reading room', 'লাইব্রেরি', 'लायब्ररी');
+      } else if (l.type === 'hostel') {
+        keywords.push('hostel', 'hostels', 'chhatravas', 'boys hostel', 'girls hostel', 'tagore', 'raman', 'vivekananda', 'gour hostel', 'saraswati', 'laxmibai', 'nivedita', 'priyadarshini');
+      } else if (code === 'admin-block') {
+        keywords.push('admin block', 'administrative block', 'prashasnik bhawan');
+      } else if (code === 'pariksha-bhawan') {
+        keywords.push('pariksha bhawan', 'exam building');
+      }
 
       return keywords.some(kw => {
         if (!kw) return false;
@@ -180,15 +186,86 @@ export class KnowledgeService {
   }
 
   /**
+   * Detects if the student is asking an exhaustive count/list query (e.g. how many, list all, all hostels, etc.)
+   */
+  isExhaustiveQuery(query: string): { isExhaustive: boolean; category?: 'boys_hostel' | 'girls_hostel' | 'hostel' | 'library' | 'campus' | 'department' | 'school' } {
+    const q = query.toLowerCase();
+    const isCountOrList = /\b(how many|total|number of|list all|all|kitne|kitna|kaun kaun se|saare|sabhi|kya kya)\b/i.test(q) ||
+                          /\b(only one|sirf ek|ek hi)\b/i.test(q);
+
+    if (/\b(boys hostel|boys' hostel|boys hostels|men's hostel|chhatra chhatravas)\b/i.test(q)) {
+      return { isExhaustive: true, category: 'boys_hostel' };
+    }
+    if (/\b(girls hostel|girls' hostel|girls hostels|women's hostel|chhatraayein chhatravas)\b/i.test(q)) {
+      return { isExhaustive: true, category: 'girls_hostel' };
+    }
+    if (/\b(hostel|hostels|chhatravas)\b/i.test(q) && (isCountOrList || q.includes('hostel'))) {
+      return { isExhaustive: isCountOrList, category: 'hostel' };
+    }
+    if (/\b(library|libraries|pustakalaya|granthalaya)\b/i.test(q) && (isCountOrList || q.includes('library') || q.includes('libraries'))) {
+      return { isExhaustive: isCountOrList, category: 'library' };
+    }
+    if (/\b(campus|campuses|parisar)\b/i.test(q)) {
+      return { isExhaustive: true, category: 'campus' };
+    }
+    if (/\b(departments|all departments|kitne department|kul vibhag)\b/i.test(q)) {
+      return { isExhaustive: true, category: 'department' };
+    }
+    if (/\b(schools|all schools|kitne school|kul sankay)\b/i.test(q)) {
+      return { isExhaustive: true, category: 'school' };
+    }
+
+    return { isExhaustive: false };
+  }
+
+  /**
    * Generates rich, complete, targeted context snippet for Gemini
    */
   getCompactContextForQuery(query: string, history: Array<{ role: 'user' | 'assistant'; content: string }> = []): string {
+    const exhaustive = this.isExhaustiveQuery(query);
     const { matchedServices, matchedOffices, matchedDepartments, matchedLocations } = this.findRelevantContext(query, history);
 
     const parts: string[] = [
       `University: ${this.university.name} (${this.university.shortName}, est. ${this.university.establishedYear}), Sagar, MP. Official: ${this.university.officialWebsite}`,
-      `Campus Structure: 11 Schools, ${this.departments.length} Academic Departments across Valley Campus & Upper Campus (Patharia Hills).`
+      `Campus Structure: 2 Primary Campuses:
+1. Valley Campus (Gour Nagar): Contains Department of Computer Science & Applications (CSA) & specific lower campus facilities.
+2. Upper Campus (Patharia Hills): Main administrative block (Prashasnik Bhawan), Pariksha Bhawan, Central Library, Science complex (Physics, Chemistry, Botany), Law, Management, DSW, University Health Centre, Hostels, Stadium.`
     ];
+
+    // ── Exhaustive Category Handling ──────────────────────────────────────────
+    if (exhaustive.category === 'boys_hostel') {
+      const boysHostels = this.locations.filter(l => l.type === 'hostel' && l.name.toLowerCase().includes("boys"));
+      parts.push(`OFFICIAL VERIFIED BOYS' HOSTELS COUNT: ${boysHostels.length}
+List of all ${boysHostels.length} Boys' Hostels:
+${boysHostels.map((h, i) => `${i + 1}. **${h.name}** (Building: ${h.building}, Location: ${h.campus || 'Upper Campus, Patharia Hills'}, Landmark: ${h.landmark})`).join('\n')}
+* Hostel Administration: Chief Warden Office is situated at Tagore Hostel Complex.`);
+    } else if (exhaustive.category === 'girls_hostel') {
+      const girlsHostels = this.locations.filter(l => l.type === 'hostel' && l.name.toLowerCase().includes("girls"));
+      parts.push(`OFFICIAL VERIFIED GIRLS' HOSTELS COUNT: ${girlsHostels.length}
+List of all ${girlsHostels.length} Girls' Hostels:
+${girlsHostels.map((h, i) => `${i + 1}. **${h.name}** (Building: ${h.building}, Location: ${h.campus || 'Upper Campus, Patharia Hills'}, Landmark: ${h.landmark})`).join('\n')}
+* 24x7 Security and female warden supervision available.`);
+    } else if (exhaustive.category === 'hostel') {
+      const allHostels = this.locations.filter(l => l.type === 'hostel');
+      const boys = allHostels.filter(h => h.name.toLowerCase().includes('boys'));
+      const girls = allHostels.filter(h => h.name.toLowerCase().includes('girls'));
+      parts.push(`OFFICIAL VERIFIED HOSTELS SUMMARY (Total: ${allHostels.length} Hostels - ${boys.length} Boys' Hostels & ${girls.length} Girls' Hostels):
+• Boys' Hostels (${boys.length}):
+${boys.map((h, i) => `  ${i + 1}. **${h.name}** (${h.campus || 'Upper Campus, Patharia Hills'})`).join('\n')}
+• Girls' Hostels (${girls.length}):
+${girls.map((h, i) => `  ${i + 1}. **${h.name}** (${h.campus || 'Upper Campus, Patharia Hills'})`).join('\n')}
+• Administration: Chief Warden Office (Tagore Hostel Complex).`);
+    } else if (exhaustive.category === 'library') {
+      const libraries = this.locations.filter(l => l.type === 'library');
+      parts.push(`OFFICIAL VERIFIED LIBRARIES IN UNIVERSITY:
+1. **Jawaharlal Nehru Central Library**: The primary central university library with >400,000 volumes, e-resource labs (DELNET, e-ShodhSindhu), and reading halls on Upper Campus.
+2. **Departmental Libraries & Reading Rooms**: Specialized departmental libraries and reading collections maintained across academic departments (Science, Law, Management, CSA, etc.).
+* IMPORTANT TRUTH: The Central Library is the main library, but it is NOT the only library on campus because departmental libraries also operate.`);
+    } else if (exhaustive.category === 'campus') {
+      parts.push(`OFFICIAL VERIFIED CAMPUSES (Total: 2 Campuses):
+1. **Valley Campus (Gour Nagar)**: Located at the base, houses Department of Computer Science & Applications (CSA) and specific computing facilities.
+2. **Upper Campus (Patharia Hills)**: The main hilltop campus housing Administrative Block (Prashasnik Bhawan), Pariksha Bhawan, Central Library, Science Complex, Law, Management, Hostels, and Health Centre.`);
+    }
 
     if (matchedDepartments.length > 0) {
       parts.push(`MATCHED ACADEMIC DEPARTMENTS:\n` + matchedDepartments.map(d => 
@@ -218,9 +295,10 @@ export class KnowledgeService {
       ).join('\n\n'));
     }
 
-    if (matchedLocations.length > 0) {
+    if (matchedLocations.length > 0 && !exhaustive.category) {
       parts.push(`MATCHED CAMPUS LOCATIONS:\n` + matchedLocations.map(l => 
         `• Location: ${l.name}
+  - Type: ${l.type}
   - Campus: ${l.campus || (l.id === 'loc-csa-building' ? 'Valley Campus' : 'Upper Campus (Patharia Hills)')}
   - Building: ${l.building}
   - Landmark: ${l.landmark || 'Patharia Hills Campus'}

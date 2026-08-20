@@ -3,6 +3,7 @@
     "id": "loc-admin-block",
     "name": "Administrative Building (Prashasnik Bhawan)",
     "type": "administrative",
+    "campus": "Upper Campus (Patharia Hills)",
     "building": "Prashasnik Bhawan",
     "description": "Main nerve centre of the university housing Vice Chancellor Secretariat, Registrar Office, Finance & Accounts Branch, Scholarship Section, and Proctor Office.",
     "landmark": "Near Main University Flagpost & Patharia Hills Campus Entry",
@@ -12,12 +13,14 @@
       "lng": 78.7752
     },
     "mapLink": "https://maps.google.com/?q=Administrative+Block+DHSGSU+Sagar",
+    "googleMapsUrl": "https://maps.google.com/?q=Administrative+Block+DHSGSU+Sagar",
     "relatedOffices": ["office-registrar-academic", "office-finance-branch", "office-scholarship-cell", "office-anti-ragging-proctor"]
   },
   {
     "id": "loc-pariksha-bhawan",
     "name": "Examination Building (Pariksha Bhawan)",
     "type": "administrative",
+    "campus": "Upper Campus (Patharia Hills)",
     "building": "Pariksha Bhawan",
     "description": "Houses Controller of Examinations (CoE), examination confidential sections, marksheet issuance counters, and grievance desk for exam queries.",
     "landmark": "Adjacent to the Main Administrative Block",
@@ -27,14 +30,16 @@
       "lng": 78.7759
     },
     "mapLink": "https://maps.google.com/?q=Examination+Cell+DHSGSU+Sagar",
+    "googleMapsUrl": "https://maps.google.com/?q=Examination+Cell+DHSGSU+Sagar",
     "relatedOffices": ["office-exam-cell"]
   },
   {
     "id": "loc-central-library",
     "name": "Jawaharlal Nehru Central Library",
     "type": "library",
+    "campus": "Upper Campus (Patharia Hills)",
     "building": "Central Library Building",
-    "description": "Multi-storey modern university library housing over 400,000 volumes, reading halls, e-resource laboratory, periodicals, and research carrels.",
+    "description": "Primary central university library housing over 400,000 volumes, e-resource laboratory (e-ShodhSindhu, DELNET), reading halls, periodicals, and research carrels.",
     "landmark": "Centrally situated between Faculty of Arts and Science Complex",
     "floor": "Ground, 1st & 2nd Floors",
     "coordinates": {
@@ -42,7 +47,24 @@
       "lng": 78.7766
     },
     "mapLink": "https://maps.google.com/?q=Central+Library+DHSGSU+Sagar",
+    "googleMapsUrl": "https://maps.google.com/?q=Central+Library+DHSGSU+Sagar",
     "relatedOffices": ["office-registrar-academic"]
+  },
+  {
+    "id": "loc-dept-libraries",
+    "name": "Departmental Libraries & Reading Rooms",
+    "type": "library",
+    "campus": "Upper Campus & Valley Campus",
+    "building": "Respective Academic Department Buildings",
+    "description": "Specialized departmental reference libraries and reading collections maintained across academic departments (including Science, Law, Management, and Engineering).",
+    "landmark": "Located within respective Department Buildings across Campus",
+    "floor": "Various Floors",
+    "coordinates": {
+      "lat": 23.8358,
+      "lng": 78.7768
+    },
+    "mapLink": "https://maps.google.com/?q=DHSGSU+University+Campus+Sagar",
+    "googleMapsUrl": "https://maps.google.com/?q=DHSGSU+University+Campus+Sagar"
   },
   {
     "id": "loc-csa-building",
@@ -65,6 +87,7 @@
     "id": "loc-dsw-building",
     "name": "Dean Students' Welfare (DSW) Complex",
     "type": "facility",
+    "campus": "Upper Campus (Patharia Hills)",
     "building": "DSW Building",
     "description": "Hub for cultural activities, student union & welfare counseling, scholarship facilitation, youth festival preparations, and student clubs.",
     "landmark": "Opposite Student Activity Centre / University Auditorium",
@@ -74,27 +97,31 @@
       "lng": 78.7745
     },
     "mapLink": "https://maps.google.com/?q=Dean+Students+Welfare+DHSGSU+Sagar",
+    "googleMapsUrl": "https://maps.google.com/?q=Dean+Students+Welfare+DHSGSU+Sagar",
     "relatedOffices": ["office-dsw", "office-scholarship-cell"]
   },
   {
     "id": "loc-health-centre",
     "name": "University Health Centre",
     "type": "medical",
+    "campus": "Upper Campus (Patharia Hills)",
     "building": "Health Centre",
     "description": "On-campus health facility providing OPD consultations, emergency medical care, dressing, free generic medicines, and ambulance transport.",
-    "landmark": "Near Tagore Hostel & Residential Quarters",
+    "landmark": "Near Tagore Hostel & Residential Quarters, Patharia Hills",
     "floor": "Ground Floor",
     "coordinates": {
       "lat": 23.8328,
       "lng": 78.7735
     },
     "mapLink": "https://maps.google.com/?q=University+Health+Centre+DHSGSU+Sagar",
+    "googleMapsUrl": "https://maps.google.com/?q=University+Health+Centre+DHSGSU+Sagar",
     "relatedOffices": ["office-health-centre"]
   },
   {
-    "id": "loc-tagore-hostel",
-    "name": "Rabindranath Tagore Boys' Hostel & Chief Warden Office",
+    "id": "loc-hostel-tagore",
+    "name": "Rabindranath Tagore Boys' Hostel",
     "type": "hostel",
+    "campus": "Upper Campus (Patharia Hills)",
     "building": "Tagore Hostel Complex",
     "description": "Prominent boys' hostel and headquarters of the Chief Warden Office for university hostel administration.",
     "landmark": "Hostel Zone, Upper Patharia Hills",
@@ -103,19 +130,134 @@
       "lng": 78.7728
     },
     "mapLink": "https://maps.google.com/?q=Tagore+Hostel+DHSGSU+Sagar",
+    "googleMapsUrl": "https://maps.google.com/?q=Tagore+Hostel+DHSGSU+Sagar",
+    "relatedOffices": ["office-hostel-chief-warden"]
+  },
+  {
+    "id": "loc-hostel-raman",
+    "name": "C.V. Raman Boys' Hostel",
+    "type": "hostel",
+    "campus": "Upper Campus (Patharia Hills)",
+    "building": "C.V. Raman Hostel Building",
+    "description": "University boys' hostel accommodating postgraduate and undergraduate science and engineering students.",
+    "landmark": "Hostel Zone, Patharia Hills",
+    "coordinates": {
+      "lat": 23.8325,
+      "lng": 78.7731
+    },
+    "mapLink": "https://maps.google.com/?q=C+V+Raman+Hostel+DHSGSU+Sagar",
+    "googleMapsUrl": "https://maps.google.com/?q=C+V+Raman+Hostel+DHSGSU+Sagar",
+    "relatedOffices": ["office-hostel-chief-warden"]
+  },
+  {
+    "id": "loc-hostel-vivekananda",
+    "name": "Swami Vivekananda Boys' Hostel",
+    "type": "hostel",
+    "campus": "Upper Campus (Patharia Hills)",
+    "building": "Vivekananda Hostel Building",
+    "description": "Boys' hostel providing accommodation with dining hall, recreational facilities, and study rooms.",
+    "landmark": "Hostel Zone, Patharia Hills",
+    "coordinates": {
+      "lat": 23.8320,
+      "lng": 78.7725
+    },
+    "mapLink": "https://maps.google.com/?q=Vivekananda+Hostel+DHSGSU+Sagar",
+    "googleMapsUrl": "https://maps.google.com/?q=Vivekananda+Hostel+DHSGSU+Sagar",
+    "relatedOffices": ["office-hostel-chief-warden"]
+  },
+  {
+    "id": "loc-hostel-gour",
+    "name": "Dr. Harisingh Gour Boys' Hostel",
+    "type": "hostel",
+    "campus": "Upper Campus (Patharia Hills)",
+    "building": "Gour Boys' Hostel Complex",
+    "description": "Senior boys' hostel offering residential accommodation and research scholar facilities.",
+    "landmark": "Hostel Zone, Patharia Hills",
+    "coordinates": {
+      "lat": 23.8318,
+      "lng": 78.7722
+    },
+    "mapLink": "https://maps.google.com/?q=Gour+Hostel+DHSGSU+Sagar",
+    "googleMapsUrl": "https://maps.google.com/?q=Gour+Hostel+DHSGSU+Sagar",
+    "relatedOffices": ["office-hostel-chief-warden"]
+  },
+  {
+    "id": "loc-hostel-saraswati",
+    "name": "Saraswati Girls' Hostel",
+    "type": "hostel",
+    "campus": "Upper Campus (Patharia Hills)",
+    "building": "Saraswati Girls' Hostel Complex",
+    "description": "Secure girls' hostel with warden supervision, dining mess, common reading room, and sports facilities.",
+    "landmark": "Girls Hostel Enclave, Patharia Hills",
+    "coordinates": {
+      "lat": 23.8332,
+      "lng": 78.7740
+    },
+    "mapLink": "https://maps.google.com/?q=Saraswati+Girls+Hostel+DHSGSU+Sagar",
+    "googleMapsUrl": "https://maps.google.com/?q=Saraswati+Girls+Hostel+DHSGSU+Sagar",
+    "relatedOffices": ["office-hostel-chief-warden"]
+  },
+  {
+    "id": "loc-hostel-laxmibai",
+    "name": "Rani Laxmibai Girls' Hostel",
+    "type": "hostel",
+    "campus": "Upper Campus (Patharia Hills)",
+    "building": "Rani Laxmibai Hostel Complex",
+    "description": "Girls' hostel with round-the-clock security, Wi-Fi connectivity, mess facilities, and solar water heating.",
+    "landmark": "Girls Hostel Enclave, Patharia Hills",
+    "coordinates": {
+      "lat": 23.8335,
+      "lng": 78.7742
+    },
+    "mapLink": "https://maps.google.com/?q=Rani+Laxmibai+Hostel+DHSGSU+Sagar",
+    "googleMapsUrl": "https://maps.google.com/?q=Rani+Laxmibai+Hostel+DHSGSU+Sagar",
+    "relatedOffices": ["office-hostel-chief-warden"]
+  },
+  {
+    "id": "loc-hostel-nivedita",
+    "name": "Sister Nivedita Girls' Hostel",
+    "type": "hostel",
+    "campus": "Upper Campus (Patharia Hills)",
+    "building": "Nivedita Hostel Complex",
+    "description": "University girls' hostel for postgraduate and doctoral research scholars.",
+    "landmark": "Girls Hostel Enclave, Patharia Hills",
+    "coordinates": {
+      "lat": 23.8338,
+      "lng": 78.7744
+    },
+    "mapLink": "https://maps.google.com/?q=Nivedita+Girls+Hostel+DHSGSU+Sagar",
+    "googleMapsUrl": "https://maps.google.com/?q=Nivedita+Girls+Hostel+DHSGSU+Sagar",
+    "relatedOffices": ["office-hostel-chief-warden"]
+  },
+  {
+    "id": "loc-hostel-priyadarshini",
+    "name": "Priyadarshini Girls' Hostel",
+    "type": "hostel",
+    "campus": "Upper Campus (Patharia Hills)",
+    "building": "Priyadarshini Hostel Complex",
+    "description": "Girls' hostel providing residential accommodation with mess, gym, and 24x7 security surveillance.",
+    "landmark": "Girls Hostel Enclave, Patharia Hills",
+    "coordinates": {
+      "lat": 23.8340,
+      "lng": 78.7746
+    },
+    "mapLink": "https://maps.google.com/?q=Priyadarshini+Girls+Hostel+DHSGSU+Sagar",
+    "googleMapsUrl": "https://maps.google.com/?q=Priyadarshini+Girls+Hostel+DHSGSU+Sagar",
     "relatedOffices": ["office-hostel-chief-warden"]
   },
   {
     "id": "loc-sports-complex",
     "name": "University Sports Complex & Gymnasium",
     "type": "sports",
+    "campus": "Upper Campus (Patharia Hills)",
     "building": "University Stadium & Indoor Gym",
     "description": "Facilities for athletics, football, cricket, basketball, badminton, table tennis, and a modern gymnasium for students and athletes.",
-    "landmark": "Near Main University Stadium",
+    "landmark": "Near Main University Stadium, Patharia Hills",
     "coordinates": {
       "lat": 23.8315,
       "lng": 78.7761
     },
-    "mapLink": "https://maps.google.com/?q=University+Stadium+DHSGSU+Sagar"
+    "mapLink": "https://maps.google.com/?q=University+Stadium+DHSGSU+Sagar",
+    "googleMapsUrl": "https://maps.google.com/?q=University+Stadium+DHSGSU+Sagar"
   }
 ]

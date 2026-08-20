@@ -1,0 +1,40 @@
+{
+  "name": "Dr. Harisingh Gour Vishwavidyalaya",
+  "shortName": "DHSGSU",
+  "hindiName": "डॉ. हरीसिंह गौर विश्वविद्यालय",
+  "tagline": "A Central University (NAAC 'A' Grade Accredited)",
+  "establishedYear": 1946,
+  "founder": "Sir Dr. Harisingh Gour",
+  "accreditation": "NAAC 'A' Grade",
+  "type": "Central University (Under Ministry of Education, Govt. of India)",
+  "officialWebsite": "https://dhsgsu.edu.in/index.php/en/",
+  "campusArea": "approx. 1300 acres over Patharia Hills",
+  "location": {
+    "address": "Patharia Hills, Sagar",
+    "city": "Sagar",
+    "district": "Sagar",
+    "state": "Madhya Pradesh",
+    "pincode": "470003",
+    "mapLink": "https://maps.google.com/?q=Dr.+Harisingh+Gour+Vishwavidyalaya+Sagar",
+    "coordinates": {
+      "lat": 23.8343,
+      "lng": 78.7758
+    }
+  },
+  "authorities": {
+    "visitor": "Hon'ble President of India",
+    "chancellor": "Hon'ble Chancellor, DHSGSU",
+    "viceChancellor": "Prof. Neelima Gupta",
+    "registrar": "Office of the Registrar",
+    "financeOfficer": "Office of the Finance Officer",
+    "controllerOfExaminations": "Controller of Examinations (CoE)",
+    "deanStudentsWelfare": "Dean, Students' Welfare (DSW)",
+    "chiefProctor": "Office of the Chief Proctor"
+  },
+  "helpline": {
+    "generalEnquiry": "07582-265810",
+    "admissionHelpdesk": "07582-265833",
+    "examinationHelpdesk": "07582-264445",
+    "email": "registrar@dhsgsu.edu.in"
+  }
+}

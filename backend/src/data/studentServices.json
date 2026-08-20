@@ -1,0 +1,299 @@
+[
+  {
+    "id": "service-scholarship-support",
+    "name": "Scholarship Assistance (MP Taas / NSP / Fellowship)",
+    "category": "Scholarship",
+    "description": "Guidance and institutional approval for State Scholarships (MP Taas Portal for SC/ST/OBC), National Scholarship Portal (NSP), Central Sector Schemes, and UGC fellowships.",
+    "commonProblems": [
+      "Meri scholarship nahi aayi",
+      "Scholarship ka paisa kab aayega",
+      "Scholarship renewal form verify karwana hai",
+      "NSP portal verification pending at institute level",
+      "MP Taas scholarship status checking",
+      "Bank account seeding / NPCI link issue"
+    ],
+    "responsibleOfficeId": "office-scholarship-cell",
+    "responsibleOfficeName": "University Scholarship & Fellowship Cell / DSW Office",
+    "location": "Room No. 12, Main Administrative Block / DSW Building",
+    "requiredDocuments": [
+      "Current Semester Fee Receipt",
+      "Student ID Card or Admission Slip",
+      "Previous Year Marksheets (Self-attested)",
+      "Income Certificate (Current financial year, issued by Tehsildar)",
+      "Caste Certificate (for SC/ST/OBC applicants)",
+      "Domicile Certificate (Mool Niwas Praman Patra)",
+      "Aadhaar Card linked with Bank Account (NPCI seeded bank passbook copy)"
+    ],
+    "process": [
+      "Submit your online application on MP Taas (mptaas.mp.gov.in) or NSP (scholarships.gov.in).",
+      "Print the filled application form and attach all self-attested documents.",
+      "Get the form endorsed by your Department HOD.",
+      "Submit the physical copy at the University Scholarship Cell (Admin Block, Room 12).",
+      "The nodal officer will verify and approve the application at the institutional level."
+    ],
+    "officialSourceUrl": "https://dhsgsu.edu.in/index.php/en/student-services/scholarships",
+    "relatedServices": ["service-bonafide-cert", "service-fee-reconciliation", "service-student-grievance"],
+    "verified": true
+  },
+  {
+    "id": "service-marksheet-correction",
+    "name": "Marksheet Error Correction & Duplicate Marksheet",
+    "category": "Certificates",
+    "description": "Correction of student's name, parent's name, enrollment number, subject code, or internal marks discrepancies on semester marksheets, as well as applying for duplicate marksheets.",
+    "commonProblems": [
+      "Marksheet mein correction karwana hai",
+      "Marksheet mein spelling mistake ho gayi hai",
+      "Marksheet kho gayi hai, duplicate marksheet kaise milegi",
+      "Internal marks absent ya zero dikha raha hai marksheet par"
+    ],
+    "responsibleOfficeId": "office-exam-cell",
+    "responsibleOfficeName": "Examination Cell (Controller of Examinations)",
+    "location": "Examination Building (Pariksha Bhawan), Near Main Administrative Block",
+    "requiredDocuments": [
+      "Written Application addressed to the Controller of Examinations (CoE)",
+      "Original erroneous marksheet (for corrections)",
+      "Class 10th (High School) marksheet/certificate for name spelling proof",
+      "Forwarding letter/signature from your Department Head (HOD)",
+      "Challan/Receipt of the prescribed correction fee (from Finance Branch)",
+      "FIR copy and Affidavit (only in case of applying for Duplicate Marksheet)"
+    ],
+    "process": [
+      "Write a formal application detailing the discrepancy.",
+      "Get the application forwarded by your Department Head.",
+      "Pay the prescribed correction fee at the Finance Section or University SBI challan.",
+      "Submit the application with the fee slip and 10th certificate at the Examination Cell counter.",
+      "Collect the corrected marksheet within 7 to 15 working days from the counter."
+    ],
+    "officialSourceUrl": "https://dhsgsu.edu.in/index.php/en/administration/examination-cell",
+    "relatedServices": ["service-duplicate-marksheet", "service-degree-transcripts", "service-exam-form-issue"],
+    "verified": true
+  },
+  {
+    "id": "service-exam-form-issue",
+    "name": "Examination Form & Fee Portal Resolution",
+    "category": "Examination",
+    "description": "Assistance with semester exam form submission, ATKT/Back-paper registration, fee debit without receipt generation, and admit card download issues.",
+    "commonProblems": [
+      "Exam form submit nahi ho raha",
+      "Exam fee pay ho gayi par unpaid dikha raha hai",
+      "Admit card download nahi ho raha",
+      "ATKT back paper subject list show nahi kar raha"
+    ],
+    "responsibleOfficeId": "office-exam-cell",
+    "responsibleOfficeName": "Examination Cell & IT Helpdesk",
+    "location": "Examination Building (Pariksha Bhawan), Ground Floor Counter",
+    "requiredDocuments": [
+      "Student Enrollment Number",
+      "Transaction ID & Bank Debit Statement (for fee payment issues)",
+      "Previous Semester Marksheet copy",
+      "Student ID Card"
+    ],
+    "process": [
+      "For payment glitches: Wait 24 hours for automated bank settlement.",
+      "If status remains unpaid, present transaction reference to the Exam Cell IT Helpdesk.",
+      "For course mismatch: Have your department course coordinator endorse your subject selection.",
+      "Re-generate admit card from the student portal after verification."
+    ],
+    "officialSourceUrl": "https://dhsgsu.edu.in/index.php/en/administration/examination-cell",
+    "relatedServices": ["service-fee-reconciliation", "service-marksheet-correction"],
+    "verified": true
+  },
+  {
+    "id": "service-bonafide-cert",
+    "name": "Bonafide Certificate & Character Certificate",
+    "category": "Certificates",
+    "description": "Issuance of official Bonafide / Study Certificate for bank education loans, scholarship verification, passport applications, and student railway concessions.",
+    "commonProblems": [
+      "Bonafide certificate kaha se milega",
+      "Education loan ke liye study certificate chahiye",
+      "Railway concession form verify karwana hai",
+      "Character certificate kaise banwaye"
+    ],
+    "responsibleOfficeId": "office-registrar-academic",
+    "responsibleOfficeName": "Academic Section (Registrar Office) & Respective Department",
+    "location": "Administrative Building (First Floor) / Department Office",
+    "requiredDocuments": [
+      "Application Form for Bonafide Certificate",
+      "Current Semester Fee Receipt",
+      "Valid Student Identity Card",
+      "Previous Semester Marksheet"
+    ],
+    "process": [
+      "Obtain the Bonafide Application form from your Department office or Academic Section.",
+      "Fill the purpose (e.g. Bank Loan, Scholarship, Bus/Train Pass, Passport).",
+      "Submit to your Department Head for preliminary verification.",
+      "Get final seal and signature at the Academic Section (Prashasnik Bhawan)."
+    ],
+    "officialSourceUrl": "https://dhsgsu.edu.in/index.php/en/administration/registrar-office",
+    "relatedServices": ["service-migration-cert", "service-scholarship-support"],
+    "verified": true
+  },
+  {
+    "id": "service-hostel-allotment",
+    "name": "Hostel Admission & Accommodation",
+    "category": "Hostel",
+    "description": "Hostel room allotment, hostel merit lists, mess enrollment, and hostel rule compliance for university hostels (Tagore, Raman, C.V. Raman, Saraswati, Rani Laxmibai, etc.).",
+    "commonProblems": [
+      "Hostel kaise milega",
+      "Hostel allotment form kaha jama karna hai",
+      "Hostel ki fees kitni hai aur merit list kab aayegi",
+      "Room allotment confirmation kaise hoga"
+    ],
+    "responsibleOfficeId": "office-hostel-chief-warden",
+    "responsibleOfficeName": "Chief Warden Office & DSW Office",
+    "location": "Hostel Office Complex (Tagore Hostel premises) / DSW Building",
+    "requiredDocuments": [
+      "University Admission Slip and Fee Receipt",
+      "Hostel Application Form with passport photos",
+      "Caste / Domicile Certificate (for category allotment)",
+      "Distance Proof / Permanent Residence Certificate",
+      "Anti-Ragging and Hostel Rules Undertaking by Student & Parent"
+    ],
+    "process": [
+      "Apply online for hostel allotment on the university student portal post-admission.",
+      "Check the published merit list on the university notice board / website.",
+      "If shortlisted, report to the Chief Warden Office with original documents.",
+      "Pay hostel & mess fees via university challan/portal and receive room key allotment."
+    ],
+    "officialSourceUrl": "https://dhsgsu.edu.in/index.php/en/facilities/hostels",
+    "relatedServices": ["service-medical-assistance", "service-anti-ragging"],
+    "verified": true
+  },
+  {
+    "id": "service-library-access",
+    "name": "Central Library Membership & Digital Resources",
+    "category": "Library",
+    "description": "Jawaharlal Nehru Central Library services: Library membership card, book issuing/return, e-journal access (e-ShodhSindhu, DELNET), reading hall access, and thesis repository.",
+    "commonProblems": [
+      "Library kaha hai aur card kaise banega",
+      "Library timings kya hai aur Sunday ko khuli rehti hai kya",
+      "E-library access aur research paper download kaise kare",
+      "Book issue limit kitni hai"
+    ],
+    "responsibleOfficeId": "office-registrar-academic",
+    "responsibleOfficeName": "Jawaharlal Nehru Central Library Administration",
+    "location": "Jawaharlal Nehru Central Library Building (Opposite Arts Faculty)",
+    "requiredDocuments": [
+      "Student ID Card / University Admission Receipt",
+      "2 Passport-sized Photographs",
+      "Library Membership Enrollment Form endorsed by Department HOD"
+    ],
+    "process": [
+      "Collect the Library Membership Form from the Circulation Desk.",
+      "Fill your enrollment details and obtain HOD endorsement.",
+      "Submit at the Library Card section to receive your RFID Barcoded Library Card.",
+      "Borrow books (UG: 3 books, PG: 5 books, Research: 8 books) for 14-30 days."
+    ],
+    "officialSourceUrl": "https://dhsgsu.edu.in/index.php/en/facilities/library",
+    "relatedServices": ["service-bonafide-cert"],
+    "verified": true
+  },
+  {
+    "id": "service-fee-reconciliation",
+    "name": "Fee Payment Verification & Refund",
+    "category": "Admission",
+    "description": "Assistance with double payment reconciliation, fee refund on admission cancellation, and official fee clearance receipts.",
+    "commonProblems": [
+      "Fee payment ho gaya but portal par update nahi hua",
+      "Account se paise kat gaye admission portal par pending hai",
+      "Double transaction fee refund application"
+    ],
+    "responsibleOfficeId": "office-finance-branch",
+    "responsibleOfficeName": "Finance & Accounts Branch",
+    "location": "Main Administrative Building (Prashasnik Bhawan), Ground Floor",
+    "requiredDocuments": [
+      "Bank Account Statement / Debit Transaction Proof (with UTR Number)",
+      "University Online Registration / Form Number",
+      "Application stating double deduction details",
+      "Cancelled Cheque or Bank Passbook copy for refund processing"
+    ],
+    "process": [
+      "Wait 24-48 banking hours for auto-reconciliation.",
+      "If still uncredited, visit Finance Branch with bank debit confirmation.",
+      "Finance branch reconciles with SBI Gateway and updates the student ledger."
+    ],
+    "officialSourceUrl": "https://dhsgsu.edu.in/index.php/en/administration/finance-office",
+    "relatedServices": ["service-scholarship-support", "service-exam-form-issue"],
+    "verified": true
+  },
+  {
+    "id": "service-medical-assistance",
+    "name": "University Medical & Health Services",
+    "category": "Medical",
+    "description": "Free doctor consultations, basic diagnostics, essential medicines, first-aid, ambulance service, and medical fitness certificates for students.",
+    "commonProblems": [
+      "University mein medical facility hai kya",
+      "Doctor consultation aur emergency medicines",
+      "Ambulance service campus mein kaise milegi"
+    ],
+    "responsibleOfficeId": "office-health-centre",
+    "responsibleOfficeName": "University Health Centre",
+    "location": "Health Centre Building, Patharia Hills Campus (Near Hostels)",
+    "requiredDocuments": [
+      "Valid Student Identity Card (for free medicines & OPD registration)"
+    ],
+    "process": [
+      "Visit Health Centre OPD during operating hours (8:00 AM - 1:00 PM / 4:00 PM - 7:00 PM).",
+      "Show Student ID at the registration desk for free OPD slip.",
+      "Consult Medical Officer and collect prescribed medicines from the pharmacy counter.",
+      "For emergency medical ambulance, contact Health Centre Helpline: 07582-265825."
+    ],
+    "officialSourceUrl": "https://dhsgsu.edu.in/index.php/en/facilities/health-centre",
+    "relatedServices": ["service-hostel-allotment"],
+    "verified": true
+  },
+  {
+    "id": "service-anti-ragging",
+    "name": "Anti-Ragging & Campus Safety Helpline",
+    "category": "Grievance",
+    "description": "Strict anti-ragging cell, quick grievance response, 24x7 security helpline, and student counseling to guarantee a ragging-free campus.",
+    "commonProblems": [
+      "Anti-ragging complaint kahan register kare",
+      "Campus security assistance",
+      "Online anti-ragging affidavit submission"
+    ],
+    "responsibleOfficeId": "office-anti-ragging-proctor",
+    "responsibleOfficeName": "Chief Proctor Office & Anti-Ragging Committee",
+    "location": "Administrative Building, Ground Floor / 24x7 Helpline",
+    "requiredDocuments": [
+      "Anti-Ragging Undertaking Reference Number (antiragging.in)",
+      "Incident details / complaint letter (can be submitted confidentially)"
+    ],
+    "process": [
+      "Immediate Toll-Free National Anti-Ragging Helpline: 1800-180-5522.",
+      "Contact University Proctorial Board / DSW office directly.",
+      "Submit written complaint in the grievance box or via proctor@dhsgsu.edu.in.",
+      "Action is initiated immediately with strict confidentiality."
+    ],
+    "officialSourceUrl": "https://dhsgsu.edu.in/index.php/en/student-services/anti-ragging",
+    "relatedServices": ["service-student-grievance"],
+    "verified": true
+  },
+  {
+    "id": "service-student-grievance",
+    "name": "Student Grievance Redressal Mechanism",
+    "category": "Grievance",
+    "description": "Formal institutional mechanism for students to raise concerns regarding academic, administrative, evaluation, or campus life issues without fear of prejudice.",
+    "commonProblems": [
+      "Mujhe complaint / grievance register karni hai",
+      "Department level problem solve nahi ho rahi",
+      "Dean ya Vice-Chancellor grievance cell"
+    ],
+    "responsibleOfficeId": "office-dsw",
+    "responsibleOfficeName": "Dean of Students' Welfare (DSW) & Grievance Redressal Committee",
+    "location": "DSW Building, DHSGSU Campus",
+    "requiredDocuments": [
+      "Written Grievance Application",
+      "Supporting evidence / previous communication copies",
+      "Student ID Card"
+    ],
+    "process": [
+      "Step 1: Attempt resolution at the Department HOD level.",
+      "Step 2: If unresolved, submit formal grievance to DSW Office.",
+      "Step 3: Case is examined by the Student Grievance Redressal Committee (SGRC)."
+    ],
+    "officialSourceUrl": "https://dhsgsu.edu.in/index.php/en/student-services/student-grievance",
+    "relatedServices": ["service-anti-ragging", "service-scholarship-support"],
+    "verified": true
+  }
+]

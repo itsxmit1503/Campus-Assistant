@@ -1,0 +1,119 @@
+[
+  {
+    "id": "loc-admin-block",
+    "name": "Administrative Building (Prashasnik Bhawan)",
+    "type": "administrative",
+    "building": "Prashasnik Bhawan",
+    "description": "Main nerve centre of the university housing Vice Chancellor Secretariat, Registrar Office, Finance & Accounts Branch, Scholarship Section, and Proctor Office.",
+    "landmark": "Near Main University Flagpost & Patharia Hills Campus Entry",
+    "floor": "Ground, First & Second Floors",
+    "coordinates": {
+      "lat": 23.8345,
+      "lng": 78.7752
+    },
+    "mapLink": "https://maps.google.com/?q=Administrative+Block+DHSGSU+Sagar",
+    "relatedOffices": ["office-registrar-academic", "office-finance-branch", "office-scholarship-cell", "office-anti-ragging-proctor"]
+  },
+  {
+    "id": "loc-pariksha-bhawan",
+    "name": "Examination Building (Pariksha Bhawan)",
+    "type": "administrative",
+    "building": "Pariksha Bhawan",
+    "description": "Houses Controller of Examinations (CoE), examination confidential sections, marksheet issuance counters, and grievance desk for exam queries.",
+    "landmark": "Adjacent to the Main Administrative Block",
+    "floor": "Ground and First Floor",
+    "coordinates": {
+      "lat": 23.8348,
+      "lng": 78.7759
+    },
+    "mapLink": "https://maps.google.com/?q=Examination+Cell+DHSGSU+Sagar",
+    "relatedOffices": ["office-exam-cell"]
+  },
+  {
+    "id": "loc-central-library",
+    "name": "Jawaharlal Nehru Central Library",
+    "type": "library",
+    "building": "Central Library Building",
+    "description": "Multi-storey modern university library housing over 400,000 volumes, reading halls, e-resource laboratory, periodicals, and research carrels.",
+    "landmark": "Centrally situated between Faculty of Arts and Science Complex",
+    "floor": "Ground, 1st & 2nd Floors",
+    "coordinates": {
+      "lat": 23.8355,
+      "lng": 78.7766
+    },
+    "mapLink": "https://maps.google.com/?q=Central+Library+DHSGSU+Sagar",
+    "relatedOffices": ["office-registrar-academic"]
+  },
+  {
+    "id": "loc-csa-building",
+    "name": "Computer Science & Applications (CSA) Building",
+    "type": "academic",
+    "building": "CSA & IT Complex",
+    "description": "Houses Department of Computer Science & Applications (MCA, M.Sc., Ph.D.), computer labs, software engineering center, and server rooms.",
+    "landmark": "Near Central Library & Applied Science Block",
+    "floor": "Ground & 1st Floor",
+    "coordinates": {
+      "lat": 23.8361,
+      "lng": 78.7772
+    },
+    "mapLink": "https://maps.google.com/?q=Department+of+Computer+Science+DHSGSU+Sagar",
+    "relatedDepartments": ["dept-cs-applications"]
+  },
+  {
+    "id": "loc-dsw-building",
+    "name": "Dean Students' Welfare (DSW) Complex",
+    "type": "facility",
+    "building": "DSW Building",
+    "description": "Hub for cultural activities, student union & welfare counseling, scholarship facilitation, youth festival preparations, and student clubs.",
+    "landmark": "Opposite Student Activity Centre / University Auditorium",
+    "floor": "Ground Floor",
+    "coordinates": {
+      "lat": 23.8339,
+      "lng": 78.7745
+    },
+    "mapLink": "https://maps.google.com/?q=Dean+Students+Welfare+DHSGSU+Sagar",
+    "relatedOffices": ["office-dsw", "office-scholarship-cell"]
+  },
+  {
+    "id": "loc-health-centre",
+    "name": "University Health Centre",
+    "type": "medical",
+    "building": "Health Centre",
+    "description": "On-campus health facility providing OPD consultations, emergency medical care, dressing, free generic medicines, and ambulance transport.",
+    "landmark": "Near Tagore Hostel & Residential Quarters",
+    "floor": "Ground Floor",
+    "coordinates": {
+      "lat": 23.8328,
+      "lng": 78.7735
+    },
+    "mapLink": "https://maps.google.com/?q=University+Health+Centre+DHSGSU+Sagar",
+    "relatedOffices": ["office-health-centre"]
+  },
+  {
+    "id": "loc-tagore-hostel",
+    "name": "Rabindranath Tagore Boys' Hostel & Chief Warden Office",
+    "type": "hostel",
+    "building": "Tagore Hostel Complex",
+    "description": "Prominent boys' hostel and headquarters of the Chief Warden Office for university hostel administration.",
+    "landmark": "Hostel Zone, Upper Patharia Hills",
+    "coordinates": {
+      "lat": 23.8322,
+      "lng": 78.7728
+    },
+    "mapLink": "https://maps.google.com/?q=Tagore+Hostel+DHSGSU+Sagar",
+    "relatedOffices": ["office-hostel-chief-warden"]
+  },
+  {
+    "id": "loc-sports-complex",
+    "name": "University Sports Complex & Gymnasium",
+    "type": "sports",
+    "building": "University Stadium & Indoor Gym",
+    "description": "Facilities for athletics, football, cricket, basketball, badminton, table tennis, and a modern gymnasium for students and athletes.",
+    "landmark": "Near Main University Stadium",
+    "coordinates": {
+      "lat": 23.8315,
+      "lng": 78.7761
+    },
+    "mapLink": "https://maps.google.com/?q=University+Stadium+DHSGSU+Sagar"
+  }
+]

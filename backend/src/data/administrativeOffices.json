@@ -1,0 +1,247 @@
+[
+  {
+    "id": "office-exam-cell",
+    "name": "Examination Cell (Office of the Controller of Examinations)",
+    "hindiName": "परीक्षा नियंत्रण प्रकोष्ठ (परीक्षा भवन)",
+    "category": "Examination",
+    "responsibilities": [
+      "Conducting semester and annual university examinations",
+      "Issuance of marksheets, transcripts, and provisional certificates",
+      "Correction of typographical and name errors on marksheets",
+      "Duplicate marksheet and degree verification processing",
+      "Resolution of exam form submission and fee portal glitches"
+    ],
+    "servicesHandled": [
+      "service-marksheet-correction",
+      "service-exam-form-issue",
+      "service-duplicate-marksheet",
+      "service-degree-transcripts"
+    ],
+    "commonStudentProblems": [
+      "Marksheet mein naam ya roll number galat print ho gaya",
+      "Exam form submit nahi ho raha ya fee debit hone ke baad pending dikha raha hai",
+      "Provisional degree certificate ya migration certificate chahiye",
+      "Back paper / ATKT form submission"
+    ],
+    "location": "Examination Building (Pariksha Bhawan), Near Main Administrative Block",
+    "building": "Pariksha Bhawan",
+    "floor": "Ground & First Floor",
+    "contact": {
+      "email": "coe@dhsgsu.edu.in",
+      "helpline": "07582-264445"
+    },
+    "officeHours": "Monday to Friday: 10:00 AM - 5:30 PM (Lunch: 1:30 PM - 2:00 PM)",
+    "officialSourceUrl": "https://dhsgsu.edu.in/index.php/en/administration/examination-cell",
+    "verified": true
+  },
+  {
+    "id": "office-dsw",
+    "name": "Dean of Students' Welfare (DSW Office)",
+    "hindiName": "छात्र कल्याण अधिष्ठाता कार्यालय (डी.एस.डब्ल्यू)",
+    "category": "Student Welfare",
+    "responsibilities": [
+      "Student welfare programs, co-curricular and cultural activities",
+      "Facilitation and verification of State and National Scholarships",
+      "Student grievance assistance and welfare counseling",
+      "Hostel accommodation guidance and coordination",
+      "Student ID card approvals and bonafide certification endorsements"
+    ],
+    "servicesHandled": [
+      "service-scholarship-support",
+      "service-student-grievance",
+      "service-bonafide-cert",
+      "service-hostel-allotment"
+    ],
+    "commonStudentProblems": [
+      "Scholarship ka paisa nahi aaya / portal par pending dikha raha hai",
+      "Hostel allotment process and verification",
+      "General student grievance or assistance",
+      "Bonafide certificate ya student railway concession"
+    ],
+    "location": "DSW Building, Campus Road (Opposite Student Activity Centre)",
+    "building": "Dean Students Welfare Building",
+    "floor": "Ground Floor",
+    "contact": {
+      "email": "dsw@dhsgsu.edu.in",
+      "phone": "07582-265810"
+    },
+    "officeHours": "Monday to Friday: 10:00 AM - 5:30 PM",
+    "officialSourceUrl": "https://dhsgsu.edu.in/index.php/en/student-services/dean-students-welfare",
+    "verified": true
+  },
+  {
+    "id": "office-scholarship-cell",
+    "name": "University Scholarship & Fellowship Cell",
+    "hindiName": "छात्रवृत्ति एवं फेलोशिप प्रकोष्ठ",
+    "category": "Student Welfare",
+    "responsibilities": [
+      "Processing and verification of MP Post-Matric Scholarship (MP Taas portal)",
+      "National Scholarship Portal (NSP) institutional level verification",
+      "UGC Junior Research Fellowship (JRF) & Non-NET fellowship claims",
+      "Disbursement tracking and endorsement of scholarship renewal forms"
+    ],
+    "servicesHandled": [
+      "service-scholarship-support"
+    ],
+    "commonStudentProblems": [
+      "Meri scholarship nahi aayi, portal par university verification pending hai",
+      "MP Taas ya NSP renewal form approve karwana hai",
+      "Scholarship ke liye income certificate / caste verification"
+    ],
+    "location": "Administrative Block, Room No. 12 / DSW Section",
+    "building": "Administrative Block",
+    "floor": "Ground Floor",
+    "contact": {
+      "email": "scholarship@dhsgsu.edu.in",
+      "phone": "07582-265810"
+    },
+    "officeHours": "Monday to Friday: 10:00 AM - 5:00 PM",
+    "officialSourceUrl": "https://dhsgsu.edu.in/index.php/en/student-services/scholarships",
+    "verified": true
+  },
+  {
+    "id": "office-registrar-academic",
+    "name": "Academic Section (Registrar Office)",
+    "hindiName": "शैक्षणिक अनुभाग (कुलसचिव कार्यालय)",
+    "category": "Administration",
+    "responsibilities": [
+      "University enrollment, course registration, and student ID generation",
+      "Issuance of Migration Certificates, Transfer Certificates (TC), and Character Certificates",
+      "Academic calendar formulation and university regulations",
+      "Degree conferral and convocation documentation"
+    ],
+    "servicesHandled": [
+      "service-migration-cert",
+      "service-bonafide-cert",
+      "service-degree-transcripts"
+    ],
+    "commonStudentProblems": [
+      "Migration certificate chahiye dusri university mein admission ke liye",
+      "Course registration ya enrollment number generate nahi hua",
+      "Degree certificate dispatch verification"
+    ],
+    "location": "Main Administrative Building (Prashasnik Bhawan)",
+    "building": "Administrative Building",
+    "floor": "First Floor",
+    "contact": {
+      "email": "academic@dhsgsu.edu.in",
+      "helpline": "07582-265810"
+    },
+    "officeHours": "Monday to Friday: 10:00 AM - 5:30 PM",
+    "officialSourceUrl": "https://dhsgsu.edu.in/index.php/en/administration/registrar-office",
+    "verified": true
+  },
+  {
+    "id": "office-finance-branch",
+    "name": "Finance & Accounts Branch",
+    "hindiName": "वित्त एवं लेखा शाखा",
+    "category": "Finance",
+    "responsibilities": [
+      "Fee reconciliation for online admission and semester portal payments",
+      "Processing fee refunds and double payment chargebacks",
+      "Issuing official fee clearance receipts and challan verification"
+    ],
+    "servicesHandled": [
+      "service-fee-reconciliation"
+    ],
+    "commonStudentProblems": [
+      "Bank account se fee kat gayi lekin portal par 'unpaid' dikha raha hai",
+      "Double fee payment ho gayi, refund ke liye application dena hai",
+      "Fee payment receipt download nahi ho rahi"
+    ],
+    "location": "Main Administrative Building (Prashasnik Bhawan)",
+    "building": "Administrative Building",
+    "floor": "Ground Floor (Finance Wing)",
+    "contact": {
+      "email": "fo@dhsgsu.edu.in"
+    },
+    "officeHours": "Monday to Friday: 10:30 AM - 4:30 PM",
+    "officialSourceUrl": "https://dhsgsu.edu.in/index.php/en/administration/finance-office",
+    "verified": true
+  },
+  {
+    "id": "office-health-centre",
+    "name": "University Health Centre (Medical Facility)",
+    "hindiName": "विश्वविद्यालय स्वास्थ्य केंद्र (चिकित्सालय)",
+    "category": "Health",
+    "responsibilities": [
+      "Primary health care, OPD consultations and essential medicines for students & staff",
+      "Emergency first aid and 24x7 ambulance dispatch",
+      "Annual student medical check-ups and health fitness endorsements"
+    ],
+    "servicesHandled": [
+      "service-medical-assistance"
+    ],
+    "commonStudentProblems": [
+      "Health issue / emergency medical aid on campus",
+      "Free doctor consultation and basic medicines",
+      "Hostel medical fitness certificate"
+    ],
+    "location": "University Health Centre Building, Near Boys Hostels Complex",
+    "building": "Health Centre",
+    "floor": "Ground Floor",
+    "contact": {
+      "phone": "07582-265825",
+      "email": "healthcentre@dhsgsu.edu.in"
+    },
+    "officeHours": "OPD: 8:00 AM - 1:00 PM & 4:00 PM - 7:00 PM (Emergency: 24x7)",
+    "officialSourceUrl": "https://dhsgsu.edu.in/index.php/en/facilities/health-centre",
+    "verified": true
+  },
+  {
+    "id": "office-hostel-chief-warden",
+    "name": "Hostel Administration & Chief Warden Office",
+    "hindiName": "छात्रावास प्रशासन एवं मुख्य संरक्षक कार्यालय",
+    "category": "Student Welfare",
+    "responsibilities": [
+      "Hostel room allotment and merit list verification for boys & girls hostels",
+      "Hostel mess management and sanitation supervision",
+      "Hostel fee clearance and room handover / no-dues verification"
+    ],
+    "servicesHandled": [
+      "service-hostel-allotment"
+    ],
+    "commonStudentProblems": [
+      "Hostel admission merit list kab aayegi",
+      "Hostel room allotment letter aur fee receipt jama karna hai",
+      "Hostel change request ya room maintenance issue"
+    ],
+    "location": "Hostel Office Complex, Tagore Hostel premises",
+    "building": "Chief Warden Office",
+    "contact": {
+      "email": "chiefwarden@dhsgsu.edu.in"
+    },
+    "officeHours": "Monday to Saturday: 10:00 AM - 5:00 PM",
+    "officialSourceUrl": "https://dhsgsu.edu.in/index.php/en/facilities/hostels",
+    "verified": true
+  },
+  {
+    "id": "office-anti-ragging-proctor",
+    "name": "Chief Proctor & Anti-Ragging Committee",
+    "hindiName": "मुख्य कुलानुशासक एवं एंटी-रैगिंग प्रकोष्ठ",
+    "category": "Discipline",
+    "responsibilities": [
+      "Maintaining discipline, campus safety and zero tolerance against ragging",
+      "24x7 Anti-ragging helpline coordination and incident redressal",
+      "Campus security monitoring and grievance resolution"
+    ],
+    "servicesHandled": [
+      "service-anti-ragging",
+      "service-student-grievance"
+    ],
+    "commonStudentProblems": [
+      "Campus safety concern or ragging incident complaint",
+      "Disciplinary inquiry clarification",
+      "Anti-ragging affidavit verification"
+    ],
+    "location": "Proctor's Office, Main Administrative Campus",
+    "building": "Administrative Building (Ground Floor)",
+    "contact": {
+      "helpline": "1800-180-5522 (National Anti-Ragging Toll Free) / 07582-265810",
+      "email": "proctor@dhsgsu.edu.in"
+    },
+    "officeHours": "24x7 Helpline / Office: 10:00 AM - 5:30 PM",
+    "officialSourceUrl": "https://dhsgsu.edu.in/index.php/en/student-services/anti-ragging",
+    "verified": true
+  }
+]

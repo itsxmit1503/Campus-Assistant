@@ -1,0 +1,163 @@
+{
+  "schools": [
+    {
+      "id": "school-engineering-tech",
+      "name": "School of Engineering & Technology",
+      "hindiName": "अभियांत्रिकी एवं प्रौद्योगिकी संकाय",
+      "code": "SET",
+      "description": "Offering professional and technical education in Computer Applications, IT and applied technologies.",
+      "departments": ["dept-cs-applications", "dept-applied-eng"]
+    },
+    {
+      "id": "school-applied-sciences",
+      "name": "School of Applied Sciences",
+      "hindiName": "अनुप्रयुक्त विज्ञान संकाय",
+      "code": "SAS",
+      "description": "Encompassing foundational and applied physical and earth sciences with state-of-the-art research laboratories.",
+      "departments": ["dept-physics", "dept-chemistry", "dept-mathematics", "dept-applied-geology"]
+    },
+    {
+      "id": "school-commerce-mgmt",
+      "name": "School of Commerce and Management",
+      "hindiName": "वाणिज्य एवं प्रबंधन अध्ययन संकाय",
+      "code": "SCM",
+      "description": "Fostering leadership, commerce, accounting, and business administration expertise.",
+      "departments": ["dept-business-mgmt", "dept-commerce"]
+    },
+    {
+      "id": "school-humanities-social",
+      "name": "School of Humanities and Social Sciences",
+      "hindiName": "मानविकी एवं सामाजिक विज्ञान संकाय",
+      "code": "SHSS",
+      "description": "Engaging with societal studies, psychology, history, economics, political science and languages.",
+      "departments": ["dept-economics", "dept-history", "dept-psychology", "dept-sociology"]
+    },
+    {
+      "id": "school-law",
+      "name": "School of Law",
+      "hindiName": "विधि संकाय",
+      "code": "SL",
+      "description": "Providing comprehensive undergraduate, postgraduate and doctoral legal studies.",
+      "departments": ["dept-law"]
+    },
+    {
+      "id": "school-biological-sciences",
+      "name": "School of Biological Sciences",
+      "hindiName": "जैविक विज्ञान संकाय",
+      "code": "SBS",
+      "description": "Focusing on botany, zoology, biotechnology and environmental life sciences.",
+      "departments": ["dept-botany", "dept-zoology", "dept-biotechnology"]
+    }
+  ],
+  "departments": [
+    {
+      "id": "dept-cs-applications",
+      "name": "Department of Computer Science & Applications (CSA)",
+      "schoolId": "school-engineering-tech",
+      "schoolName": "School of Engineering & Technology",
+      "description": "Offers postgraduate and research degrees including Master of Computer Applications (MCA), M.Sc. (Computer Science), and Ph.D. Equipped with modern software and networking labs.",
+      "hod": "Head, Department of Computer Science & Applications",
+      "programmes": ["MCA (Master of Computer Applications)", "M.Sc. (Computer Science)", "Ph.D. in Computer Science"],
+      "location": "CSA Building, Upper Campus (near Central Library & Science Block)",
+      "building": "Computer Science & Applications Building",
+      "contact": {
+        "email": "csa@dhsgsu.edu.in",
+        "phone": "07582-265840"
+      },
+      "mapLink": "https://maps.google.com/?q=Department+of+Computer+Science+DHSGSU+Sagar",
+      "officialSourceUrl": "https://dhsgsu.edu.in/index.php/en/academics/schools-departments/school-of-engineering-technology",
+      "services": ["MCA Lab Access", "Project Guidelines", "Academic Timetable", "Seminar Approvals"],
+      "verified": true
+    },
+    {
+      "id": "dept-physics",
+      "name": "Department of Physics",
+      "schoolId": "school-applied-sciences",
+      "schoolName": "School of Applied Sciences",
+      "description": "One of the premier and oldest physics departments in central India, offering B.Sc., M.Sc. Physics, and doctoral research in Condensed Matter Physics, Materials Science, and Nuclear Physics.",
+      "hod": "Head, Department of Physics",
+      "programmes": ["B.Sc. Physics", "M.Sc. Physics", "Ph.D. Physics"],
+      "location": "Science Block, DHSGSU Campus",
+      "building": "Department of Physics Building",
+      "contact": {
+        "email": "physics@dhsgsu.edu.in"
+      },
+      "mapLink": "https://maps.google.com/?q=Department+of+Physics+DHSGSU+Sagar",
+      "officialSourceUrl": "https://dhsgsu.edu.in/index.php/en/academics/schools-departments/school-of-applied-sciences",
+      "services": ["Physics Laboratory", "Research Instrumentation Access"],
+      "verified": true
+    },
+    {
+      "id": "dept-chemistry",
+      "name": "Department of Chemistry",
+      "schoolId": "school-applied-sciences",
+      "schoolName": "School of Applied Sciences",
+      "description": "Offering advanced academic training and cutting-edge research in Organic, Inorganic, Physical, and Analytical Chemistry.",
+      "hod": "Head, Department of Chemistry",
+      "programmes": ["B.Sc. Chemistry", "M.Sc. Chemistry", "Ph.D. Chemistry"],
+      "location": "Chemistry Block, Science Complex",
+      "building": "Chemistry Department Building",
+      "contact": {
+        "email": "chemistry@dhsgsu.edu.in"
+      },
+      "mapLink": "https://maps.google.com/?q=Department+of+Chemistry+DHSGSU+Sagar",
+      "officialSourceUrl": "https://dhsgsu.edu.in/index.php/en/academics/schools-departments/school-of-applied-sciences",
+      "services": ["Chemical Lab Facility", "Instrumental Analysis Service"],
+      "verified": true
+    },
+    {
+      "id": "dept-business-mgmt",
+      "name": "Department of Business Management (MBA)",
+      "schoolId": "school-commerce-mgmt",
+      "schoolName": "School of Commerce and Management",
+      "description": "Offers Master of Business Administration (MBA) and doctoral research in Human Resources, Marketing, Finance, and International Business.",
+      "hod": "Head, Department of Business Management",
+      "programmes": ["MBA (Master of Business Administration)", "Ph.D. in Management"],
+      "location": "Management Building, Near Administrative Block",
+      "building": "Institute of Management Studies Building",
+      "contact": {
+        "email": "mba@dhsgsu.edu.in"
+      },
+      "mapLink": "https://maps.google.com/?q=Department+of+Business+Management+DHSGSU+Sagar",
+      "officialSourceUrl": "https://dhsgsu.edu.in/index.php/en/academics/schools-departments/school-of-commerce-management",
+      "services": ["Management Seminars", "Internship Placement Coordination"],
+      "verified": true
+    },
+    {
+      "id": "dept-law",
+      "name": "Department of Law",
+      "schoolId": "school-law",
+      "schoolName": "School of Law",
+      "description": "Offers BA-LLB (Hons), LL.B., LL.M., and Ph.D. in Law with moot court training and legal aid clinics.",
+      "hod": "Head, Department of Law",
+      "programmes": ["BA-LL.B. (Hons)", "LL.B. (3 Years)", "LL.M.", "Ph.D. in Law"],
+      "location": "Law Building, DHSGSU Campus",
+      "building": "Law Faculty Building",
+      "contact": {
+        "email": "law@dhsgsu.edu.in"
+      },
+      "mapLink": "https://maps.google.com/?q=Department+of+Law+DHSGSU+Sagar",
+      "officialSourceUrl": "https://dhsgsu.edu.in/index.php/en/academics/schools-departments/school-of-law",
+      "services": ["Moot Court Training", "Free Legal Aid Clinic"],
+      "verified": true
+    },
+    {
+      "id": "dept-botany",
+      "name": "Department of Botany",
+      "schoolId": "school-biological-sciences",
+      "schoolName": "School of Biological Sciences",
+      "description": "Renowned for plant taxonomy, biotechnology, ethnobotany and maintaining the University Botanical Garden and Herbarium.",
+      "hod": "Head, Department of Botany",
+      "programmes": ["B.Sc. Botany", "M.Sc. Botany", "Ph.D. Botany"],
+      "location": "Life Sciences Complex, DHSGSU Campus",
+      "building": "Botany Department Building",
+      "contact": {
+        "email": "botany@dhsgsu.edu.in"
+      },
+      "mapLink": "https://maps.google.com/?q=Department+of+Botany+DHSGSU+Sagar",
+      "officialSourceUrl": "https://dhsgsu.edu.in/index.php/en/academics/schools-departments/school-of-biological-sciences",
+      "services": ["Botanical Garden Access", "Herbarium Consultation"],
+      "verified": true
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+[
+  {
+    "id": "notice-admission-general",
+    "title": "General Admission Guidelines & CUET Verification",
+    "category": "Admissions",
+    "publishedDate": "2025-07-15",
+    "summary": "Official guidelines for undergraduate and postgraduate admissions through CUET counseling, document verification at respective departments, and semester fee payment.",
+    "sourceUrl": "https://dhsgsu.edu.in/index.php/en/admissions",
+    "sourceType": "official",
+    "verified": true
+  },
+  {
+    "id": "notice-exam-regulations",
+    "title": "Semester Examination & Form Submission Protocol",
+    "category": "Examinations",
+    "publishedDate": "2025-08-01",
+    "summary": "Notification regarding online semester exam form submission on MP Online / Samarth portal, ATKT guidelines, and marksheet correction requests at Pariksha Bhawan.",
+    "sourceUrl": "https://dhsgsu.edu.in/index.php/en/administration/examination-cell",
+    "sourceType": "official",
+    "verified": true
+  },
+  {
+    "id": "notice-scholarship-mptaas",
+    "title": "MP Taas Post-Matric Scholarship & NSP Institutional Endorsement Notice",
+    "category": "Scholarships",
+    "publishedDate": "2025-08-10",
+    "summary": "Instructions for SC/ST/OBC and minority students to submit physical copies of scholarship applications with income and caste certificates to Room No. 12 (Scholarship Cell).",
+    "sourceUrl": "https://dhsgsu.edu.in/index.php/en/student-services/scholarships",
+    "sourceType": "official",
+    "verified": true
+  },
+  {
+    "id": "notice-hostel-rules",
+    "title": "Hostel Admission, Code of Conduct & Mess Allotment",
+    "category": "Hostel",
+    "publishedDate": "2025-07-20",
+    "summary": "Merit-based room allocation procedure, mess advance deposit instructions, and strict zero-tolerance anti-ragging undertakings for hostel residents.",
+    "sourceUrl": "https://dhsgsu.edu.in/index.php/en/facilities/hostels",
+    "sourceType": "official",
+    "verified": true
+  }
+]

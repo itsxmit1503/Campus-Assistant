@@ -2,7 +2,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { config } from '../config/env.js';
 import { StructuredAnswer, ChatRequest } from '../types/index.js';
 import { knowledgeService } from './knowledgeService.js';
-import { routeQuery } from './queryRouter.js';
+import { routeQuery, detectLanguage } from './queryRouter.js';
 
 export class GeminiService {
   private genAI: GoogleGenerativeAI | null = null;
@@ -29,56 +29,65 @@ export class GeminiService {
       return cached.answer;
     }
 
-    // 2. Query Router: check if this can be solved deterministically with 0 API calls
+    // 2. Query Router: Check if this can be solved deterministically (0 Gemini API calls)
     const decision = routeQuery(cleanMsg, language, conversationHistory);
     if (!decision.requiresGemini && decision.deterministicResponse) {
       return decision.deterministicResponse;
     }
 
-    // 3. If no Gemini client is available, fallback to deterministic knowledge response
+    // 3. Fallback if no Gemini client available
     if (!this.genAI) {
-      return decision.deterministicResponse || this.buildSafeFallback(cleanMsg);
+      return decision.deterministicResponse || this.buildSafeFallback(cleanMsg, conversationHistory);
     }
 
-    // 4. Compact Context & Bounded History for Gemini API invocation
+    // 4. Compact Context & Bounded History for Gemini API
     try {
       const model = this.genAI.getGenerativeModel({
         model: 'gemini-1.5-flash',
         generationConfig: {
-          temperature: 0.25,
-          maxOutputTokens: 600,
+          temperature: 0.3,
+          maxOutputTokens: 500,
           responseMimeType: 'application/json'
         }
       });
 
-      // Retrieve only targeted relevant knowledge slice (saves ~80% prompt tokens)
       const targetedContext = knowledgeService.getCompactContextForQuery(cleanMsg);
-
-      // Keep bounded history: last 4 messages only
       const boundedHistory = conversationHistory.slice(-4);
       const historySummary = boundedHistory.map(h => `${h.role === 'user' ? 'Student' : 'Assistant'}: ${h.content}`).join('\n');
+      const userLang = detectLanguage(cleanMsg, conversationHistory);
 
       const systemPrompt = `
-You are the friendly, knowledgeable digital campus guide for Dr. Harisingh Gour Vishwavidyalaya (DHSGSU), Sagar (MP).
-You are having a natural human-like conversation with a student.
+You are not a generic chatbot. You are a real, knowledgeable, friendly person sitting at the Dr. Harisingh Gour Vishwavidyalaya (DHSGSU, Sagar) campus help desk.
+A student has walked up and is talking with you.
 
-NON-NEGOTIABLE CONVERSATIONAL RULES:
-1. Answer the student's ACTUAL CURRENT MESSAGE directly.
-2. NEVER repeatedly introduce yourself with "I am your DHSGSU Campus Assistant" if the conversation is ongoing.
-3. NEVER list your capabilities ("I can help with scholarships, marksheets, hostels...") unless the student explicitly asks "What can you do?".
-4. For casual chat or testing ("kuch nahi", "bas dekh raha hu", "okay", "thanks"), respond naturally and briefly in 1 line. Set ALL display flags to FALSE.
-5. If the student describes a problem (e.g. scholarship or marksheet), clarify the issue first instead of dumping office/location cards immediately.
-6. Display flags ("display.location", "display.contact", "display.documents", "display.sources") must be TRUE ONLY when explicitly requested or required for the immediate step.
-7. Tone: warm, natural, senior-student-like, concise. Match the user's language (English, Hindi, Hinglish, etc.) naturally.
+CRITICAL CONVERSATIONAL & LANGUAGE RULES:
+1. MATCH THE STUDENT'S LANGUAGE & TONE:
+   - If the student speaks Hinglish ("bhai", "kuch nahi", "chal rha", "scene", "kahan jana", "nahi aayi"), respond in natural, friendly Hinglish. DO NOT force English.
+   - If the student speaks Hindi, respond in Hindi.
+   - If the student speaks English, respond in English.
+2. ANSWER WHAT WAS ASKED:
+   - If the student is casually talking or testing (e.g. "kuch nahi bas dekh raha hu"), respond naturally in 1 line (e.g. "Haha, haan, bilkul chal raha hai 😄 Jab kuch poochna ho bas bol dena."). Set ALL display flags to FALSE.
+   - NEVER re-introduce yourself with "I am your DHSGSU Campus Assistant".
+   - NEVER list your capabilities unless the student explicitly asks "Tu kya kya kar sakta hai?" / "What can you do?".
+   - If the student mentions a problem, clarify the problem first instead of immediately dumping office/location/contact cards.
+3. DISPLAY FLAGS:
+   - "display.location = true" ONLY if student asks where something is or where to go.
+   - "display.contact = true" ONLY if student asks for phone/email/number.
+   - "display.documents = true" ONLY if student asks what documents to bring.
+   - "display.sources = true" ONLY for verified university factual queries.
+   - All display flags must be FALSE for casual/conversational messages.
+4. Keep answers authentic, concise, and helpful.
 
 TARGETED DHSGSU CAMPUS CONTEXT:
 ${targetedContext}
 
-Respond strictly in JSON format:
+Detected Student Language Mode: ${userLang}
+
+Respond strictly in JSON:
 {
-  "answer": "Concise natural response in student's language and style.",
-  "language": "Detected language",
-  "intent": "Intent code",
+  "answer": "Natural conversational response in the student's language and style.",
+  "language": "${userLang}",
+  "intent": "intent_code",
   "intentCategory": "GREETING | CASUAL_CONVERSATION | INFORMATION | LOCATION | CONTACT | PROCESS | PROBLEM_SOLVING | CURRENT_INFORMATION | EXPLORATION",
   "display": {
     "responsibleUnit": false,
@@ -103,8 +112,8 @@ Respond strictly in JSON format:
       const prompt = `
 ${systemPrompt}
 
-${historySummary ? `Previous Context:\n${historySummary}\n` : ''}
-Student's Message: "${cleanMsg}"
+${historySummary ? `Recent Conversation:\n${historySummary}\n` : ''}
+Current Student Message: "${cleanMsg}"
 `;
 
       const result = await model.generateContent(prompt);
@@ -113,7 +122,6 @@ Student's Message: "${cleanMsg}"
       try {
         const parsed = JSON.parse(text) as StructuredAnswer;
         if (parsed && parsed.answer) {
-          // Cache successful responses for 5 minutes
           this.responseCache.set(cacheKey, {
             answer: parsed,
             expiry: Date.now() + 5 * 60 * 1000
@@ -124,21 +132,26 @@ Student's Message: "${cleanMsg}"
         console.warn('[GeminiService] JSON parse error, falling back to router response');
       }
 
-      return decision.deterministicResponse || this.buildSafeFallback(cleanMsg);
+      return decision.deterministicResponse || this.buildSafeFallback(cleanMsg, conversationHistory);
     } catch (apiError) {
-      console.warn('[GeminiService] API rate-limit/network error, gracefully falling back:', apiError);
-      return decision.deterministicResponse || this.buildSafeFallback(cleanMsg);
+      console.warn('[GeminiService] API error, falling back safely:', apiError);
+      return decision.deterministicResponse || this.buildSafeFallback(cleanMsg, conversationHistory);
     }
   }
 
-  private buildSafeFallback(query: string): StructuredAnswer {
-    const isHindi = /[\u0900-\u097F]/.test(query) || /\b(kaha|kya|hai|kare|nahi|batao)\b/i.test(query);
+  private buildSafeFallback(query: string, history: Array<{ role: 'user' | 'assistant'; content: string }> = []): StructuredAnswer {
+    const lang = detectLanguage(query, history);
+
+    let answer = `I can help you around DHSGSU campus. Let me know what you'd like to know!`;
+    if (lang === 'hinglish') {
+      answer = `Haan, batao campus mein kis cheez ke baare mein janna hai?`;
+    } else if (lang === 'hindi') {
+      answer = `हाँ, बताइए DHSGSU परिसर में आपको किस विषय में जानकारी चाहिए?`;
+    }
 
     return {
-      answer: isHindi
-        ? `Haan, main DHSGSU campus ke baare mein aapki madad kar sakta hoon. Aapko kis cheez mein help chahiye?`
-        : `I can help you around DHSGSU campus. Let me know what you'd like to know!`,
-      language: isHindi ? 'Hinglish' : 'English',
+      answer,
+      language: lang,
       intent: 'general_fallback',
       intentCategory: 'CASUAL_CONVERSATION',
       display: {

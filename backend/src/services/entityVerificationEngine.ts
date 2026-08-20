@@ -10,6 +10,7 @@ import {
 import { KnowledgeService, knowledgeService } from './knowledgeService.js';
 
 import { googlePlacesService } from './googlePlacesService.js';
+import { officialSourceFetcher } from './officialSourceFetcher.js';
 
 export interface VerifiedRequestContext {
   query: string;
@@ -36,21 +37,38 @@ export class EntityVerificationEngine {
     query: string,
     history: Array<{ role: 'user' | 'assistant'; content: string }> = []
   ): Promise<VerifiedRequestContext> {
-    console.log(`\n[CHAT] User question: "${query}"`);
+    console.log(`\n[CHAT] User message: "${query}"`);
     const cleanQuery = query.trim().toLowerCase();
     const isPhysicalLocationQuery = /\b(where|kaha|kahan|kidhar|location|address|building|map|campus|pahuchu|rasta)\b/i.test(query);
+
+    // ── STEP 1: Query Understanding & Information Type Identification ─────────
+    let infoType = 'GENERAL_INFORMATION';
+    if (isPhysicalLocationQuery) infoType = 'PHYSICAL_LOCATION';
+    else if (/\b(fee|fees|kitni|charge|cost|rupees|rs)\b/i.test(query)) infoType = 'FEES_AND_CHARGES';
+    else if (/\b(eligibility|qualify|marks|cuet|criteria|admission|apply)\b/i.test(query)) infoType = 'ADMISSION_AND_ELIGIBILITY';
+    else if (/\b(hod|head|incharge|dean|professor|faculty)\b/i.test(query)) infoType = 'FACULTY_AND_ADMINISTRATION';
+    else if (/\b(how many|total|all|list|kitne|sabhi)\b/i.test(query)) infoType = 'EXHAUSTIVE_COUNT';
+
+    console.log(`[QUERY] Detected Information Request: ${infoType}`);
 
     const conflictsDetected: Array<{ field: string; entity: string; description: string }> = [];
     const entityRecords: VerifiedEntityRecord[] = [];
     const identifiedEntities: string[] = [];
 
-    // ── STEP 1: Exhaustive / Category Check ────────────────────────────────────
+    // ── STEP 2: Check Local Knowledge Cache Status ─────────────────────────────
     const exhaustive = this.ks.isExhaustiveQuery(query);
     let exhaustiveSummary: string | undefined;
 
     if (exhaustive.isExhaustive && exhaustive.category) {
-      console.log(`[ENTITY] Category detected: ${exhaustive.category} (Retrieval Mode: EXHAUSTIVE)`);
+      console.log(`[LOCAL] Local knowledge status: COMPLETE (Exhaustive Category: ${exhaustive.category})`);
       exhaustiveSummary = this.buildExhaustiveCategoryData(exhaustive.category, conflictsDetected, entityRecords, identifiedEntities);
+    }
+
+    // ── STEP 3: Dynamic Official Source Retrieval (Fees, Eligibility, Admissions) ──
+    const officialFact = await officialSourceFetcher.retrieveOfficialFacts(query);
+    if (officialFact) {
+      identifiedEntities.push(officialFact.entity);
+      exhaustiveSummary = (exhaustiveSummary ? exhaustiveSummary + '\n\n' : '') + `OFFICIAL DHSGSU VERIFIED PROGRAMME DATA:\n${officialFact.summary}`;
     }
 
     // ── STEP 2: Specific Entity Resolution ─────────────────────────────────────

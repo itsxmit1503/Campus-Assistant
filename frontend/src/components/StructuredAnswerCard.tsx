@@ -117,23 +117,46 @@ export default function StructuredAnswerCard({ data, onSelectTopic }: Structured
                   </div>
                 )}
 
-                {(location.googleMapsUrl || location.mapLink) && (
-                  <div className="pt-1.5 flex items-center gap-2">
-                    <a
-                      href={location.googleMapsUrl || location.mapLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-campus-green text-white text-xs font-semibold hover:bg-campus-greenHover shadow-subtle transition-all"
-                    >
-                      <MapPin className="w-3.5 h-3.5" />
-                      <span>Open in Google Maps</span>
-                      <ExternalLink className="w-3 h-3 ml-0.5 opacity-80" />
-                    </a>
-                    {location.verified !== false && (
-                      <span className="text-[10px] font-medium text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-1 rounded border border-emerald-200 dark:border-emerald-800">
-                        ✓ Verified Listing
-                      </span>
+                {/* Verification Status & Map Navigation Actions */}
+                {location.verificationStatus === 'VERIFIED' || (location.verified !== false && (location.googleMapsUrl || location.googleMapsPlaceId)) ? (
+                  <div className="pt-1.5 flex flex-wrap items-center gap-2">
+                    {location.googleMapsUrl && (
+                      <a
+                        href={location.googleMapsUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-campus-green text-white text-xs font-semibold hover:bg-campus-greenHover shadow-subtle transition-all"
+                      >
+                        <MapPin className="w-3.5 h-3.5" />
+                        <span>Open in Google Maps</span>
+                        <ExternalLink className="w-3 h-3 ml-0.5 opacity-80" />
+                      </a>
                     )}
+                    <span className="text-[10px] font-medium text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-1 rounded border border-emerald-200 dark:border-emerald-800 flex items-center gap-1">
+                      <CheckCircle2 className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                      Verified Listing
+                    </span>
+                  </div>
+                ) : location.verificationStatus === 'PARTIALLY_VERIFIED' ? (
+                  <div className="pt-1.5 flex flex-wrap items-center gap-2">
+                    {location.googleMapsUrl && (
+                      <a
+                        href={location.googleMapsUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 text-xs font-medium hover:bg-stone-200"
+                      >
+                        <span>Search on Google Maps</span>
+                        <ExternalLink className="w-3 h-3 ml-0.5 opacity-70" />
+                      </a>
+                    )}
+                    <span className="text-[10px] font-medium text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded border border-amber-200 dark:border-amber-800">
+                      ⚠ General Campus Location
+                    </span>
+                  </div>
+                ) : (
+                  <div className="pt-1 text-[11px] text-amber-700 dark:text-amber-300 bg-amber-50/50 dark:bg-amber-950/30 px-2 py-1 rounded border border-amber-200/60 dark:border-amber-800/50 inline-block">
+                    ⚠ Exact building/place listing unverified
                   </div>
                 )}
               </div>

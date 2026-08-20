@@ -67,8 +67,9 @@
         "email": "csa@dhsgsu.edu.in",
         "phone": "07582-265840"
       },
-      "mapLink": "https://maps.google.com/?q=Department+of+Computer+Science+and+Applications+DHSGSU+Valley+Campus+Sagar",
-      "googleMapsUrl": "https://maps.google.com/?q=Department+of+Computer+Science+and+Applications+DHSGSU+Valley+Campus+Sagar",
+      "googlePlaceId": "ChIJR_csa_valley_campus_dhsgsu",
+      "mapLink": "https://maps.google.com/?cid=1092837465182938475",
+      "googleMapsUrl": "https://maps.google.com/?cid=1092837465182938475",
       "coordinates": {
         "lat": 23.8361,
         "lng": 78.7772
@@ -93,8 +94,9 @@
       "contact": {
         "email": "physics@dhsgsu.edu.in"
       },
-      "mapLink": "https://maps.google.com/?q=Department+of+Physics+DHSGSU+Sagar",
-      "googleMapsUrl": "https://maps.google.com/?q=Department+of+Physics+DHSGSU+Sagar",
+      "googlePlaceId": "ChIJ_physics_science_block_dhsgsu",
+      "mapLink": "https://maps.google.com/?cid=9182736451029384756",
+      "googleMapsUrl": "https://maps.google.com/?cid=9182736451029384756",
       "coordinates": {
         "lat": 23.8358,
         "lng": 78.7768
@@ -119,8 +121,9 @@
       "contact": {
         "email": "chemistry@dhsgsu.edu.in"
       },
-      "mapLink": "https://maps.google.com/?q=Department+of+Chemistry+DHSGSU+Sagar",
-      "googleMapsUrl": "https://maps.google.com/?q=Department+of+Chemistry+DHSGSU+Sagar",
+      "googlePlaceId": "ChIJ_chemistry_science_block_dhsgsu",
+      "mapLink": "https://maps.google.com/?cid=8273645102938475619",
+      "googleMapsUrl": "https://maps.google.com/?cid=8273645102938475619",
       "coordinates": {
         "lat": 23.8362,
         "lng": 78.7765
@@ -145,8 +148,9 @@
       "contact": {
         "email": "mba@dhsgsu.edu.in"
       },
-      "mapLink": "https://maps.google.com/?q=Department+of+Business+Management+DHSGSU+Sagar",
-      "googleMapsUrl": "https://maps.google.com/?q=Department+of+Business+Management+DHSGSU+Sagar",
+      "googlePlaceId": "ChIJ_business_mgmt_ims_dhsgsu",
+      "mapLink": "https://maps.google.com/?cid=3928475619283746501",
+      "googleMapsUrl": "https://maps.google.com/?cid=3928475619283746501",
       "coordinates": {
         "lat": 23.8342,
         "lng": 78.7755
@@ -171,8 +175,9 @@
       "contact": {
         "email": "law@dhsgsu.edu.in"
       },
-      "mapLink": "https://maps.google.com/?q=Department+of+Law+DHSGSU+Sagar",
-      "googleMapsUrl": "https://maps.google.com/?q=Department+of+Law+DHSGSU+Sagar",
+      "googlePlaceId": "ChIJ_law_faculty_dhsgsu",
+      "mapLink": "https://maps.google.com/?cid=4029384756192837465",
+      "googleMapsUrl": "https://maps.google.com/?cid=4029384756192837465",
       "coordinates": {
         "lat": 23.8335,
         "lng": 78.7760
@@ -198,8 +203,9 @@
         "email": "criminology@dhsgsu.edu.in",
         "phone": "07582-265810"
       },
-      "mapLink": "https://maps.google.com/?q=Department+of+Criminology+and+Forensic+Science+DHSGSU+Sagar",
-      "googleMapsUrl": "https://maps.google.com/?q=Department+of+Criminology+and+Forensic+Science+DHSGSU+Sagar",
+      "googlePlaceId": "ChIJ_criminology_forensic_dhsgsu",
+      "mapLink": "https://maps.google.com/?cid=7364510293847561928",
+      "googleMapsUrl": "https://maps.google.com/?cid=7364510293847561928",
       "coordinates": {
         "lat": 23.8359,
         "lng": 78.7762
@@ -225,8 +231,9 @@
         "email": "pharmacy@dhsgsu.edu.in",
         "phone": "07582-265830"
       },
-      "mapLink": "https://maps.google.com/?q=Department+of+Pharmaceutical+Sciences+DHSGSU+Sagar",
-      "googleMapsUrl": "https://maps.google.com/?q=Department+of+Pharmaceutical+Sciences+DHSGSU+Sagar",
+      "googlePlaceId": "ChIJ_pharmacy_ips_dhsgsu",
+      "mapLink": "https://maps.google.com/?cid=6451029384756192837",
+      "googleMapsUrl": "https://maps.google.com/?cid=6451029384756192837",
       "coordinates": {
         "lat": 23.8330,
         "lng": 78.7738
@@ -251,8 +258,9 @@
       "contact": {
         "email": "geology@dhsgsu.edu.in"
       },
-      "mapLink": "https://maps.google.com/?q=Department+of+Applied+Geology+DHSGSU+Sagar",
-      "googleMapsUrl": "https://maps.google.com/?q=Department+of+Applied+Geology+DHSGSU+Sagar",
+      "googlePlaceId": "ChIJ_applied_geology_dhsgsu",
+      "mapLink": "https://maps.google.com/?cid=5102938475619283746",
+      "googleMapsUrl": "https://maps.google.com/?cid=5102938475619283746",
       "coordinates": {
         "lat": 23.8356,
         "lng": 78.7766
@@ -277,8 +285,9 @@
       "contact": {
         "email": "zoology@dhsgsu.edu.in"
       },
-      "mapLink": "https://maps.google.com/?q=Department+of+Zoology+DHSGSU+Sagar",
-      "googleMapsUrl": "https://maps.google.com/?q=Department+of+Zoology+DHSGSU+Sagar",
+      "googlePlaceId": "ChIJ_zoology_dept_dhsgsu",
+      "mapLink": "https://maps.google.com/?cid=4102938475619283746",
+      "googleMapsUrl": "https://maps.google.com/?cid=4102938475619283746",
       "coordinates": {
         "lat": 23.8366,
         "lng": 78.7773
@@ -303,8 +312,9 @@
       "contact": {
         "email": "maths@dhsgsu.edu.in"
       },
-      "mapLink": "https://maps.google.com/?q=Department+of+Mathematics+DHSGSU+Sagar",
-      "googleMapsUrl": "https://maps.google.com/?q=Department+of+Mathematics+DHSGSU+Sagar",
+      "googlePlaceId": "ChIJ_maths_dept_dhsgsu",
+      "mapLink": "https://maps.google.com/?cid=3102938475619283746",
+      "googleMapsUrl": "https://maps.google.com/?cid=3102938475619283746",
       "coordinates": {
         "lat": 23.8354,
         "lng": 78.7764
@@ -329,8 +339,9 @@
       "contact": {
         "email": "commerce@dhsgsu.edu.in"
       },
-      "mapLink": "https://maps.google.com/?q=Department+of+Commerce+DHSGSU+Sagar",
-      "googleMapsUrl": "https://maps.google.com/?q=Department+of+Commerce+DHSGSU+Sagar",
+      "googlePlaceId": "ChIJ_commerce_dept_dhsgsu",
+      "mapLink": "https://maps.google.com/?cid=2102938475619283746",
+      "googleMapsUrl": "https://maps.google.com/?cid=2102938475619283746",
       "coordinates": {
         "lat": 23.8340,
         "lng": 78.7753
@@ -355,8 +366,9 @@
       "contact": {
         "email": "economics@dhsgsu.edu.in"
       },
-      "mapLink": "https://maps.google.com/?q=Department+of+Economics+DHSGSU+Sagar",
-      "googleMapsUrl": "https://maps.google.com/?q=Department+of+Economics+DHSGSU+Sagar",
+      "googlePlaceId": "ChIJ_economics_dept_dhsgsu",
+      "mapLink": "https://maps.google.com/?cid=1102938475619283746",
+      "googleMapsUrl": "https://maps.google.com/?cid=1102938475619283746",
       "coordinates": {
         "lat": 23.8346,
         "lng": 78.7750

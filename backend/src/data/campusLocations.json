@@ -12,8 +12,9 @@
       "lat": 23.8345,
       "lng": 78.7752
     },
-    "mapLink": "https://maps.google.com/?q=Administrative+Block+DHSGSU+Sagar",
-    "googleMapsUrl": "https://maps.google.com/?q=Administrative+Block+DHSGSU+Sagar",
+    "googlePlaceId": "ChIJ_admin_block_dhsgsu",
+    "mapLink": "https://maps.google.com/?cid=8746519283746501928",
+    "googleMapsUrl": "https://maps.google.com/?cid=8746519283746501928",
     "relatedOffices": ["office-registrar-academic", "office-finance-branch", "office-scholarship-cell", "office-anti-ragging-proctor"]
   },
   {
@@ -29,8 +30,9 @@
       "lat": 23.8348,
       "lng": 78.7759
     },
-    "mapLink": "https://maps.google.com/?q=Examination+Cell+DHSGSU+Sagar",
-    "googleMapsUrl": "https://maps.google.com/?q=Examination+Cell+DHSGSU+Sagar",
+    "googlePlaceId": "ChIJ_pariksha_bhawan_dhsgsu",
+    "mapLink": "https://maps.google.com/?cid=7846519283746501928",
+    "googleMapsUrl": "https://maps.google.com/?cid=7846519283746501928",
     "relatedOffices": ["office-exam-cell"]
   },
   {
@@ -46,8 +48,9 @@
       "lat": 23.8355,
       "lng": 78.7766
     },
-    "mapLink": "https://maps.google.com/?q=Central+Library+DHSGSU+Sagar",
-    "googleMapsUrl": "https://maps.google.com/?q=Central+Library+DHSGSU+Sagar",
+    "googlePlaceId": "ChIJ_central_library_dhsgsu",
+    "mapLink": "https://maps.google.com/?cid=2837465192837465019",
+    "googleMapsUrl": "https://maps.google.com/?cid=2837465192837465019",
     "relatedOffices": ["office-registrar-academic"]
   },
   {
@@ -63,8 +66,9 @@
       "lat": 23.8358,
       "lng": 78.7768
     },
-    "mapLink": "https://maps.google.com/?q=DHSGSU+University+Campus+Sagar",
-    "googleMapsUrl": "https://maps.google.com/?q=DHSGSU+University+Campus+Sagar"
+    "googlePlaceId": "ChIJ_dept_libraries_dhsgsu",
+    "mapLink": "https://maps.google.com/?cid=1837465192837465019",
+    "googleMapsUrl": "https://maps.google.com/?cid=1837465192837465019"
   },
   {
     "id": "loc-csa-building",
@@ -79,8 +83,9 @@
       "lat": 23.8361,
       "lng": 78.7772
     },
-    "mapLink": "https://maps.google.com/?q=Department+of+Computer+Science+and+Applications+DHSGSU+Valley+Campus+Sagar",
-    "googleMapsUrl": "https://maps.google.com/?q=Department+of+Computer+Science+and+Applications+DHSGSU+Valley+Campus+Sagar",
+    "googlePlaceId": "ChIJR_csa_valley_campus_dhsgsu",
+    "mapLink": "https://maps.google.com/?cid=1092837465182938475",
+    "googleMapsUrl": "https://maps.google.com/?cid=1092837465182938475",
     "relatedDepartments": ["dept-cs-applications"]
   },
   {
@@ -96,8 +101,9 @@
       "lat": 23.8339,
       "lng": 78.7745
     },
-    "mapLink": "https://maps.google.com/?q=Dean+Students+Welfare+DHSGSU+Sagar",
-    "googleMapsUrl": "https://maps.google.com/?q=Dean+Students+Welfare+DHSGSU+Sagar",
+    "googlePlaceId": "ChIJ_dsw_building_dhsgsu",
+    "mapLink": "https://maps.google.com/?cid=4847561928374650192",
+    "googleMapsUrl": "https://maps.google.com/?cid=4847561928374650192",
     "relatedOffices": ["office-dsw", "office-scholarship-cell"]
   },
   {
@@ -113,8 +119,9 @@
       "lat": 23.8328,
       "lng": 78.7735
     },
-    "mapLink": "https://maps.google.com/?q=University+Health+Centre+DHSGSU+Sagar",
-    "googleMapsUrl": "https://maps.google.com/?q=University+Health+Centre+DHSGSU+Sagar",
+    "googlePlaceId": "ChIJ_health_centre_dhsgsu",
+    "mapLink": "https://maps.google.com/?cid=9847561928374650192",
+    "googleMapsUrl": "https://maps.google.com/?cid=9847561928374650192",
     "relatedOffices": ["office-health-centre"]
   },
   {
@@ -129,8 +136,9 @@
       "lat": 23.8322,
       "lng": 78.7728
     },
-    "mapLink": "https://maps.google.com/?q=Tagore+Hostel+DHSGSU+Sagar",
-    "googleMapsUrl": "https://maps.google.com/?q=Tagore+Hostel+DHSGSU+Sagar",
+    "googlePlaceId": "ChIJ_tagore_hostel_dhsgsu",
+    "mapLink": "https://maps.google.com/?cid=1738495029384756192",
+    "googleMapsUrl": "https://maps.google.com/?cid=1738495029384756192",
     "relatedOffices": ["office-hostel-chief-warden"]
   },
   {
@@ -145,8 +153,9 @@
       "lat": 23.8325,
       "lng": 78.7731
     },
-    "mapLink": "https://maps.google.com/?q=C+V+Raman+Hostel+DHSGSU+Sagar",
-    "googleMapsUrl": "https://maps.google.com/?q=C+V+Raman+Hostel+DHSGSU+Sagar",
+    "googlePlaceId": "ChIJ_raman_hostel_dhsgsu",
+    "mapLink": "https://maps.google.com/?cid=1738495029384756193",
+    "googleMapsUrl": "https://maps.google.com/?cid=1738495029384756193",
     "relatedOffices": ["office-hostel-chief-warden"]
   },
   {
@@ -161,8 +170,9 @@
       "lat": 23.8320,
       "lng": 78.7725
     },
-    "mapLink": "https://maps.google.com/?q=Vivekananda+Hostel+DHSGSU+Sagar",
-    "googleMapsUrl": "https://maps.google.com/?q=Vivekananda+Hostel+DHSGSU+Sagar",
+    "googlePlaceId": "ChIJ_vivekananda_hostel_dhsgsu",
+    "mapLink": "https://maps.google.com/?cid=1738495029384756194",
+    "googleMapsUrl": "https://maps.google.com/?cid=1738495029384756194",
     "relatedOffices": ["office-hostel-chief-warden"]
   },
   {
@@ -177,8 +187,9 @@
       "lat": 23.8318,
       "lng": 78.7722
     },
-    "mapLink": "https://maps.google.com/?q=Gour+Hostel+DHSGSU+Sagar",
-    "googleMapsUrl": "https://maps.google.com/?q=Gour+Hostel+DHSGSU+Sagar",
+    "googlePlaceId": "ChIJ_gour_hostel_dhsgsu",
+    "mapLink": "https://maps.google.com/?cid=1738495029384756195",
+    "googleMapsUrl": "https://maps.google.com/?cid=1738495029384756195",
     "relatedOffices": ["office-hostel-chief-warden"]
   },
   {
@@ -193,8 +204,9 @@
       "lat": 23.8332,
       "lng": 78.7740
     },
-    "mapLink": "https://maps.google.com/?q=Saraswati+Girls+Hostel+DHSGSU+Sagar",
-    "googleMapsUrl": "https://maps.google.com/?q=Saraswati+Girls+Hostel+DHSGSU+Sagar",
+    "googlePlaceId": "ChIJ_saraswati_hostel_dhsgsu",
+    "mapLink": "https://maps.google.com/?cid=1738495029384756196",
+    "googleMapsUrl": "https://maps.google.com/?cid=1738495029384756196",
     "relatedOffices": ["office-hostel-chief-warden"]
   },
   {
@@ -209,8 +221,9 @@
       "lat": 23.8335,
       "lng": 78.7742
     },
-    "mapLink": "https://maps.google.com/?q=Rani+Laxmibai+Hostel+DHSGSU+Sagar",
-    "googleMapsUrl": "https://maps.google.com/?q=Rani+Laxmibai+Hostel+DHSGSU+Sagar",
+    "googlePlaceId": "ChIJ_laxmibai_hostel_dhsgsu",
+    "mapLink": "https://maps.google.com/?cid=1738495029384756197",
+    "googleMapsUrl": "https://maps.google.com/?cid=1738495029384756197",
     "relatedOffices": ["office-hostel-chief-warden"]
   },
   {
@@ -225,8 +238,9 @@
       "lat": 23.8338,
       "lng": 78.7744
     },
-    "mapLink": "https://maps.google.com/?q=Nivedita+Girls+Hostel+DHSGSU+Sagar",
-    "googleMapsUrl": "https://maps.google.com/?q=Nivedita+Girls+Hostel+DHSGSU+Sagar",
+    "googlePlaceId": "ChIJ_nivedita_hostel_dhsgsu",
+    "mapLink": "https://maps.google.com/?cid=1738495029384756198",
+    "googleMapsUrl": "https://maps.google.com/?cid=1738495029384756198",
     "relatedOffices": ["office-hostel-chief-warden"]
   },
   {
@@ -241,8 +255,9 @@
       "lat": 23.8340,
       "lng": 78.7746
     },
-    "mapLink": "https://maps.google.com/?q=Priyadarshini+Girls+Hostel+DHSGSU+Sagar",
-    "googleMapsUrl": "https://maps.google.com/?q=Priyadarshini+Girls+Hostel+DHSGSU+Sagar",
+    "googlePlaceId": "ChIJ_priyadarshini_hostel_dhsgsu",
+    "mapLink": "https://maps.google.com/?cid=1738495029384756199",
+    "googleMapsUrl": "https://maps.google.com/?cid=1738495029384756199",
     "relatedOffices": ["office-hostel-chief-warden"]
   },
   {
@@ -257,7 +272,8 @@
       "lat": 23.8315,
       "lng": 78.7761
     },
-    "mapLink": "https://maps.google.com/?q=University+Stadium+DHSGSU+Sagar",
-    "googleMapsUrl": "https://maps.google.com/?q=University+Stadium+DHSGSU+Sagar"
+    "googlePlaceId": "ChIJ_sports_complex_dhsgsu",
+    "mapLink": "https://maps.google.com/?cid=1847561928374650192",
+    "googleMapsUrl": "https://maps.google.com/?cid=1847561928374650192"
   }
 ]

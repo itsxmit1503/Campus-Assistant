@@ -108,6 +108,8 @@ export class KnowledgeService {
       if (code === 'cs-applications') keywords.push('computer science', 'computer applications', 'csa', 'cse', 'mca', 'cs department');
       else if (code === 'physics') keywords.push('physics', 'bhautik');
       else if (code === 'chemistry') keywords.push('chemistry', 'rasayan');
+      else if (code === 'criminology-forensic') keywords.push('criminology', 'forensic', 'forensic science', 'crim');
+      else if (code === 'pharmacy') keywords.push('pharmacy', 'pharmaceutical', 'b.pharm', 'm.pharm', 'aushadhi');
       else if (code === 'mathematics') keywords.push('maths', 'mathematics', 'ganit');
       else if (code === 'applied-geology') keywords.push('geology', 'bhoovigyan');
       else if (code === 'law') keywords.push('law', 'vidhi', 'llb', 'ba llb', 'llm');

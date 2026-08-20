@@ -182,29 +182,187 @@
       "verified": true
     },
     {
-      "id": "dept-botany",
-      "name": "Department of Botany",
+      "id": "dept-criminology-forensic",
+      "name": "Department of Criminology & Forensic Science",
+      "schoolId": "school-applied-sciences",
+      "schoolName": "School of Applied Sciences",
+      "description": "One of India's oldest and most prestigious forensic science departments, founded by Dr. Harisingh Gour. Offers B.Sc., M.Sc., and Ph.D. in Forensic Science and Criminology with specialized ballistic, DNA, and crime investigation laboratories.",
+      "hod": "Head, Department of Criminology & Forensic Science",
+      "programmes": ["B.Sc. Forensic Science", "M.Sc. Criminology", "M.Sc. Forensic Science", "Ph.D. in Forensic Science"],
+      "campus": "Upper Campus (Patharia Hills)",
+      "location": "Forensic Science Block, Patharia Hills Campus",
+      "building": "Department of Forensic Science Building",
+      "address": "Department of Criminology & Forensic Science, Patharia Hills, Dr. Harisingh Gour Vishwavidyalaya, Sagar, Madhya Pradesh 470003",
+      "landmark": "Near Science Complex & Anthropological Museum, Patharia Hills",
+      "contact": {
+        "email": "criminology@dhsgsu.edu.in",
+        "phone": "07582-265810"
+      },
+      "mapLink": "https://maps.google.com/?q=Department+of+Criminology+and+Forensic+Science+DHSGSU+Sagar",
+      "googleMapsUrl": "https://maps.google.com/?q=Department+of+Criminology+and+Forensic+Science+DHSGSU+Sagar",
+      "coordinates": {
+        "lat": 23.8359,
+        "lng": 78.7762
+      },
+      "officialSourceUrl": "https://dhsgsu.edu.in/index.php/en/academics/schools-departments/school-of-applied-sciences",
+      "services": ["Forensic Ballistics Lab", "Crime Scene Reconstruction Lab"],
+      "verified": true
+    },
+    {
+      "id": "dept-pharmacy",
+      "name": "Department of Pharmaceutical Sciences",
+      "schoolId": "school-applied-sciences",
+      "schoolName": "School of Applied Sciences",
+      "description": "Premier PCI-approved pharmaceutical education and research institute offering B.Pharm, M.Pharm (Pharmaceutics, Pharmacology, Pharmacognosy, Pharmaceutical Chemistry) and Ph.D.",
+      "hod": "Head, Department of Pharmaceutical Sciences",
+      "programmes": ["B.Pharm (Bachelor of Pharmacy)", "M.Pharm (Pharmaceutics / Pharmacology)", "Ph.D. in Pharmaceutical Sciences"],
+      "campus": "Upper Campus (Patharia Hills)",
+      "location": "Institute of Pharmaceutical Sciences Building, Patharia Hills",
+      "building": "Department of Pharmaceutical Sciences Building",
+      "address": "Department of Pharmaceutical Sciences, Patharia Hills, Dr. Harisingh Gour Vishwavidyalaya, Sagar, Madhya Pradesh 470003",
+      "landmark": "Near University Health Centre & Patharia Hills Campus Entry",
+      "contact": {
+        "email": "pharmacy@dhsgsu.edu.in",
+        "phone": "07582-265830"
+      },
+      "mapLink": "https://maps.google.com/?q=Department+of+Pharmaceutical+Sciences+DHSGSU+Sagar",
+      "googleMapsUrl": "https://maps.google.com/?q=Department+of+Pharmaceutical+Sciences+DHSGSU+Sagar",
+      "coordinates": {
+        "lat": 23.8330,
+        "lng": 78.7738
+      },
+      "officialSourceUrl": "https://dhsgsu.edu.in/index.php/en/academics/schools-departments/school-of-applied-sciences",
+      "services": ["Central Instrumentation Lab", "Pharmacological Screening Facility"],
+      "verified": true
+    },
+    {
+      "id": "dept-applied-geology",
+      "name": "Department of Applied Geology",
+      "schoolId": "school-applied-sciences",
+      "schoolName": "School of Applied Sciences",
+      "description": "Distinguished Centre of Advanced Study in Geology, offering B.Sc., M.Sc. Applied Geology, M.Tech. Applied Geology, and Ph.D. with a renowned Geological Museum.",
+      "hod": "Head, Department of Applied Geology",
+      "programmes": ["B.Sc. Geology", "M.Sc. Applied Geology", "M.Tech. Applied Geology", "Ph.D. in Geology"],
+      "campus": "Upper Campus (Patharia Hills)",
+      "location": "Geology Block, Science Complex, Patharia Hills",
+      "building": "Department of Applied Geology Building",
+      "address": "Department of Applied Geology, Science Complex, Patharia Hills, Dr. Harisingh Gour Vishwavidyalaya, Sagar, Madhya Pradesh 470003",
+      "landmark": "Science Complex, Near Physics Department",
+      "contact": {
+        "email": "geology@dhsgsu.edu.in"
+      },
+      "mapLink": "https://maps.google.com/?q=Department+of+Applied+Geology+DHSGSU+Sagar",
+      "googleMapsUrl": "https://maps.google.com/?q=Department+of+Applied+Geology+DHSGSU+Sagar",
+      "coordinates": {
+        "lat": 23.8356,
+        "lng": 78.7766
+      },
+      "officialSourceUrl": "https://dhsgsu.edu.in/index.php/en/academics/schools-departments/school-of-applied-sciences",
+      "services": ["Geological Museum", "Mineralogy & Petrology Lab"],
+      "verified": true
+    },
+    {
+      "id": "dept-zoology",
+      "name": "Department of Zoology",
       "schoolId": "school-biological-sciences",
       "schoolName": "School of Biological Sciences",
-      "description": "Renowned for plant taxonomy, biotechnology, ethnobotany and maintaining the University Botanical Garden and Herbarium.",
-      "hod": "Head, Department of Botany",
-      "programmes": ["B.Sc. Botany", "M.Sc. Botany", "Ph.D. Botany"],
+      "description": "Department focusing on Animal Physiology, Entomology, Fish Biology, Toxicology, and Biodiversity conservation.",
+      "hod": "Head, Department of Zoology",
+      "programmes": ["B.Sc. Zoology", "M.Sc. Zoology", "Ph.D. Zoology"],
       "campus": "Upper Campus (Patharia Hills)",
-      "location": "Life Sciences Complex, Patharia Hills Campus",
-      "building": "Botany Department Building",
-      "address": "Department of Botany, Life Sciences Complex, Patharia Hills, Dr. Harisingh Gour Vishwavidyalaya, Sagar, Madhya Pradesh 470003",
-      "landmark": "Near Botanical Garden, Patharia Hills",
+      "location": "Life Sciences Block, Patharia Hills",
+      "building": "Zoology Department Building",
+      "address": "Department of Zoology, Life Sciences Complex, Patharia Hills, Dr. Harisingh Gour Vishwavidyalaya, Sagar, Madhya Pradesh 470003",
+      "landmark": "Near Botany Department & Zoological Museum",
       "contact": {
-        "email": "botany@dhsgsu.edu.in"
+        "email": "zoology@dhsgsu.edu.in"
       },
-      "mapLink": "https://maps.google.com/?q=Department+of+Botany+DHSGSU+Sagar",
-      "googleMapsUrl": "https://maps.google.com/?q=Department+of+Botany+DHSGSU+Sagar",
+      "mapLink": "https://maps.google.com/?q=Department+of+Zoology+DHSGSU+Sagar",
+      "googleMapsUrl": "https://maps.google.com/?q=Department+of+Zoology+DHSGSU+Sagar",
       "coordinates": {
-        "lat": 23.8368,
-        "lng": 78.7775
+        "lat": 23.8366,
+        "lng": 78.7773
       },
       "officialSourceUrl": "https://dhsgsu.edu.in/index.php/en/academics/schools-departments/school-of-biological-sciences",
-      "services": ["Botanical Garden Access", "Herbarium Consultation"],
+      "services": ["Zoological Museum", "Animal Tissue Culture Lab"],
+      "verified": true
+    },
+    {
+      "id": "dept-mathematics",
+      "name": "Department of Mathematics and Statistics",
+      "schoolId": "school-applied-sciences",
+      "schoolName": "School of Applied Sciences",
+      "description": "Academic center for Pure & Applied Mathematics, Fluid Mechanics, Topology, and Statistical Modeling.",
+      "hod": "Head, Department of Mathematics",
+      "programmes": ["B.Sc. Mathematics", "M.Sc. Mathematics", "Ph.D. in Mathematics"],
+      "campus": "Upper Campus (Patharia Hills)",
+      "location": "Mathematics Block, Patharia Hills",
+      "building": "Department of Mathematics Building",
+      "address": "Department of Mathematics, Patharia Hills, Dr. Harisingh Gour Vishwavidyalaya, Sagar, Madhya Pradesh 470003",
+      "landmark": "Near Science Complex, Patharia Hills",
+      "contact": {
+        "email": "maths@dhsgsu.edu.in"
+      },
+      "mapLink": "https://maps.google.com/?q=Department+of+Mathematics+DHSGSU+Sagar",
+      "googleMapsUrl": "https://maps.google.com/?q=Department+of+Mathematics+DHSGSU+Sagar",
+      "coordinates": {
+        "lat": 23.8354,
+        "lng": 78.7764
+      },
+      "officialSourceUrl": "https://dhsgsu.edu.in/index.php/en/academics/schools-departments/school-of-applied-sciences",
+      "services": ["Computational Mathematics Lab"],
+      "verified": true
+    },
+    {
+      "id": "dept-commerce",
+      "name": "Department of Commerce",
+      "schoolId": "school-commerce-mgmt",
+      "schoolName": "School of Commerce and Management",
+      "description": "Offering B.Com (Hons), M.Com, and Ph.D. in Accounting, Taxation, Banking, and Corporate Finance.",
+      "hod": "Head, Department of Commerce",
+      "programmes": ["B.Com (Hons)", "M.Com", "Ph.D. in Commerce"],
+      "campus": "Upper Campus (Patharia Hills)",
+      "location": "Commerce Block, Patharia Hills",
+      "building": "Department of Commerce Building",
+      "address": "Department of Commerce, Patharia Hills, Dr. Harisingh Gour Vishwavidyalaya, Sagar, Madhya Pradesh 470003",
+      "landmark": "Near Institute of Management Studies",
+      "contact": {
+        "email": "commerce@dhsgsu.edu.in"
+      },
+      "mapLink": "https://maps.google.com/?q=Department+of+Commerce+DHSGSU+Sagar",
+      "googleMapsUrl": "https://maps.google.com/?q=Department+of+Commerce+DHSGSU+Sagar",
+      "coordinates": {
+        "lat": 23.8340,
+        "lng": 78.7753
+      },
+      "officialSourceUrl": "https://dhsgsu.edu.in/index.php/en/academics/schools-departments/school-of-commerce-management",
+      "services": ["Commerce Lab", "Career Counseling Desk"],
+      "verified": true
+    },
+    {
+      "id": "dept-economics",
+      "name": "Department of Economics",
+      "schoolId": "school-humanities-social",
+      "schoolName": "School of Humanities and Social Sciences",
+      "description": "Offering BA, MA Economics, and Ph.D. in Development Economics, Agricultural Economics, and Econometrics.",
+      "hod": "Head, Department of Economics",
+      "programmes": ["B.A. Economics", "M.A. Economics", "Ph.D. in Economics"],
+      "campus": "Upper Campus (Patharia Hills)",
+      "location": "Social Sciences Building, Patharia Hills",
+      "building": "Social Sciences Complex",
+      "address": "Department of Economics, Social Sciences Complex, Patharia Hills, Dr. Harisingh Gour Vishwavidyalaya, Sagar, Madhya Pradesh 470003",
+      "landmark": "Near Faculty of Arts, Patharia Hills",
+      "contact": {
+        "email": "economics@dhsgsu.edu.in"
+      },
+      "mapLink": "https://maps.google.com/?q=Department+of+Economics+DHSGSU+Sagar",
+      "googleMapsUrl": "https://maps.google.com/?q=Department+of+Economics+DHSGSU+Sagar",
+      "coordinates": {
+        "lat": 23.8346,
+        "lng": 78.7750
+      },
+      "officialSourceUrl": "https://dhsgsu.edu.in/index.php/en/academics/schools-departments/school-of-humanities-social-sciences",
+      "services": ["Econometrics Data Lab"],
       "verified": true
     }
   ]

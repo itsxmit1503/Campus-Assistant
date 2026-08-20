@@ -139,7 +139,7 @@ export class GeminiService {
     }
 
     // ── STEP 4: Official Source-First & Physical Entity Verification ───────────
-    const verifiedReqContext = entityVerificationEngine.verifyQuery(cleanMsg, conversationHistory);
+    const verifiedReqContext = await entityVerificationEngine.verifyQuery(cleanMsg, conversationHistory);
     const targetedContext = verifiedReqContext.verificationSummaryText;
     const userLang = detectLanguage(cleanMsg, conversationHistory);
     console.log(`[CHAT] Verified knowledge context prepared (detected language: ${userLang})`);

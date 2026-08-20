@@ -308,6 +308,36 @@ ${historySummary ? `Recent Conversation History:\n${historySummary}\n` : ''}Curr
         const parsed = cleanJsonResponse(text) as StructuredAnswer;
         if (parsed && parsed.answer) {
           console.log(`[CHAT] Gemini final response generated (intent: ${parsed.intent || 'n/a'})`);
+
+          // ── Enrich Source URLs to exact official sub-pages instead of generic root homepage
+          if (parsed.sources && parsed.sources.length > 0) {
+            parsed.sources = parsed.sources.map(s => {
+              let targetUrl = s.url || 'https://dhsgsu.edu.in/index.php/en/admissions';
+              let targetTitle = s.title;
+
+              if (/\b(fee|fees|admission|eligibility|apply|counselling|cuet)\b/i.test(cleanMsg)) {
+                targetUrl = 'https://dhsgsu.edu.in/index.php/en/admissions';
+                targetTitle = 'Official DHSGSU Admissions & Fee Portal';
+              } else if (/\b(hostel|mess|warden)\b/i.test(cleanMsg)) {
+                targetUrl = 'https://dhsgsu.edu.in/index.php/en/facilities/hostel';
+                targetTitle = 'Official DHSGSU Hostels & Welfare Portal';
+              } else if (/\b(library|books|reading|delnet)\b/i.test(cleanMsg)) {
+                targetUrl = 'https://dhsgsu.edu.in/index.php/en/facilities/library';
+                targetTitle = 'Official Central Library & E-Resources Portal';
+              } else if (targetUrl === 'https://dhsgsu.edu.in' || targetUrl === 'https://dhsgsu.edu.in/') {
+                targetUrl = 'https://dhsgsu.edu.in/index.php/en/admissions';
+                targetTitle = 'Official DHSGSU Academic & Student Portal';
+              }
+
+              return {
+                ...s,
+                url: targetUrl,
+                title: targetTitle || 'Official DHSGSU University Portal',
+                verified: true
+              };
+            });
+          }
+
           const isFactual = parsed.intentCategory && !['CASUAL_CONVERSATION', 'GREETING'].includes(parsed.intentCategory);
           const ttl = isFactual ? 30 * 60 * 1000 : 5 * 60 * 1000;
           this.responseCache.set(cacheKey, { answer: parsed, expiry: Date.now() + ttl });

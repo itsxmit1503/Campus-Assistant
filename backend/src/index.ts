@@ -10,9 +10,7 @@ const app = express();
 
 // Middlewares
 app.use(cors({
-  origin: config.nodeEnv === 'production' && config.frontendUrl !== 'http://localhost:3000'
-    ? [config.frontendUrl, 'http://localhost:3000']
-    : '*',
+  origin: '*',
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));

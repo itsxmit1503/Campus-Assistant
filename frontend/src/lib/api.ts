@@ -1,6 +1,6 @@
 import { StructuredAnswer } from '../types';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://campus-assistant-qcxy.onrender.com';
 
 export async function sendChatMessage(
   message: string,

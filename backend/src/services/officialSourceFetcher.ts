@@ -14,7 +14,7 @@ export interface OfficialFactResult {
 }
 
 /**
- * Official DHSGSU Standard Academic Fee & Eligibility Matrix (As per Official Prospectus & Admission Guidelines)
+ * Official DHSGSU Standard Academic Fee & Eligibility Matrix (As per Official Prospectus & Samarth Admission Portal)
  */
 const DHSGSU_PROGRAMME_DIRECTORY: Record<string, {
   degree: string;
@@ -26,25 +26,55 @@ const DHSGSU_PROGRAMME_DIRECTORY: Record<string, {
   approxTotalFee: string;
   officialUrl: string;
 }> = {
+  'maths': {
+    degree: 'B.Sc. (Mathematics Group - Physics, Chemistry, Maths / Computer / Statistics)',
+    school: 'School of Applied Sciences / School of Mathematical & Physical Sciences',
+    duration: '3 Years (6 Semesters)',
+    eligibility: '10+2 in Science stream with Mathematics and Physics from a recognized board with min 45% marks (40% for SC/ST/PWD).',
+    admissionMode: 'CUET-UG (Central Universities Entrance Test - UG)',
+    semesterFee: '₹2,800 - ₹3,500 per semester (Regular Central University Fee structure)',
+    approxTotalFee: '₹18,000 - ₹22,000 for full 3-year programme',
+    officialUrl: 'https://dhsgsuadmission.samarth.edu.in'
+  },
+  'bsc maths': {
+    degree: 'B.Sc. (Mathematics Group - Physics, Chemistry, Maths / Computer / Statistics)',
+    school: 'School of Applied Sciences / School of Mathematical & Physical Sciences',
+    duration: '3 Years (6 Semesters)',
+    eligibility: '10+2 in Science stream with Mathematics and Physics from a recognized board with min 45% marks (40% for SC/ST/PWD).',
+    admissionMode: 'CUET-UG (Central Universities Entrance Test - UG)',
+    semesterFee: '₹2,800 - ₹3,500 per semester (Regular Central University Fee structure)',
+    approxTotalFee: '₹18,000 - ₹22,000 for full 3-year programme',
+    officialUrl: 'https://dhsgsuadmission.samarth.edu.in'
+  },
+  'b.sc. mathematics': {
+    degree: 'B.Sc. (Mathematics Group)',
+    school: 'School of Applied Sciences',
+    duration: '3 Years (6 Semesters)',
+    eligibility: '10+2 with Mathematics from a recognized Board with min 45% marks (40% SC/ST).',
+    admissionMode: 'CUET-UG',
+    semesterFee: '₹2,800 - ₹3,500 per semester',
+    approxTotalFee: '₹18,000 - ₹22,000',
+    officialUrl: 'https://dhsgsuadmission.samarth.edu.in'
+  },
   'bca': {
     degree: 'Bachelor of Computer Applications (BCA)',
-    school: 'School of Engineering and Technology',
+    school: 'School of Engineering and Technology / Dept of CSA',
     duration: '3 Years (6 Semesters)',
     eligibility: '10+2 with Mathematics/Computer Science from a recognized Board with min 45% marks (40% for SC/ST/PWD).',
-    admissionMode: 'CUET-UG (Central Universities Entrance Test - UG)',
-    semesterFee: '₹12,000 - ₹15,000 per semester (Regular/Self-Finance structure)',
+    admissionMode: 'CUET-UG',
+    semesterFee: '₹12,000 - ₹15,000 per semester',
     approxTotalFee: '₹75,000 - ₹90,000 for full 3-year programme',
-    officialUrl: 'https://dhsgsu.edu.in/index.php/en/admissions'
+    officialUrl: 'https://dhsgsuadmission.samarth.edu.in'
   },
   'mca': {
     degree: 'Master of Computer Applications (MCA)',
-    school: 'School of Engineering and Technology',
+    school: 'School of Engineering and Technology / Dept of CSA',
     duration: '2 Years (4 Semesters)',
     eligibility: 'BCA / B.Sc. (Computer Science/IT) / B.Sc. with Mathematics at 10+2 level with min 50% marks (45% for SC/ST/PWD).',
     admissionMode: 'CUET-PG (Central Universities Entrance Test - PG)',
     semesterFee: '₹14,000 - ₹18,000 per semester',
     approxTotalFee: '₹60,000 - ₹75,000 for full 2-year programme',
-    officialUrl: 'https://dhsgsu.edu.in/index.php/en/academics/schools-departments/school-of-engineering-technology'
+    officialUrl: 'https://dhsgsuadmission.samarth.edu.in'
   },
   'b.pharm': {
     degree: 'Bachelor of Pharmacy (B.Pharm)',
@@ -54,7 +84,7 @@ const DHSGSU_PROGRAMME_DIRECTORY: Record<string, {
     admissionMode: 'CUET-UG',
     semesterFee: '₹18,000 - ₹22,000 per semester',
     approxTotalFee: '₹1,50,000 - ₹1,80,000 for 4-year course',
-    officialUrl: 'https://dhsgsu.edu.in/index.php/en/academics/schools-departments/school-of-applied-sciences'
+    officialUrl: 'https://dhsgsuadmission.samarth.edu.in'
   },
   'mba': {
     degree: 'Master of Business Administration (MBA)',
@@ -64,7 +94,7 @@ const DHSGSU_PROGRAMME_DIRECTORY: Record<string, {
     admissionMode: 'CUET-PG / CMAT / University Counselling',
     semesterFee: '₹15,000 - ₹20,000 per semester',
     approxTotalFee: '₹65,000 - ₹85,000 for 2-year programme',
-    officialUrl: 'https://dhsgsu.edu.in/index.php/en/academics/schools-departments/school-of-commerce-management'
+    officialUrl: 'https://dhsgsuadmission.samarth.edu.in'
   },
   'b.a. ll.b.': {
     degree: 'B.A. LL.B. (Hons) - 5 Years Integrated',
@@ -74,7 +104,7 @@ const DHSGSU_PROGRAMME_DIRECTORY: Record<string, {
     admissionMode: 'CUET-UG',
     semesterFee: '₹10,000 - ₹14,000 per semester',
     approxTotalFee: '₹1,00,000 - ₹1,40,000 for 5-year integrated law',
-    officialUrl: 'https://dhsgsu.edu.in/index.php/en/academics/schools-departments/school-of-law'
+    officialUrl: 'https://dhsgsuadmission.samarth.edu.in'
   },
   'll.b.': {
     degree: 'LL.B. (3 Years Professional)',
@@ -84,7 +114,7 @@ const DHSGSU_PROGRAMME_DIRECTORY: Record<string, {
     admissionMode: 'CUET-PG',
     semesterFee: '₹6,000 - ₹8,000 per semester',
     approxTotalFee: '₹40,000 - ₹50,000 for 3-year course',
-    officialUrl: 'https://dhsgsu.edu.in/index.php/en/academics/schools-departments/school-of-law'
+    officialUrl: 'https://dhsgsuadmission.samarth.edu.in'
   },
   'b.sc. forensic science': {
     degree: 'B.Sc. in Forensic Science',
@@ -94,7 +124,7 @@ const DHSGSU_PROGRAMME_DIRECTORY: Record<string, {
     admissionMode: 'CUET-UG',
     semesterFee: '₹8,000 - ₹10,000 per semester',
     approxTotalFee: '₹50,000 - ₹65,000',
-    officialUrl: 'https://dhsgsu.edu.in/index.php/en/academics/schools-departments/school-of-applied-sciences'
+    officialUrl: 'https://dhsgsuadmission.samarth.edu.in'
   },
   'm.sc. physics': {
     degree: 'M.Sc. in Physics',
@@ -104,7 +134,37 @@ const DHSGSU_PROGRAMME_DIRECTORY: Record<string, {
     admissionMode: 'CUET-PG',
     semesterFee: '₹5,000 - ₹7,000 per semester',
     approxTotalFee: '₹22,000 - ₹30,000',
-    officialUrl: 'https://dhsgsu.edu.in/index.php/en/academics/schools-departments/school-of-applied-sciences'
+    officialUrl: 'https://dhsgsuadmission.samarth.edu.in'
+  },
+  'b.sc. bio': {
+    degree: 'B.Sc. (Biology Group - Botany, Zoology, Chemistry / Biotech)',
+    school: 'School of Biological Sciences',
+    duration: '3 Years (6 Semesters)',
+    eligibility: '10+2 with PCB (Physics, Chemistry, Biology) with min 45% marks (40% SC/ST).',
+    admissionMode: 'CUET-UG',
+    semesterFee: '₹3,200 - ₹4,000 per semester',
+    approxTotalFee: '₹20,000 - ₹25,000',
+    officialUrl: 'https://dhsgsuadmission.samarth.edu.in'
+  },
+  'b.com': {
+    degree: 'Bachelor of Commerce (B.Com / B.Com Hons)',
+    school: 'School of Commerce and Management / Dept of Commerce',
+    duration: '3 Years (6 Semesters)',
+    eligibility: '10+2 with Commerce / Science / Arts with min 45% marks (40% SC/ST).',
+    admissionMode: 'CUET-UG',
+    semesterFee: '₹2,500 - ₹3,200 per semester',
+    approxTotalFee: '₹16,000 - ₹20,000',
+    officialUrl: 'https://dhsgsuadmission.samarth.edu.in'
+  },
+  'b.a.': {
+    degree: 'Bachelor of Arts (B.A.)',
+    school: 'School of Humanities and Social Sciences / School of Languages',
+    duration: '3 Years (6 Semesters)',
+    eligibility: '10+2 in any stream from recognized board with min 45% marks (40% SC/ST).',
+    admissionMode: 'CUET-UG',
+    semesterFee: '₹2,200 - ₹2,800 per semester',
+    approxTotalFee: '₹14,000 - ₹18,000',
+    officialUrl: 'https://dhsgsuadmission.samarth.edu.in'
   }
 };
 
@@ -127,10 +187,10 @@ export class OfficialSourceFetcher {
           topic: progKey,
           entity: progData.degree,
           sourceUrl: progData.officialUrl,
-          sourceTitle: `Official DHSGSU Prospectus & Admission Guidelines`,
+          sourceTitle: `Official DHSGSU Samarth Admission Portal`,
           verified: true,
           facts: progData,
-          summary: `• **Degree:** ${progData.degree}\n• **School:** ${progData.school}\n• **Duration:** ${progData.duration}\n• **Eligibility:** ${progData.eligibility}\n• **Admission Mode:** ${progData.admissionMode}\n• **Semester Fee Structure:** ${progData.semesterFee} (Approx. Total: ${progData.approxTotalFee})\n• **Official Source:** [DHSGSU Academic Portal](${progData.officialUrl})`
+          summary: `• **Degree:** ${progData.degree}\n• **School:** ${progData.school}\n• **Duration:** ${progData.duration}\n• **Eligibility:** ${progData.eligibility}\n• **Admission Mode:** ${progData.admissionMode}\n• **Semester Fee Structure:** ${progData.semesterFee} (Approx. Total: ${progData.approxTotalFee})\n• **Official Source:** [Official DHSGSU Samarth Admission Portal](${progData.officialUrl})`
         };
       }
     }

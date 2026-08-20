@@ -7,10 +7,29 @@ import { routeQuery, detectLanguage } from './queryRouter.js';
 
 function cleanJsonResponse(rawText: string): any {
   let cleaned = rawText.trim();
-  if (cleaned.startsWith('```')) {
-    cleaned = cleaned.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+  // Strip markdown code fences if present anywhere
+  if (cleaned.includes('```')) {
+    const match = cleaned.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+    if (match) {
+      cleaned = match[1].trim();
+    } else {
+      cleaned = cleaned.replace(/```(?:json)?/gi, '').replace(/```/g, '').trim();
+    }
   }
-  return JSON.parse(cleaned);
+
+  // Try standard parse
+  try {
+    return JSON.parse(cleaned);
+  } catch (e1) {
+    // If there is leading/trailing text outside the JSON object, extract between first { and last }
+    const firstBrace = cleaned.indexOf('{');
+    const lastBrace = cleaned.lastIndexOf('}');
+    if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+      const jsonSubstr = cleaned.substring(firstBrace, lastBrace + 1);
+      return JSON.parse(jsonSubstr);
+    }
+    throw e1;
+  }
 }
 
 /**
@@ -223,7 +242,6 @@ ${historySummary ? `Recent Conversation History:\n${historySummary}\n` : ''}Curr
         const parsed = cleanJsonResponse(text) as StructuredAnswer;
         if (parsed && parsed.answer) {
           console.log(`[CHAT] Gemini final response generated (intent: ${parsed.intent || 'n/a'})`);
-          // Cache with context-aware key (TTL: 30 minutes for university facts, shorter for casual)
           const isFactual = parsed.intentCategory && !['CASUAL_CONVERSATION', 'GREETING'].includes(parsed.intentCategory);
           const ttl = isFactual ? 30 * 60 * 1000 : 5 * 60 * 1000;
           this.responseCache.set(cacheKey, { answer: parsed, expiry: Date.now() + ttl });
@@ -232,7 +250,27 @@ ${historySummary ? `Recent Conversation History:\n${historySummary}\n` : ''}Curr
           return parsed;
         }
       } catch (parseError) {
-        console.warn(`[CHAT] Gemini JSON parse error — using structured knowledge fallback`);
+        console.warn(`[CHAT] Strict JSON parse failed, extracting raw text directly from Gemini`);
+        // If Gemini outputted plain text instead of strict JSON, use Gemini's actual text!
+        if (text && text.trim().length > 0) {
+          const rawCleaned = text.replace(/```(?:json)?/gi, '').replace(/```/g, '').trim();
+          const fallbackAnswer: StructuredAnswer = {
+            answer: rawCleaned,
+            language: userLang,
+            intent: 'gemini_text_response',
+            intentCategory: 'CASUAL_CONVERSATION',
+            display: {
+              responsibleUnit: false,
+              location: false,
+              contact: false,
+              documents: false,
+              nextSteps: false,
+              sources: false,
+              relatedTopics: false
+            }
+          };
+          return fallbackAnswer;
+        }
       }
 
       return this.buildSafeFallback(cleanMsg, conversationHistory);

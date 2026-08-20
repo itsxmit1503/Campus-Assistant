@@ -24,6 +24,24 @@ export interface DisplayFlags {
   relatedTopics?: boolean;
 }
 
+export type LocationVerificationStatus = 'VERIFIED' | 'PARTIALLY_VERIFIED' | 'UNVERIFIED' | 'UNKNOWN';
+
+export interface LocationInfo {
+  name: string;
+  campus?: 'Valley Campus' | 'Upper Campus (Patharia Hills)' | string;
+  building?: string;
+  floor?: string;
+  address?: string;
+  landmark?: string;
+  mapLink?: string;
+  googleMapsUrl?: string;
+  googleMapsPlaceId?: string;
+  coordinates?: { lat: number; lng: number };
+  source?: string;
+  verificationStatus?: LocationVerificationStatus;
+  verified?: boolean;
+}
+
 export interface StructuredAnswer {
   answer: string;
   language: string;
@@ -49,17 +67,7 @@ export interface StructuredAnswer {
     website?: string;
   } | null;
   responsibleUnit?: ResponsibleUnit | null;
-  location?: {
-    name: string;
-    campus?: string;
-    building?: string;
-    floor?: string;
-    address?: string;
-    landmark?: string;
-    mapLink?: string;
-    googleMapsUrl?: string;
-    coordinates?: { lat: number; lng: number };
-  } | null;
+  location?: LocationInfo | null;
   contact?: {
     email?: string;
     phone?: string;

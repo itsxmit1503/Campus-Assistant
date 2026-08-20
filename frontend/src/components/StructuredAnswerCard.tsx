@@ -111,14 +111,14 @@ export default function StructuredAnswerCard({ data, onSelectTopic }: Structured
                   </div>
                 )}
 
-                {location.landmark && !location.address && (
+                {location.landmark && (
                   <div className="text-xs text-campus-muted">
                     <span className="font-medium text-campus-text">Landmark:</span> {location.landmark}
                   </div>
                 )}
 
                 {(location.googleMapsUrl || location.mapLink) && (
-                  <div className="pt-1.5">
+                  <div className="pt-1.5 flex items-center gap-2">
                     <a
                       href={location.googleMapsUrl || location.mapLink}
                       target="_blank"
@@ -129,6 +129,11 @@ export default function StructuredAnswerCard({ data, onSelectTopic }: Structured
                       <span>Open in Google Maps</span>
                       <ExternalLink className="w-3 h-3 ml-0.5 opacity-80" />
                     </a>
+                    {location.verified !== false && (
+                      <span className="text-[10px] font-medium text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-1 rounded border border-emerald-200 dark:border-emerald-800">
+                        ✓ Verified Listing
+                      </span>
+                    )}
                   </div>
                 )}
               </div>

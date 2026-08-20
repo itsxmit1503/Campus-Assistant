@@ -28,7 +28,7 @@ export interface StructuredAnswer {
   answer: string;
   language: string;
   intent: string;
-  intentCategory?: 'GREETING' | 'CASUAL_CONVERSATION' | 'INFORMATION' | 'LOCATION' | 'CONTACT' | 'PROCESS' | 'PROBLEM_SOLVING' | 'CURRENT_INFORMATION' | 'EXPLORATION';
+  intentCategory?: 'GREETING' | 'CASUAL_CONVERSATION' | 'INFORMATION' | 'LOCATION' | 'CONTACT' | 'PROCESS' | 'PROBLEM_SOLVING' | 'CURRENT_INFORMATION' | 'EXPLORATION' | 'TRIAGE';
   display?: DisplayFlags;
   followUpQuestion?: string;
   service?: {

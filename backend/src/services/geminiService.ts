@@ -1,4 +1,5 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import crypto from 'crypto';
 import { config } from '../config/env.js';
 import { StructuredAnswer, ChatRequest } from '../types/index.js';
 import { knowledgeService } from './knowledgeService.js';
@@ -6,11 +7,22 @@ import { routeQuery, detectLanguage } from './queryRouter.js';
 
 function cleanJsonResponse(rawText: string): any {
   let cleaned = rawText.trim();
-  // Strip markdown code fences if present
   if (cleaned.startsWith('```')) {
     cleaned = cleaned.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
   }
   return JSON.parse(cleaned);
+}
+
+/**
+ * Build a cache key that includes conversation context so that follow-up questions
+ * (e.g. "hod kaun hai?" after "physics department ke baare mein batao") never return
+ * a stale cached response from a completely different conversation.
+ */
+function buildCacheKey(message: string, history: Array<{ role: string; content: string }>, lang: string): string {
+  // Include the last 3 history turns in the key to capture context
+  const recentHistory = history.slice(-3).map(h => `${h.role}:${h.content}`).join('|');
+  const raw = `${message.toLowerCase()}__${lang}__${recentHistory}`;
+  return crypto.createHash('md5').update(raw).digest('hex');
 }
 
 export class GeminiService {
@@ -30,248 +42,284 @@ export class GeminiService {
   async processChat(request: ChatRequest): Promise<StructuredAnswer> {
     const { message, conversationHistory = [], language = 'auto' } = request;
     const cleanMsg = message.trim();
-    const cacheKey = `${cleanMsg.toLowerCase()}_${language}`;
 
-    // 1. Check local in-memory cache (TTL: 1 hour to protect quota)
-    const cached = this.responseCache.get(cacheKey);
-    if (cached && cached.expiry > Date.now()) {
-      return cached.answer;
-    }
+    console.log(`\n[CHAT] ──────────────────────────────────────`);
+    console.log(`[CHAT] Message received: "${cleanMsg}"`);
 
-    // 2. Query Router: Check if pure social message can be solved locally to save quota
+    // ── STEP 1: Check if this is a trivial local-only message ────────────────
     const decision = routeQuery(cleanMsg, language, conversationHistory);
+
     if (!decision.requiresGemini && decision.deterministicResponse) {
+      console.log(`[CHAT] Routing → LOCAL TRIVIAL RESPONSE (thanks/bye/emoji)`);
       return decision.deterministicResponse;
     }
 
-    // 3. Fallback if no Gemini client available
+    console.log(`[CHAT] Routing → GEMINI`);
+
+    // ── STEP 2: Check cache (with context-aware cache key) ───────────────────
+    const cacheKey = buildCacheKey(cleanMsg, conversationHistory, language);
+    const cached = this.responseCache.get(cacheKey);
+    if (cached && cached.expiry > Date.now()) {
+      console.log(`[CHAT] Cache hit — returning cached Gemini response`);
+      return cached.answer;
+    }
+
+    // ── STEP 3: Fallback if Gemini is not configured ─────────────────────────
     if (!this.genAI) {
+      console.warn(`[CHAT] Gemini not configured — using structured knowledge fallback`);
       return this.buildSafeFallback(cleanMsg, conversationHistory);
     }
 
-    // 4. Send to Gemini for Intelligent Help-Desk Reasoning over MongoDB Knowledge Context
-    try {
-      const model = this.genAI.getGenerativeModel({
-        model: 'gemini-3.6-flash',
-        generationConfig: {
-          temperature: 0.35,
-          maxOutputTokens: 700,
-          responseMimeType: 'application/json'
-        }
-      });
+    // ── STEP 4: Retrieve relevant university context from knowledge base ──────
+    console.log(`[CHAT] Knowledge retrieval started`);
+    const targetedContext = knowledgeService.getCompactContextForQuery(cleanMsg, conversationHistory);
+    const userLang = detectLanguage(cleanMsg, conversationHistory);
+    console.log(`[CHAT] Knowledge context prepared (detected language: ${userLang})`);
 
-      const targetedContext = knowledgeService.getCompactContextForQuery(cleanMsg, conversationHistory);
-      const boundedHistory = conversationHistory.slice(-6);
-      const historySummary = boundedHistory.map(h => `${h.role === 'user' ? 'Student' : 'Assistant'}: ${h.content}`).join('\n');
-      const userLang = detectLanguage(cleanMsg, conversationHistory);
+    // ── STEP 5: Prepare conversation history for Gemini ───────────────────────
+    const boundedHistory = conversationHistory.slice(-8);
+    const historySummary = boundedHistory
+      .map(h => `${h.role === 'user' ? 'Student' : 'Assistant'}: ${h.content}`)
+      .join('\n');
 
-      const systemPrompt = `
-You are a friendly, knowledgeable human sitting at the Dr. Harisingh Gour Vishwavidyalaya (DHSGSU, Sagar, MP) campus help desk.
-A student is talking with you.
+    // ── STEP 6: Build the system prompt ──────────────────────────────────────
+    const systemPrompt = `You are a friendly, knowledgeable university help-desk assistant at Dr. Harisingh Gour Vishwavidyalaya (DHSGSU), Sagar, Madhya Pradesh, India.
+A student is talking with you directly. Behave like a real, helpful person sitting at the campus help desk — not a scripted chatbot.
 
-CORE HELP-DESK RULES:
-1. ANSWER THE STUDENT'S ACTUAL QUESTION:
-   - When a student asks for information (even in casual language, typos, or slang), ALWAYS answer the question directly, naturally, and accurately.
-   - NEVER reply with "Haan bolo", "Hello 😄", or dismiss the student's question.
-2. REQUEST DEPTH & COMPLETENESS:
-   - If the student asks for an overview or related information (e.g., "mujhe physics department ke related information chahiye" or "baare mein sab batao"), provide a complete, well-structured department profile including:
-     • School/Faculty
-     • Location & Building
-     • Head of Department (HOD)
-     • Programmes/Courses offered
-     • Contact Phone & Official Email
-     • Campus Map / Website reference
-   - If the student asks a specific question (e.g. "physics department kaha hai?" or "HOD kaun hai?"), answer that specific detail directly and concisely.
-   - If the student has a problem (e.g. "scholarship nahi aayi", "marksheet mein naam galat hai"), explain the responsible office, location, required documents, and process steps.
-3. CONVERSATION CONTEXT & FOLLOW-UPS:
-   - Resolve short follow-ups like "hod kaun hai?", "aur kaha hai?", "contact number?", "waha admission kaise hota hai?" using the active department/topic from the recent conversation history.
-4. NO HALLUCINATIONS:
-   - Use ONLY verified information provided in the DHSGSU CONTEXT below. If a specific phone number or detail is not present in the context, explicitly say that it is currently not available in university records.
-5. LANGUAGE & TONE:
-   - Always match the student's language (Hinglish, Hindi, Bengali, Marathi, Tamil, Telugu, English, etc.) and conversational tone.
-6. DYNAMIC DISPLAY FLAGS:
-   - "display.location = true" if student asks where something is or needs directions.
-   - "display.contact = true" if student asks for phone/email/contact.
-   - "display.documents = true" if documents are needed.
-   - "display.sources = true" for verified university facts.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+CORE CONVERSATIONAL RULES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-VERIFIED DHSGSU CAMPUS CONTEXT:
+1. UNDERSTAND WHAT THE STUDENT ACTUALLY SAID.
+   - Read the message fully. Understand the intent, not just the words.
+   - Do NOT respond based on language alone. Language = how to communicate. Intent = what to communicate.
+
+2. RESPOND TO THE ACTUAL MESSAGE.
+   - If the student says "hey" → greet them naturally.
+   - If the student says "umm just checking" → respond naturally (e.g., "Haha, no worries 😄 Take your time.").
+   - If the student asks "what can you help with?" → actually explain your capabilities.
+   - If the student asks about a department → provide actual department information.
+   - NEVER respond with "Haan bolo", "Sure, go ahead", or "How can I help?" when the student has already asked a specific question.
+
+3. CAPABILITIES (use this when the student asks what you can do):
+   "I can help with things around DHSGSU like finding departments and offices, admission and exam-related info, scholarships, hostels, library, documents, contacts, campus facilities, and where to go for any specific problem. Ask me anything!"
+   (Adjust the language and tone to match the student.)
+
+4. LANGUAGE MIRRORING — CRITICAL:
+   - Detect the student's language from their message.
+   - Respond FULLY in that same language.
+   - English message → English response.
+   - Hindi message → Hindi response.
+   - Hinglish message → Hinglish response.
+   - Bengali message → Bengali response.
+   - Marathi message → Marathi response.
+   - Gujarati message → Gujarati response.
+   - Tamil message → Tamil response.
+   - Telugu message → Telugu response.
+   - Kannada message → Kannada response.
+   - ANY other Indian language → respond in that language.
+   - Do NOT translate into English unless the student is writing in English.
+   - If the student code-switches (mixes languages), mirror that mix naturally.
+
+5. CONVERSATION CONTEXT AND FOLLOW-UPS:
+   - Study the conversation history carefully.
+   - Resolve follow-up references using context.
+     Examples:
+       - "hod kaun hai?" after discussing Physics → answer Physics HOD.
+       - "aur contact?" after giving library location → give library contact.
+       - "timing kya hai?" after library discussion → give library timing.
+   - Do NOT ask "which department?" if the context already makes it clear.
+
+6. NO HALLUCINATIONS:
+   - Use ONLY verified information from the DHSGSU CONTEXT section below.
+   - If a specific detail (phone, email, room number, timing) is not in the context, say:
+     "Verified information for that detail is currently not available in university records."
+   - Do NOT invent names, numbers, emails, locations, HODs, fees, or deadlines.
+
+7. RESPONSE LENGTH MATCHING:
+   - Simple greeting ("hey") → very short natural reply.
+   - Location question → concise answer with relevant detail.
+   - "Tell me everything about X department" → comprehensive structured overview.
+   - Problem situation ("scholarship nahi aayi") → helpful explanation of steps + office.
+   - Do NOT dump the entire database for a simple question.
+   - Do NOT give one sentence for a "tell me everything" request.
+
+8. CASUAL CONVERSATION:
+   - Match the student's tone. Be relaxed for casual messages, helpful for questions, clear for serious problems.
+   - Do NOT force every response toward university services.
+   - If someone is just chatting, chat naturally. You can offer assistance when it feels natural, not after every single response.
+
+9. STRUCTURED DATA FLAGS:
+   - Set "display.location = true" only if the student is asking about a location/directions.
+   - Set "display.contact = true" only if the student wants contact details.
+   - Set "display.documents = true" only if documents are relevant.
+   - Set "display.responsibleUnit = true" only if identifying a responsible office/dept adds value.
+   - Set "display.sources = true" for verified university factual answers.
+   - For pure casual conversation, set ALL display flags to false.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+VERIFIED DHSGSU CAMPUS CONTEXT (USE THIS — DO NOT INVENT)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ${targetedContext}
 
-Detected Language: ${userLang}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DETECTED STUDENT LANGUAGE: ${userLang}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Respond strictly in JSON:
+Respond STRICTLY in this JSON format:
 {
-  "answer": "Helpful, natural conversational response in student's language.",
+  "answer": "Your natural, helpful response in the student's language.",
   "language": "${userLang}",
-  "intent": "intent_code",
-  "intentCategory": "INFORMATION | LOCATION | CONTACT | PROCESS | PROBLEM_SOLVING | CURRENT_INFORMATION",
+  "intent": "concise_intent_code",
+  "intentCategory": "GREETING | CASUAL_CONVERSATION | INFORMATION | LOCATION | CONTACT | PROCESS | PROBLEM_SOLVING | CURRENT_INFORMATION",
   "display": {
     "responsibleUnit": false,
     "location": false,
     "contact": false,
     "documents": false,
     "nextSteps": false,
-    "sources": true,
+    "sources": false,
     "relatedTopics": false
   },
-  "followUpQuestion": "Optional follow-up or null",
-  "responsibleUnit": { "name": "Office/Department Name or null", "type": "department | office", "location": "Location or null" },
-  "location": { "name": "Building name or null", "building": "Building or null", "landmark": "Landmark or null", "mapLink": "Map link or null" },
-  "contact": { "phone": "Phone or null", "helpline": "Helpline or null", "email": "Email or null" },
-  "requiredDocuments": ["Doc 1", "Doc 2"],
-  "nextSteps": ["Step 1", "Step 2"],
-  "sources": [{ "title": "Official DHSGSU Record", "url": "https://dhsgsu.edu.in", "sourceType": "official", "verified": true }],
-  "relatedTopics": ["Topic 1", "Topic 2"]
+  "followUpQuestion": null,
+  "responsibleUnit": null,
+  "location": null,
+  "contact": null,
+  "requiredDocuments": [],
+  "nextSteps": [],
+  "sources": [],
+  "relatedTopics": []
 }
-      `.trim();
 
-      const prompt = `
-${systemPrompt}
+For university information fields (responsibleUnit, location, contact), use this structure when relevant:
+  "responsibleUnit": { "name": "...", "type": "department|office", "location": "...", "officeHours": "..." }
+  "location": { "name": "...", "building": "...", "floor": "...", "landmark": "...", "mapLink": "..." }
+  "contact": { "phone": "...", "helpline": "...", "email": "...", "officialWebsite": "..." }
+  "sources": [{ "title": "...", "url": "...", "sourceType": "official", "verified": true }]
 
-${historySummary ? `Recent Conversation History:\n${historySummary}\n` : ''}
-Current Student Message: "${cleanMsg}"
-`;
+Set null for any field that is not applicable to this response.`;
 
-      const result = await model.generateContent(prompt);
+    const fullPrompt = `${systemPrompt}
+
+${historySummary ? `Recent Conversation History:\n${historySummary}\n` : ''}Current Student Message: "${cleanMsg}"`;
+
+    // ── STEP 7: Call Gemini ───────────────────────────────────────────────────
+    try {
+      console.log(`[CHAT] Gemini request started`);
+
+      const model = this.genAI.getGenerativeModel({
+        model: 'gemini-3.5-flash',
+        generationConfig: {
+          temperature: 0.4,
+          maxOutputTokens: 900,
+          responseMimeType: 'application/json'
+        }
+      });
+
+      const result = await model.generateContent(fullPrompt);
       const text = result.response.text();
 
       try {
         const parsed = cleanJsonResponse(text) as StructuredAnswer;
         if (parsed && parsed.answer) {
-          this.responseCache.set(cacheKey, {
-            answer: parsed,
-            expiry: Date.now() + 60 * 60 * 1000
-          });
+          console.log(`[CHAT] Gemini final response generated (intent: ${parsed.intent || 'n/a'})`);
+          // Cache with context-aware key (TTL: 30 minutes for university facts, shorter for casual)
+          const isFactual = parsed.intentCategory && !['CASUAL_CONVERSATION', 'GREETING'].includes(parsed.intentCategory);
+          const ttl = isFactual ? 30 * 60 * 1000 : 5 * 60 * 1000;
+          this.responseCache.set(cacheKey, { answer: parsed, expiry: Date.now() + ttl });
+          console.log(`[CHAT] Response returned to client`);
+          console.log(`[CHAT] ──────────────────────────────────────\n`);
           return parsed;
         }
       } catch (parseError) {
-        console.warn('[GeminiService] JSON parse error, using local knowledge resolution');
+        console.warn(`[CHAT] Gemini JSON parse error — using structured knowledge fallback`);
       }
 
       return this.buildSafeFallback(cleanMsg, conversationHistory);
     } catch (apiError: any) {
-      console.warn('[GeminiService] API error/quota limit, using local knowledge fallback:', apiError?.message || apiError);
+      console.error(`[CHAT] Gemini API error: ${apiError?.message || apiError}`);
       return this.buildSafeFallback(cleanMsg, conversationHistory);
     }
   }
 
-  private buildSafeFallback(query: string, history: Array<{ role: 'user' | 'assistant'; content: string }> = []): StructuredAnswer {
+  /**
+   * buildSafeFallback — Called ONLY when Gemini is unavailable.
+   *
+   * This is NOT a canned response generator.
+   * It attempts to provide the best possible factual answer from the knowledge base,
+   * and clearly communicates when the full assistant is temporarily unavailable.
+   *
+   * It must NEVER return "Haan bolo" or "Sure, go ahead".
+   */
+  private buildSafeFallback(
+    query: string,
+    history: Array<{ role: 'user' | 'assistant'; content: string }> = []
+  ): StructuredAnswer {
+    console.log(`[CHAT] Using knowledge-based fallback (Gemini unavailable)`);
     const lang = detectLanguage(query, history);
     const isEnglish = lang === 'english';
-    const isHindi = lang === 'hindi';
     const q = query.toLowerCase();
-    const { matchedDepartments, matchedOffices, matchedLocations, matchedServices } = knowledgeService.findRelevantContext(query, history);
 
-    // 1. Department Count / Total Structure Query
-    if (q.includes('kitne department') || q.includes('total campus') || q.includes('total department') || q.includes('how many department')) {
-      const depts = knowledgeService.getDepartments();
-      const schools = knowledgeService.getSchools();
-      const answer = isEnglish
-        ? `DHSGSU campus comprises **${schools.length} Schools** and over **${depts.length} Academic Departments** located across the Patharia Hills Campus.`
-        : `DHSGSU campus mein kul **${schools.length} Schools** ke antargat **${depts.length} se adhik Academic Departments** sthit hain.`;
+    const { matchedDepartments, matchedOffices, matchedLocations, matchedServices } =
+      knowledgeService.findRelevantContext(query, history);
 
-      return {
-        answer,
-        language: lang,
-        intent: 'campus_structure',
-        intentCategory: 'INFORMATION',
-        display: { responsibleUnit: false, location: false, contact: false, documents: false, nextSteps: false, sources: true, relatedTopics: false }
-      };
-    }
-
-    // 2. Admission Notice / Latest Updates
-    if (q.includes('latest admission') || q.includes('admission notice') || q.includes('admission update')) {
-      const answer = isEnglish
-        ? `Admissions at DHSGSU are conducted through CUET (UG/PG) and Departmental Entrances. For current seat allocation, merit lists, and counseling schedules, check the official portal: **dhsgsu.edu.in**.`
-        : `DHSGSU mein admissions CUET (UG/PG) aur Departmental Entrance dwara hote hain. Latest merit list, counseling schedule aur updates ke liye official website **dhsgsu.edu.in** dekhein.`;
-
-      return {
-        answer,
-        language: lang,
-        intent: 'admission_notice',
-        intentCategory: 'CURRENT_INFORMATION',
-        sources: [{ title: 'Official DHSGSU Admissions', url: 'https://dhsgsu.edu.in', sourceType: 'official', verified: true }],
-        display: { responsibleUnit: false, location: false, contact: false, documents: false, nextSteps: false, sources: true, relatedTopics: false }
-      };
-    }
-
-    // 3. Exam Form Submission Query
-    if (q.includes('exam form') || q.includes('examination form')) {
-      const examOffice = knowledgeService.getOfficeById('office-exam-cell')!;
-      const answer = isEnglish
-        ? `Exam forms are submitted online via the MP Online / Samarth Portal and verified at the **Examination Cell (Pariksha Bhawan)**.`
-        : `Exam form online MP Online / Samarth Portal par bhara jaata hai aur physical verification **Examination Cell (Pariksha Bhawan)** mein hota hai.`;
-
-      return {
-        answer,
-        language: lang,
-        intent: 'exam_form',
-        intentCategory: 'PROCESS',
-        responsibleUnit: { name: examOffice.name, type: 'office', location: examOffice.location },
-        location: { name: 'Pariksha Bhawan', building: 'Examination Building', mapLink: examOffice.officialSourceUrl },
-        display: { responsibleUnit: true, location: true, contact: false, documents: false, nextSteps: true, sources: true, relatedTopics: false }
-      };
-    }
-
-    // 4. Matched Department Fallback
+    // ── Department match ─────────────────────────────────────────────────────
     if (matchedDepartments.length > 0) {
       const d = matchedDepartments[0];
       const isLocationReq = /\b(kaha|kahan|kidhar|where|location|building|map)\b/i.test(query);
-      const isHodReq = /\b(hod|head|kaun hai|who is)\b/i.test(query);
+      const isHodReq = /\b(hod|head|kaun hai|who is|adhyaksh)\b/i.test(query);
       const isContactReq = /\b(contact|number|phone|email)\b/i.test(query);
+      const isCoursesReq = /\b(course|courses|programme|programmes|degree|branch)\b/i.test(query);
 
       if (isLocationReq) {
         return {
           answer: isEnglish
             ? `The **${d.name}** is located at ${d.location || d.building}.`
             : `**${d.name}** ${d.location || d.building} mein sthit hai.`,
-          language: lang,
-          intent: 'department_location',
-          intentCategory: 'LOCATION',
-          responsibleUnit: { name: d.name, type: 'department', location: d.location },
+          language: lang, intent: 'department_location', intentCategory: 'LOCATION',
           location: { name: d.building || d.name, building: d.building, landmark: 'DHSGSU Campus', mapLink: d.mapLink },
           display: { responsibleUnit: false, location: true, contact: false, documents: false, nextSteps: false, sources: true, relatedTopics: false }
         };
       }
-
       if (isHodReq) {
         return {
           answer: isEnglish
-            ? `The Head of the **${d.name}** is **${d.hod}**.`
-            : `**${d.name}** ke Head (HOD) **${d.hod}** hain.`,
-          language: lang,
-          intent: 'department_hod',
-          intentCategory: 'INFORMATION',
+            ? `The Head of the **${d.name}** is **${d.hod || 'not currently available in records'}**.`
+            : `**${d.name}** ke Head (HOD) **${d.hod || 'records mein available nahi hai'}** hain.`,
+          language: lang, intent: 'department_hod', intentCategory: 'INFORMATION',
+          responsibleUnit: { name: d.name, type: 'department', location: d.location },
+          display: { responsibleUnit: true, location: false, contact: false, documents: false, nextSteps: false, sources: true, relatedTopics: false }
+        };
+      }
+      if (isContactReq) {
+        return {
+          answer: isEnglish
+            ? `Contact for **${d.name}**: Phone: **${d.contact?.phone || 'N/A'}**, Email: **${d.contact?.email || 'N/A'}**.`
+            : `**${d.name}** ka contact — Phone: **${d.contact?.phone || 'N/A'}**, Email: **${d.contact?.email || 'N/A'}**.`,
+          language: lang, intent: 'department_contact', intentCategory: 'CONTACT',
+          contact: { phone: d.contact?.phone, email: d.contact?.email, officialWebsite: d.officialSourceUrl },
+          display: { responsibleUnit: true, location: false, contact: true, documents: false, nextSteps: false, sources: true, relatedTopics: false }
+        };
+      }
+      if (isCoursesReq) {
+        return {
+          answer: isEnglish
+            ? `The **${d.name}** offers: **${d.programmes.join(', ')}**.`
+            : `**${d.name}** mein yeh programmes hain: **${d.programmes.join(', ')}**.`,
+          language: lang, intent: 'department_courses', intentCategory: 'INFORMATION',
           responsibleUnit: { name: d.name, type: 'department', location: d.location },
           display: { responsibleUnit: true, location: false, contact: false, documents: false, nextSteps: false, sources: true, relatedTopics: false }
         };
       }
 
-      if (isContactReq) {
-        return {
-          answer: isEnglish
-            ? `Contact for **${d.name}**: Phone: **${d.contact?.phone || 'N/A'}**, Email: **${d.contact?.email || 'N/A'}**.`
-            : `**${d.name}** ka contact: Phone: **${d.contact?.phone || 'N/A'}**, Email: **${d.contact?.email || 'N/A'}**.`,
-          language: lang,
-          intent: 'department_contact',
-          intentCategory: 'CONTACT',
-          responsibleUnit: { name: d.name, type: 'department', location: d.location },
-          contact: { phone: d.contact?.phone, email: d.contact?.email, officialWebsite: d.officialSourceUrl },
-          display: { responsibleUnit: true, location: false, contact: true, documents: false, nextSteps: false, sources: true, relatedTopics: false }
-        };
-      }
-
-      // Complete Department Profile
-      const overviewText = isEnglish
-        ? `**${d.name}** (${d.schoolName})\n\n📍 **Location:** ${d.location || d.building}\n👤 **HOD:** ${d.hod}\n🎓 **Programmes:** ${d.programmes.join(', ')}\n📞 **Contact:** ${d.contact?.phone || 'N/A'}\n✉️ **Email:** ${d.contact?.email || 'N/A'}`
-        : `Haan, bilkul. **${d.name}** (${d.schoolName}) ki details:\n\n📍 **Location:** ${d.location || d.building}\n👤 **HOD:** ${d.hod}\n🎓 **Programmes:** ${d.programmes.join(', ')}\n📞 **Phone:** ${d.contact?.phone || 'N/A'}\n✉️ **Email:** ${d.contact?.email || 'N/A'}`;
+      // Full department overview
+      const overview = isEnglish
+        ? `**${d.name}** (${d.schoolName})\n\n📍 **Location:** ${d.location || d.building}\n👤 **HOD:** ${d.hod || 'N/A'}\n🎓 **Programmes:** ${d.programmes.join(', ')}\n📞 **Phone:** ${d.contact?.phone || 'N/A'}\n✉️ **Email:** ${d.contact?.email || 'N/A'}`
+        : `**${d.name}** (${d.schoolName})\n\n📍 **Location:** ${d.location || d.building}\n👤 **HOD:** ${d.hod || 'N/A'}\n🎓 **Programmes:** ${d.programmes.join(', ')}\n📞 **Phone:** ${d.contact?.phone || 'N/A'}\n✉️ **Email:** ${d.contact?.email || 'N/A'}`;
 
       return {
-        answer: overviewText,
-        language: lang,
-        intent: 'department_overview',
-        intentCategory: 'INFORMATION',
+        answer: overview,
+        language: lang, intent: 'department_overview', intentCategory: 'INFORMATION',
         responsibleUnit: { name: d.name, type: 'department', location: d.location },
         location: { name: d.building || d.name, building: d.building, mapLink: d.mapLink },
         contact: { phone: d.contact?.phone, email: d.contact?.email, officialWebsite: d.officialSourceUrl },
@@ -279,45 +327,42 @@ Current Student Message: "${cleanMsg}"
       };
     }
 
-    // 5. Matched Location Fallback
+    // ── Location match ───────────────────────────────────────────────────────
     if (matchedLocations.length > 0) {
       const l = matchedLocations[0];
       return {
         answer: isEnglish
           ? `**${l.name}** is located at ${l.building} (${l.landmark || 'Patharia Hills Campus'}).`
           : `**${l.name}** ${l.building} (${l.landmark || 'Patharia Hills Campus'}) mein sthit hai.`,
-        language: lang,
-        intent: 'location_info',
-        intentCategory: 'LOCATION',
+        language: lang, intent: 'location_info', intentCategory: 'LOCATION',
         location: { name: l.name, building: l.building, landmark: l.landmark, mapLink: l.mapLink },
         display: { responsibleUnit: false, location: true, contact: false, documents: false, nextSteps: false, sources: true, relatedTopics: false }
       };
     }
 
-    // 6. Matched Office Fallback
+    // ── Office match ─────────────────────────────────────────────────────────
     if (matchedOffices.length > 0) {
       const o = matchedOffices[0];
       return {
         answer: isEnglish
-          ? `**${o.name}** is located at ${o.location} (${o.building}). Office Hours: ${o.officeHours}.`
-          : `**${o.name}** ${o.location} (${o.building}) mein sthit hai. Timing: ${o.officeHours}.`,
-        language: lang,
-        intent: 'office_overview',
-        intentCategory: 'INFORMATION',
+          ? `**${o.name}** is located at ${o.location} (${o.building}). Office hours: ${o.officeHours}.`
+          : `**${o.name}** ${o.location} (${o.building}) mein hai. Timing: ${o.officeHours}.`,
+        language: lang, intent: 'office_info', intentCategory: 'INFORMATION',
         responsibleUnit: { name: o.name, type: 'office', location: o.location, officeHours: o.officeHours },
         display: { responsibleUnit: true, location: true, contact: false, documents: false, nextSteps: false, sources: true, relatedTopics: false }
       };
     }
 
-    // 7. General Help Fallback
+    // ── Complete fallback — Gemini was unavailable and no match found ─────────
     return {
       answer: isEnglish
-        ? `I can help you with DHSGSU departments, locations, admissions, exams, scholarships, hostels, and contacts. What would you like to know?`
-        : `DHSGSU campus se related departments, locations, admission, exam, scholarship ya contact se sambandhit aap kya janna chahte hain?`,
+        ? `I'm having trouble connecting to the assistant right now. Please try again in a moment. You can also check **dhsgsu.edu.in** for official university information.`
+        : `Abhi assistant se connect karne mein thodi dikkat aa rahi hai. Kripya thodi der baad try karein. Aap official website **dhsgsu.edu.in** bhi dekh sakte hain.`,
       language: lang,
-      intent: 'general_help',
+      intent: 'service_unavailable',
       intentCategory: 'INFORMATION',
-      display: { responsibleUnit: false, location: false, contact: false, documents: false, nextSteps: false, sources: false, relatedTopics: false }
+      sources: [{ title: 'DHSGSU Official Website', url: 'https://dhsgsu.edu.in', sourceType: 'official', verified: true }],
+      display: { responsibleUnit: false, location: false, contact: false, documents: false, nextSteps: false, sources: true, relatedTopics: false }
     };
   }
 }

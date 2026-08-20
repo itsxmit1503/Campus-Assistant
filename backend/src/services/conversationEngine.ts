@@ -1,5 +1,9 @@
 import { StructuredAnswer } from '../types/index.js';
 
+/**
+ * detectLanguage — lightweight script detection used only for context labelling.
+ * Gemini is responsible for language-based response generation.
+ */
 export function detectLanguage(text: string, history: Array<{ role: 'user' | 'assistant'; content: string }> = []): string {
   if (/[\u0980-\u09FF]/.test(text)) return 'bengali';
   if (/[\u0A00-\u0A7F]/.test(text)) return 'punjabi';
@@ -15,13 +19,13 @@ export function detectLanguage(text: string, history: Array<{ role: 'user' | 'as
   }
 
   const hinglishMarkers = [
-    'kuch', 'nahi', 'nhi', 'bas', 'checkout', 'check', 'rha', 'rhi', 'raha', 'rahi', 'hu', 'hoon', 'hai', 'hain',
-    'kya', 'kaha', 'kahan', 'kidhar', 'kaise', 'kaun', 'kyun', 'kyu', 'kab', 'bhai', 'yaar', 'batao', 'bata',
-    'dekh', 'dekhte', 'chal', 'chl', 'samajh', 'pata', 'chahiye', 'karna', 'kare', 'karu', 'karein', 'jana',
-    'jaun', 'padega', 'milega', 'mili', 'aaya', 'aayi', 'paisa', 'scene', 'acha', 'achha', 'theek', 'thik',
-    'haan', 'sahi', 'leke', 'saath', 'bhi', 'se', 'ko', 'me', 'mein', 'par', 'pe', 'toh', 'to', 'ho', 'gaya',
-    'gayi', 'hoga', 'hogi', 'rakha', 'mera', 'meri', 'mere', 'tera', 'teri', 'tere', 'apna', 'apni', 'waise',
-    'chalo', 'dikha', 'du', 'do', 'bol', 'bolo', 'haal', 'kaise', 'badhiya', 'chahiye', 'janna', 'bataiye'
+    'kuch', 'nahi', 'nhi', 'bas', 'rha', 'rhi', 'raha', 'rahi', 'hoon', 'hai', 'hain',
+    'kya', 'kaha', 'kahan', 'kidhar', 'kaise', 'kaun', 'kyun', 'kyu', 'kab', 'bhai', 'yaar',
+    'batao', 'bata', 'dekh', 'dekhte', 'chal', 'chl', 'samajh', 'pata', 'chahiye', 'karna',
+    'kare', 'karu', 'karein', 'jana', 'jaun', 'padega', 'milega', 'mili', 'aaya', 'aayi',
+    'acha', 'achha', 'theek', 'thik', 'haan', 'sahi', 'bhi', 'se', 'ko', 'mein', 'par',
+    'pe', 'toh', 'ho', 'gaya', 'gayi', 'hoga', 'hogi', 'mera', 'meri', 'mere', 'apna',
+    'chalo', 'dikha', 'bolo', 'haal', 'badhiya', 'janna', 'bataiye', 'puchna', 'puchni'
   ];
 
   const words = text.toLowerCase().split(/[\s,?.!]+/);
@@ -32,156 +36,94 @@ export function detectLanguage(text: string, history: Array<{ role: 'user' | 'as
 
 export class ConversationEngine {
   /**
-   * Check if a message is purely conversational/social without any university information intent
+   * NARROW LOCAL HANDLER — Only handles truly trivial one-word/emoji acknowledgements.
+   *
+   * IMPORTANT: This method intentionally handles ONLY the absolute minimum set of
+   * trivial messages that require no conversational reasoning whatsoever.
+   *
+   * DO NOT ADD more patterns here. The following MUST go through Gemini:
+   *   - greetings (hey, hello, hi, namaste, etc.)
+   *   - capability questions (what can you do, tum kya kar sakte ho)
+   *   - casual check-ins (just checking, bas testing, umm, hmm)
+   *   - small talk (kya haal chaal, kya scene)
+   *   - openers (ek baat puchni thi, kuch puchna hai)
+   *   - all university questions
+   *   - all follow-up questions
+   *   - any message containing a question or intent
+   *
+   * Gemini handles all of the above naturally and correctly.
    */
-  resolvePurelyConversational(query: string, history: Array<{ role: 'user' | 'assistant'; content: string }> = []): StructuredAnswer | null {
-    const q = query.toLowerCase().trim();
-    const detectedLang = detectLanguage(query, history);
-    const isEnglish = detectedLang === 'english';
-    const isHindi = detectedLang === 'hindi';
+  resolvePurelyConversational(
+    query: string,
+    history: Array<{ role: 'user' | 'assistant'; content: string }> = []
+  ): StructuredAnswer | null {
+    const q = query.trim();
+    const qLower = q.toLowerCase();
 
-    // 0. Safety Guard: If query contains any question or university topic, hand over to Gemini!
+    // SAFETY: If the message has more than 5 words, it almost certainly contains
+    // intent that Gemini should handle. Route everything to Gemini.
+    const wordCount = q.split(/\s+/).filter(Boolean).length;
+    if (wordCount > 4) return null;
+
+    // SAFETY: If the message contains a '?' or any question-forming word, send to Gemini.
+    if (/[?？]/.test(q)) return null;
+    if (/\b(kya|kaha|kahan|kidhar|where|when|how|kaise|kyun|why|what|who|kaun|kitna|kitne|kab|kaunse)\b/i.test(qLower)) return null;
+
+    // SAFETY: If the message mentions any university topic, send to Gemini.
     const universityKeywords = [
-      'department', 'school', 'physics', 'chemistry', 'maths', 'mathematics', 'computer', 'csa', 'cse', 'mca', 'mba',
-      'law', 'vidhi', 'library', 'pustakalaya', 'scholarship', 'chhatravritti', 'exam', 'pariksha', 'marksheet',
-      'hostel', 'chhatravas', 'warden', 'admission', 'fee', 'fees', 'dsw', 'registrar', 'kulsachiv', 'vc', 'hod',
-      'head', 'dean', 'faculty', 'professor', 'contact', 'number', 'email', 'helpline', 'location', 'building',
-      'kaha', 'kahan', 'kidhar', 'where', 'kab', 'when', 'total', 'kitne', 'kitna', 'how many', 'process', 'kaise',
-      'form', 'result', 'degree', 'programme', 'course', 'courses', 'syllabus', 'notice', 'circular', 'deadline',
-      'galat', 'correction', 'problem', 'dikkat', 'issue', 'pending', 'scene'
+      'department', 'school', 'physics', 'chemistry', 'maths', 'math', 'mathematics',
+      'computer', 'csa', 'cse', 'mca', 'mba', 'law', 'vidhi', 'library', 'pustakalaya',
+      'scholarship', 'chhatravritti', 'exam', 'pariksha', 'marksheet', 'hostel', 'chhatravas',
+      'warden', 'admission', 'fee', 'fees', 'dsw', 'registrar', 'vc', 'hod', 'head', 'dean',
+      'faculty', 'professor', 'contact', 'number', 'email', 'helpline', 'location', 'building',
+      'form', 'result', 'degree', 'programme', 'course', 'courses', 'syllabus', 'notice',
+      'correction', 'problem', 'dikkat', 'issue', 'pending', 'galat', 'allotment', 'document',
+      'certificate', 'bonafide', 'migration', 'transfer', 'library', 'canteen', 'sports',
+      'health', 'medical', 'dispensary', 'hostel', 'room', 'mess', 'gym', 'ground', 'stadium'
     ];
-
     if (universityKeywords.some(kw => {
       const reg = new RegExp(`\\b${kw}\\b`, 'i');
-      return reg.test(q);
-    })) {
-      return null; // Not pure casual, send to Gemini with MongoDB context!
-    }
+      return reg.test(qLower);
+    })) return null;
 
-    // 1. Unspecified Openers ("ek baat puchni thi", "kuch puchna hai", "ek sawal hai", "can i ask something?")
-    if (/^(ek baat puchni thi|kuch puchna hai|ek baat puchu|ek sawal hai|can i ask something|may i ask|puch sakta hu)(\s|!|\.|\?)*$/i.test(q)) {
+    // ── TRIVIAL LOCAL RESPONSES ──────────────────────────────────────────────
+    // Only the following patterns are handled locally. All else → Gemini.
+
+    // 1. Pure thanks (standalone only)
+    if (/^(thanks|thank you|thx|dhanyawad|shukriya|ধন্যবাদ|நன்றி|ధన్యవాదాలు|આભાર|ਧੰਨਵਾਦ|شکریہ)$/i.test(qLower)) {
       return {
-        answer: isEnglish ? `Sure, go ahead and ask! 😄` : isHindi ? `बिल्कुल, पूछिए! 😄` : `Haan, pucho 😄`,
-        language: detectedLang,
-        intent: 'conversation_opening',
-        intentCategory: 'CASUAL_CONVERSATION',
-        display: { responsibleUnit: false, location: false, contact: false, documents: false, nextSteps: false, sources: false, relatedTopics: false }
-      };
-    }
-
-    // 2. Playful Social Small Talk ("kya haal chaal?", "kya haal hai", "main bhi badhiya", "hello bol")
-    if (/\b(kya haal chaal|kya haal|kya hal|aur bata|aur bhai|kya chal raha|sab badhiya|kya scene)\b/i.test(q)) {
-      return {
-        answer: `Bas badhiya 😄 Tum batao?`,
-        language: detectedLang,
-        intent: 'casual_social',
-        intentCategory: 'CASUAL_CONVERSATION',
-        display: { responsibleUnit: false, location: false, contact: false, documents: false, nextSteps: false, sources: false, relatedTopics: false }
-      };
-    }
-
-    if (/\b(main bhi badhiya|mai bhi badhiya|sab theek|sab badhiya|all good)\b/i.test(q)) {
-      return {
-        answer: `Nice 😄`,
-        language: detectedLang,
-        intent: 'casual_social',
-        intentCategory: 'CASUAL_CONVERSATION',
-        display: { responsibleUnit: false, location: false, contact: false, documents: false, nextSteps: false, sources: false, relatedTopics: false }
-      };
-    }
-
-    if (/\b(hello bol|bol na|bol re|kuch bol)\b/i.test(q)) {
-      return {
-        answer: `Hello 😄`,
-        language: detectedLang,
-        intent: 'casual_social',
-        intentCategory: 'CASUAL_CONVERSATION',
-        display: { responsibleUnit: false, location: false, contact: false, documents: false, nextSteps: false, sources: false, relatedTopics: false }
-      };
-    }
-
-    // 3. Greetings ("hey", "hello", "hi", "namaste", "pranam")
-    if (/^(hey|hello|hi|hiya|namaste|pranam|what's up|good morning|good afternoon|good evening|hey there|halo|kaise ho|নমস্কার|வணக்கம்|నమస్కారం|નમસ્તે|ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ|നമസ്കാരം)(\s|!|\.|\?)*$/i.test(q)) {
-      let answer = `Hey! 👋`;
-      if (isHindi) answer = `नमस्ते! 👋`;
-      else if (detectedLang === 'bengali') answer = `নমস্কার! 👋`;
-      else if (detectedLang === 'marathi') answer = `नमस्कार! 👋`;
-      else if (detectedLang === 'tamil') answer = `வணக்கம்! 👋`;
-
-      return {
-        answer,
-        language: detectedLang,
-        intent: 'greeting',
-        intentCategory: 'GREETING',
-        display: { responsibleUnit: false, location: false, contact: false, documents: false, nextSteps: false, sources: false, relatedTopics: false }
-      };
-    }
-
-    // 4. Acknowledgements ("hmm", "acha", "ok", "theek hai")
-    if (/^(hmm|hmmm|hmmmm|acha|achha|ok|okay|theek hai|thik hai|theek|thik|got it|sahi hai|fine|cool|alright|nice|great|haan|sahi|होय|बरोबर|ঠিক আছে|சரி)(\s|!|\.|\?)*$/i.test(q)) {
-      let answer = `😄`;
-      if (q.startsWith('hmm')) answer = `😄`;
-      else if (q === 'acha' || q === 'achha') answer = `haan 😄`;
-      else if (q === 'theek hai' || q === 'thik hai' || q === 'theek') answer = `Theek hai 👍`;
-      else if (q === 'ok' || q === 'okay' || q === 'cool' || q === 'nice') answer = `👍`;
-
-      return {
-        answer,
-        language: detectedLang,
-        intent: 'acknowledgement',
-        intentCategory: 'CASUAL_CONVERSATION',
-        display: { responsibleUnit: false, location: false, contact: false, documents: false, nextSteps: false, sources: false, relatedTopics: false }
-      };
-    }
-
-    // 5. Testing ("bas testing kar raha hu", "bas check kar raha tha", "just checking")
-    if (
-      /\b(checkout|check|test|testing|chal rha|chal raha|chl rha|chl raha|dekh rha|dekh raha|dekh raha tha|dekhte|working|kaam kar|aise hi|চেক|பரிசோதனை)\b/i.test(q) ||
-      q.includes('kuch nahi bas') || q.includes('kuch nhi bas') || q.includes('just checking') || q.includes('just testing')
-    ) {
-      return {
-        answer: `Haha, theek hai 😄`,
-        language: detectedLang,
-        intent: 'casual_testing',
-        intentCategory: 'CASUAL_CONVERSATION',
-        display: { responsibleUnit: false, location: false, contact: false, documents: false, nextSteps: false, sources: false, relatedTopics: false }
-      };
-    }
-
-    // 6. Nothing / Kuch nahi
-    if (/^(kuch nahi|kuch nhi|nothing|nothing much|never mind|chodo|rehnde|no problem|कुछ नहीं|কিছু না|काही नाही|ஒன்றுமில்லை)(\s|!|\.|\?)*$/i.test(q)) {
-      return {
-        answer: isHindi ? `कोई बात नहीं 😄` : `No worries 😄`,
-        language: detectedLang,
-        intent: 'casual_chat',
-        intentCategory: 'CASUAL_CONVERSATION',
-        display: { responsibleUnit: false, location: false, contact: false, documents: false, nextSteps: false, sources: false, relatedTopics: false }
-      };
-    }
-
-    // 7. Thanks
-    if (/\b(thanks|thank you|thx|dhanyawad|shukriya|ধন্যবাদ|நன்றி|ధన్యవాదాలు|આભાર|ਧੰਨਵਾਦ)\b/i.test(q)) {
-      return {
-        answer: `Anytime 😄`,
-        language: detectedLang,
+        answer: `Anytime 😊`,
+        language: detectLanguage(query, history),
         intent: 'thanks',
         intentCategory: 'CASUAL_CONVERSATION',
         display: { responsibleUnit: false, location: false, contact: false, documents: false, nextSteps: false, sources: false, relatedTopics: false }
       };
     }
 
-    // 8. Farewell
-    if (/^(bye|goodbye|see you|alvida|tata|good night|বিদায়)(\s|!|\.|\?)*$/i.test(q)) {
+    // 2. Pure farewell (standalone only)
+    if (/^(bye|goodbye|alvida|tata|see you|good night|বিদায়|さようなら)$/i.test(qLower)) {
       return {
-        answer: `Bye, take care 👋`,
-        language: detectedLang,
+        answer: `Bye! Take care 👋`,
+        language: detectLanguage(query, history),
         intent: 'farewell',
         intentCategory: 'CASUAL_CONVERSATION',
         display: { responsibleUnit: false, location: false, contact: false, documents: false, nextSteps: false, sources: false, relatedTopics: false }
       };
     }
 
-    return null; // All other messages -> Gemini!
+    // 3. Pure emoji acknowledgements (no text)
+    if (/^(👍|🙏|👌|✅|😊|😄|❤️|🙌)+$/.test(q)) {
+      return {
+        answer: `😊`,
+        language: 'auto',
+        intent: 'acknowledgement',
+        intentCategory: 'CASUAL_CONVERSATION',
+        display: { responsibleUnit: false, location: false, contact: false, documents: false, nextSteps: false, sources: false, relatedTopics: false }
+      };
+    }
+
+    // Everything else → Gemini handles it
+    return null;
   }
 }
 

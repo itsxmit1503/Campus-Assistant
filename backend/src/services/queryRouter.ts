@@ -3,16 +3,9 @@ import { conversationEngine, detectLanguage } from './conversationEngine.js';
 
 export { detectLanguage };
 
-export type RouteType = 
-  | 'GREETING'
-  | 'CASUAL_SOCIAL'
-  | 'CASUAL_CHAT'
-  | 'TESTING'
-  | 'ACKNOWLEDGEMENT'
-  | 'THANKS'
-  | 'FAREWELL'
-  | 'CAPABILITIES'
-  | 'UNIVERSITY_QUERY';
+export type RouteType =
+  | 'LOCAL_TRIVIAL'
+  | 'GEMINI';
 
 export interface RouteDecision {
   route: RouteType;
@@ -21,25 +14,46 @@ export interface RouteDecision {
   deterministicResponse?: StructuredAnswer;
 }
 
+/**
+ * routeQuery — Decides whether to handle a message locally or route to Gemini.
+ *
+ * Policy:
+ *   LOCAL_TRIVIAL  → pure thanks / pure farewell / pure emoji (no Gemini call needed)
+ *   GEMINI         → EVERYTHING else, including:
+ *                     - greetings
+ *                     - casual conversation
+ *                     - capability questions
+ *                     - all university questions (departments, locations, HOD, contacts, etc.)
+ *                     - follow-up questions
+ *                     - multilingual messages
+ *                     - Hinglish / mixed-language messages
+ *                     - short messages
+ *                     - unclear / ambiguous messages
+ *
+ * NEVER add language-based routing here.
+ * NEVER add keyword-based conversational routing here.
+ * Gemini is the conversational intelligence — let it handle the message.
+ */
 export function routeQuery(
   query: string,
   lang = 'auto',
   conversationHistory: Array<{ role: 'user' | 'assistant'; content: string }> = []
 ): RouteDecision {
-  // 1. Check if the message is purely social/conversational without an information request
-  const conversationalResponse = conversationEngine.resolvePurelyConversational(query, conversationHistory);
-  if (conversationalResponse) {
+  // Check if the message is a truly trivial local response (thanks / bye / emoji only)
+  const trivialResponse = conversationEngine.resolvePurelyConversational(query, conversationHistory);
+
+  if (trivialResponse) {
     return {
-      route: 'CASUAL_SOCIAL',
+      route: 'LOCAL_TRIVIAL',
       requiresGemini: false,
       requiresWebSearch: false,
-      deterministicResponse: conversationalResponse
+      deterministicResponse: trivialResponse
     };
   }
 
-  // 2. All actual university queries (departments, locations, HOD, courses, scholarships, exams, follow-ups, admissions) -> Gemini with MongoDB context!
+  // ALL other messages → Gemini
   return {
-    route: 'UNIVERSITY_QUERY',
+    route: 'GEMINI',
     requiresGemini: true,
     requiresWebSearch: false
   };

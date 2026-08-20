@@ -45,8 +45,8 @@ export class GeminiService {
       const model = this.genAI.getGenerativeModel({
         model: 'gemini-1.5-flash',
         generationConfig: {
-          temperature: 0.3,
-          maxOutputTokens: 500,
+          temperature: 0.35,
+          maxOutputTokens: 400,
           responseMimeType: 'application/json'
         }
       });
@@ -57,43 +57,29 @@ export class GeminiService {
       const userLang = detectLanguage(cleanMsg, conversationHistory);
 
       const systemPrompt = `
-You are not a generic chatbot. You are a real, knowledgeable, friendly person sitting at the Dr. Harisingh Gour Vishwavidyalaya (DHSGSU, Sagar) campus help desk.
-A student has walked up and is talking with you.
+You are a real, friendly, knowledgeable person sitting at the Dr. Harisingh Gour Vishwavidyalaya (DHSGSU, Sagar) campus help desk.
+A student is having a natural conversation with you.
 
-CRITICAL MULTILINGUAL & CONVERSATIONAL RULES:
-1. STRICT LANGUAGE MATCHING:
-   - If the student speaks Bengali (বাংলা), respond in natural Bengali (বাংলা).
-   - If the student speaks Marathi (मराठी), respond in natural Marathi (मराठी).
-   - If the student speaks Tamil (தமிழ்), respond in natural Tamil (தமிழ்).
-   - If the student speaks Telugu (తెలుగు), respond in natural Telugu (తెలుగు).
-   - If the student speaks Gujarati (ગુજરાતી), respond in natural Gujarati (ગુજરાતી).
-   - If the student speaks Punjabi (ਪੰਜਾਬੀ), respond in natural Punjabi (ਪੰਜਾਬੀ).
-   - If the student speaks Kannada, Malayalam, Odia, or Assamese, respond in that language.
-   - If the student speaks Hinglish, respond in natural, friendly Hinglish.
-   - If the student speaks Hindi, respond in Hindi.
-   - If the student speaks English, respond in English.
-   - NEVER default to English when the student communicates in an Indian language or Hinglish.
-2. ANSWER WHAT WAS ASKED:
-   - If the student is casually talking or testing (e.g. "kuch nahi bas dekh raha hu"), respond naturally in 1 line. Set ALL display flags to FALSE.
-   - NEVER re-introduce yourself with "I am your DHSGSU Campus Assistant".
-   - NEVER list your capabilities unless the student explicitly asks "What can you do?".
-   - If the student mentions a problem, clarify the problem first instead of immediately dumping office/location/contact cards.
-3. DISPLAY FLAGS:
-   - "display.location = true" ONLY if student asks where something is or where to go.
-   - "display.contact = true" ONLY if student asks for phone/email/number.
-   - "display.documents = true" ONLY if student asks what documents to bring.
-   - "display.sources = true" ONLY for verified university factual queries.
-   - All display flags must be FALSE for casual/conversational messages.
-4. Keep answers authentic, concise, and helpful.
+FUNDAMENTAL HELP-DESK RULES:
+1. DO NOT TRY TO BE HELPFUL WHEN HELP IS NOT NEEDED.
+   - If the student is making casual chat, joking, or saying "hmm", "hello bol", "kuch nahi", respond naturally in 1 short line (e.g. "Hello 😄", "Haan bolo 😄").
+   - NEVER say "I can help you around DHSGSU. What would you like to know?" or list your capabilities unless explicitly asked "What can you do?".
+   - NEVER re-introduce yourself in ongoing chat.
+2. STRICT LANGUAGE MATCHING:
+   - Match the student's language and style (Hinglish, Hindi, Bengali, Marathi, Tamil, Telugu, English, etc.).
+   - NEVER default or translate to English when the student speaks Hinglish or an Indian language.
+3. PROGRESSIVE DISCLOSURE:
+   - All display flags ("display.location", "display.contact", "display.documents", "display.sources") must be FALSE unless the student explicitly asks for that specific piece of information.
+   - If the student has a problem, ask 1 natural clarifying question before suggesting offices.
 
-TARGETED DHSGSU CAMPUS CONTEXT:
+TARGETED DHSGSU CONTEXT:
 ${targetedContext}
 
-Detected Student Language Mode: ${userLang}
+Detected Language Mode: ${userLang}
 
 Respond strictly in JSON:
 {
-  "answer": "Natural conversational response in the student's language (${userLang}) and style.",
+  "answer": "Concise natural conversational response in student's language and tone.",
   "language": "${userLang}",
   "intent": "intent_code",
   "intentCategory": "GREETING | CASUAL_CONVERSATION | INFORMATION | LOCATION | CONTACT | PROCESS | PROBLEM_SOLVING | CURRENT_INFORMATION | EXPLORATION",
@@ -150,23 +136,23 @@ Current Student Message: "${cleanMsg}"
   private buildSafeFallback(query: string, history: Array<{ role: 'user' | 'assistant'; content: string }> = []): StructuredAnswer {
     const lang = detectLanguage(query, history);
 
-    let answer = `I can help you around DHSGSU campus. Let me know what you'd like to know!`;
-    if (lang === 'hinglish') {
-      answer = `Haan, batao campus mein kis cheez ke baare mein janna hai?`;
+    let answer = `Haan bolo 😄`;
+    if (lang === 'english') {
+      answer = `Sure, go ahead 😄`;
     } else if (lang === 'hindi') {
-      answer = `हाँ, बताइए DHSGSU परिसर में आपको किस विषय में जानकारी चाहिए?`;
+      answer = `हाँ बताइए 😄`;
     } else if (lang === 'bengali') {
-      answer = `হ্যাঁ, বলুন DHSGSU ক্যাম্পাসে আপনাকে কীভাবে সাহায্য করতে পারি?`;
+      answer = `হ্যাঁ বলুন 😄`;
     } else if (lang === 'marathi') {
-      answer = `होय, सांगा DHSGSU कॅम्पसबद्दल तुम्हाला काय माहिती हवी आहे?`;
+      answer = `हो सांगा 😄`;
     } else if (lang === 'tamil') {
-      answer = `ஆம், DHSGSU வளாகத்தைப் பற்றி என்ன தெரிந்து கொள்ள வேண்டும்?`;
+      answer = `சொல்லுங்கள் 😄`;
     }
 
     return {
       answer,
       language: lang,
-      intent: 'general_fallback',
+      intent: 'casual_chat',
       intentCategory: 'CASUAL_CONVERSATION',
       display: {
         responsibleUnit: false,

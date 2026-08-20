@@ -3,6 +3,7 @@ import { knowledgeService } from './knowledgeService.js';
 
 export type RouteType = 
   | 'GREETING'
+  | 'CASUAL_SOCIAL'
   | 'CASUAL_CHAT'
   | 'TESTING'
   | 'ACKNOWLEDGEMENT'
@@ -39,7 +40,6 @@ export function detectLanguage(text: string, history: Array<{ role: 'user' | 'as
     return 'hindi';
   }
 
-  // Hinglish markers
   const hinglishMarkers = [
     'kuch', 'nahi', 'nhi', 'bas', 'checkout', 'check', 'rha', 'rhi', 'raha', 'rahi', 'hu', 'hoon', 'hai', 'hain',
     'kya', 'kaha', 'kahan', 'kidhar', 'kaise', 'kaun', 'kyun', 'kyu', 'kab', 'bhai', 'yaar', 'batao', 'bata',
@@ -47,7 +47,7 @@ export function detectLanguage(text: string, history: Array<{ role: 'user' | 'as
     'jaun', 'padega', 'milega', 'mili', 'aaya', 'aayi', 'paisa', 'scene', 'acha', 'achha', 'theek', 'thik',
     'haan', 'sahi', 'leke', 'saath', 'bhi', 'se', 'ko', 'me', 'mein', 'par', 'pe', 'toh', 'to', 'ho', 'gaya',
     'gayi', 'hoga', 'hogi', 'rakha', 'mera', 'meri', 'mere', 'tera', 'teri', 'tere', 'apna', 'apni', 'waise',
-    'chalo', 'dikha', 'du', 'do'
+    'chalo', 'dikha', 'du', 'do', 'bol', 'bolo', 'haal', 'kaise', 'badhiya'
   ];
 
   const words = text.toLowerCase().split(/[\s,?.!]+/);
@@ -72,19 +72,45 @@ export function routeQuery(
   const lastUserMsg = conversationHistory.filter(m => m.role === 'user').slice(-2, -1)[0]?.content.toLowerCase() || '';
   const lastAssistantMsg = conversationHistory.filter(m => m.role === 'assistant').slice(-1)[0]?.content.toLowerCase() || '';
 
-  // 1. GREETINGS
+  // 1. PLAYFUL COMMANDS / CHAT ("hello bol", "bol na", "kuch bol", "kya haal", "aur bata", "kya scene hai")
+  if (
+    /\b(hello bol|bol na|bol re|kuch bol|kya haal|kya hal|aur bata|aur bhai|kya chal raha|sab badhiya|kya scene)\b/i.test(q)
+  ) {
+    let answer = `Hello 😄`;
+    if (q.includes('kya haal') || q.includes('aur bata') || q.includes('sab badhiya')) {
+      answer = `Sab badhiya! Batao 😄`;
+    } else if (q.includes('hello bol')) {
+      answer = `Hello 😄`;
+    } else {
+      answer = `Haan bolo 😄`;
+    }
+
+    return {
+      route: 'CASUAL_SOCIAL',
+      requiresGemini: false,
+      requiresWebSearch: false,
+      deterministicResponse: {
+        answer,
+        language: detectedLang,
+        intent: 'casual_social',
+        intentCategory: 'CASUAL_CONVERSATION',
+        display: { responsibleUnit: false, location: false, contact: false, documents: false, nextSteps: false, sources: false, relatedTopics: false }
+      }
+    };
+  }
+
+  // 2. GREETINGS ("hey", "hello", "hi", "namaste", "pranam")
   if (
     /^(hey|hello|hi|hiya|namaste|pranam|what's up|good morning|good afternoon|good evening|hey there|halo|kaise ho|নমস্কার|வணக்கம்|నమస్కారం|નમસ્તે|ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ|നമസ്കാരം)(\s|!|\.|\?)*$/i.test(q)
   ) {
-    let answer = `Hey! 👋 How can I help you around DHSGSU?`;
-    if (detectedLang === 'hindi') answer = `नमस्ते! 👋 DHSGSU कैंपस में आपकी क्या सहायता करूँ?`;
-    else if (detectedLang === 'hinglish') answer = `Hey! 👋 Batao, campus mein kis cheez mein help chahiye?`;
-    else if (detectedLang === 'bengali') answer = `নমস্কার! 👋 DHSGSU ক্যাম্পাসে আপনাকে কীভাবে সাহায্য করতে পারি?`;
-    else if (detectedLang === 'marathi') answer = `नमस्कार! 👋 DHSGSU कॅम्पसमध्ये मी तुम्हाला कशी मदत करू शकतो?`;
-    else if (detectedLang === 'tamil') answer = `வணக்கம்! 👋 DHSGSU வளாகத்தில் உங்களுக்கு நான் எவ்வாறு உதவ முடியும்?`;
-    else if (detectedLang === 'telugu') answer = `నమస్కారం! 👋 DHSGSU క్యాంపస్‌లో మీకు నేను ఎలా సహాయపడగలను?`;
-    else if (detectedLang === 'gujarati') answer = `નમસ્તે! 👋 DHSGSU કેમ્પસમાં હું તમને કેવી રીતે મદદ કરી શકું?`;
-    else if (detectedLang === 'punjabi') answer = `ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ! 👋 DHSGSU ਕੈਂਪਸ ਵਿੱਚ ਮੈਂ ਤੁਹਾਡੀ ਕੀ ਮਦਦ ਕਰ ਸਕਦਾ ਹਾਂ?`;
+    let answer = `Hey! 👋`;
+    if (detectedLang === 'hindi') answer = `नमस्ते! 👋`;
+    else if (detectedLang === 'bengali') answer = `নমস্কার! 👋`;
+    else if (detectedLang === 'marathi') answer = `नमस्कार! 👋`;
+    else if (detectedLang === 'tamil') answer = `வணக்கம்! 👋`;
+    else if (detectedLang === 'telugu') answer = `నమస్కారం! 👋`;
+    else if (detectedLang === 'gujarati') answer = `નમસ્તે! 👋`;
+    else if (detectedLang === 'punjabi') answer = `ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ! 👋`;
 
     return {
       route: 'GREETING',
@@ -100,58 +126,20 @@ export function routeQuery(
     };
   }
 
-  // 2. CASUAL TESTING / META
+  // 3. ACKNOWLEDGEMENTS / THINKING ("hmm", "hmmm", "acha", "ok", "okay", "theek hai", "got it", "haan", "cool", "nice")
   if (
-    /\b(checkout|check|test|testing|chal rha|chal raha|chl rha|chl raha|dekh rha|dekh raha|dekhte|working|kaam kar|aise hi|চেক|பரிசோதனை|తనిఖీ)\b/i.test(q) ||
-    q.includes('kuch nahi bas') || q.includes('kuch nhi bas') || q.includes('just checking') || q.includes('just testing')
+    /^(hmm|hmmm|hmmmm|acha|achha|ok|okay|theek hai|thik hai|theek|thik|got it|sahi hai|fine|cool|alright|nice|great|haan|sahi|होय|बरोबर|ঠিক আছে|சரி)(\s|!|\.|\?)*$/i.test(q)
   ) {
-    let answer = `Haha, yep, it's working smoothly 😄\nWhenever you're ready, feel free to ask anything about the campus.`;
-    if (detectedLang === 'hindi') answer = `हाँ, बिल्कुल चालू है 😄 जब भी कुछ पूछना हो, निसंकोच बताइएगा।`;
-    else if (detectedLang === 'hinglish') answer = `Haha, haan bhai, bilkul chal raha hai 😄\nJab bhi campus se juda kuch poochna ho, bas bol dena.`;
-    else if (detectedLang === 'bengali') answer = `হ্যাঁ, একেবারে ঠিকঠাক কাজ করছে 😄 যখনই কিছু জানার থাকবে নির্দ্বিধায় জিজ্ঞাসা করবেন।`;
-    else if (detectedLang === 'marathi') answer = `हो, अगदी व्यवस्थित सुरू आहे 😄 जेव्हाही काही विचारायचे असेल, नक्की विचारा.`;
-    else if (detectedLang === 'tamil') answer = `ஆம், சரியாக வேலை செய்கிறது 😄 எப்போது வேண்டுமானாலும் வளாகம் பற்றி கேளுங்கள்.`;
-
-    return {
-      route: 'TESTING',
-      requiresGemini: false,
-      requiresWebSearch: false,
-      deterministicResponse: {
-        answer,
-        language: detectedLang,
-        intent: 'casual_testing',
-        intentCategory: 'CASUAL_CONVERSATION',
-        display: { responsibleUnit: false, location: false, contact: false, documents: false, nextSteps: false, sources: false, relatedTopics: false }
-      }
-    };
-  }
-
-  // 3. NOTHING / "Kuch nahi"
-  if (/^(kuch nahi|kuch nhi|nothing|nothing much|never mind|chodo|rehnde|no problem|কিছু না|काही नाही|ஒன்றுமில்லை)(\s|!|\.|\?)*$/i.test(q)) {
-    let answer = `No worries 😄 Take your time.`;
-    if (detectedLang === 'hindi') answer = `कोई बात नहीं 😄 आराम से, जब ज़रूरत हो बताइएगा।`;
-    else if (detectedLang === 'hinglish') answer = `Koi baat nahi 😄 Aaram se, jab zaroorat ho bata dena.`;
-    else if (detectedLang === 'bengali') answer = `কোনো সমস্যা নেই 😄 সময় নিন, যখন প্রয়োজন হবে জানাবেন।`;
-    else if (detectedLang === 'marathi') answer = `काही हरकत नाही 😄 आरामशीर, जेव्हा गरज असेल तेव्हा सांगा.`;
-
-    return {
-      route: 'CASUAL_CHAT',
-      requiresGemini: false,
-      requiresWebSearch: false,
-      deterministicResponse: {
-        answer,
-        language: detectedLang,
-        intent: 'casual_chat',
-        intentCategory: 'CASUAL_CONVERSATION',
-        display: { responsibleUnit: false, location: false, contact: false, documents: false, nextSteps: false, sources: false, relatedTopics: false }
-      }
-    };
-  }
-
-  // 4. ACKNOWLEDGEMENTS ("Acha", "Okay", "Theek hai", "Got it", "Sahi hai")
-  if (/^(acha|achha|ok|okay|theek hai|thik hai|got it|sahi hai|fine|cool|alright|hmm|accha|ঠিক আছে|சரி|होय|बरोबर)(\s|!|\.|\?)*$/i.test(q)) {
-    let answer = `👍`;
-    if (q === 'acha' || q === 'achha' || q === 'accha') answer = `Haan 😄`;
+    let answer = `😄`;
+    if (q.startsWith('hmm')) {
+      answer = `😄`;
+    } else if (q === 'acha' || q === 'achha') {
+      answer = `haan 😄`;
+    } else if (q === 'theek hai' || q === 'thik hai' || q === 'theek') {
+      answer = `Theek hai 👍`;
+    } else if (q === 'ok' || q === 'okay' || q === 'cool' || q === 'nice') {
+      answer = `👍`;
+    }
 
     return {
       route: 'ACKNOWLEDGEMENT',
@@ -167,13 +155,53 @@ export function routeQuery(
     };
   }
 
-  // 5. THANKS
-  if (/\b(thanks|thank you|thx|dhanyawad|shukriya|ধন্যবাদ|நன்றி|ధన్యవాदాలు|આભાર|ਧੰਨਵਾਦ)\b/i.test(q)) {
-    let answer = `You're welcome! 😊 Feel free to ask anytime.`;
-    if (detectedLang === 'hinglish') answer = `Anytime bhai! 😊 Kabhi bhi kuch pooch lena.`;
-    else if (detectedLang === 'hindi') answer = `स्वागत है! 😊 कभी भी पूछ सकते हैं।`;
-    else if (detectedLang === 'bengali') answer = `আপনাকে স্বাগতম! 😊 যেকোনো সময় জিজ্ঞাসা করতে পারেন।`;
-    else if (detectedLang === 'marathi') answer = `स्वागत आहे! 😊 कधीही विचारू शकता.`;
+  // 4. CASUAL TESTING / META ("bas check kar raha hu", "testing", "dekh raha tha", "chal raha hai ki nahi")
+  if (
+    /\b(checkout|check|test|testing|chal rha|chal raha|chl rha|chl raha|dekh rha|dekh raha|dekh raha tha|dekhte|working|kaam kar|aise hi|চেক|பரிசோதனை)\b/i.test(q) ||
+    q.includes('kuch nahi bas') || q.includes('kuch nhi bas') || q.includes('just checking') || q.includes('just testing')
+  ) {
+    let answer = `Haha, fair enough 😄`;
+    if (q.includes('chal raha') || q.includes('chl rha') || q.includes('working') || q.includes('checkout')) {
+      answer = `Haha, haan, chal raha hai 😄`;
+    }
+
+    return {
+      route: 'TESTING',
+      requiresGemini: false,
+      requiresWebSearch: false,
+      deterministicResponse: {
+        answer,
+        language: detectedLang,
+        intent: 'casual_testing',
+        intentCategory: 'CASUAL_CONVERSATION',
+        display: { responsibleUnit: false, location: false, contact: false, documents: false, nextSteps: false, sources: false, relatedTopics: false }
+      }
+    };
+  }
+
+  // 5. NOTHING / "Kuch nahi"
+  if (/^(kuch nahi|kuch nhi|nothing|nothing much|never mind|chodo|rehnde|no problem|कुछ नहीं|কিছু না|काही नाही|ஒன்றுமில்லை)(\s|!|\.|\?)*$/i.test(q)) {
+    let answer = `No worries 😄`;
+    if (detectedLang === 'hindi') answer = `कोई बात नहीं 😄`;
+
+    return {
+      route: 'CASUAL_CHAT',
+      requiresGemini: false,
+      requiresWebSearch: false,
+      deterministicResponse: {
+        answer,
+        language: detectedLang,
+        intent: 'casual_chat',
+        intentCategory: 'CASUAL_CONVERSATION',
+        display: { responsibleUnit: false, location: false, contact: false, documents: false, nextSteps: false, sources: false, relatedTopics: false }
+      }
+    };
+  }
+
+  // 6. THANKS
+  if (/\b(thanks|thank you|thx|dhanyawad|shukriya|ধন্যবাদ|நன்றி|ధన్యవాదాలు|આભાર|ਧੰਨਵਾਦ)\b/i.test(q)) {
+    let answer = `Anytime 😄`;
+    if (detectedLang === 'hindi') answer = `स्वागत है! 😊`;
 
     return {
       route: 'THANKS',
@@ -189,11 +217,9 @@ export function routeQuery(
     };
   }
 
-  // 6. FAREWELL
+  // 7. FAREWELL
   if (/^(bye|goodbye|see you|alvida|tata|good night|বিদায়)(\s|!|\.|\?)*$/i.test(q)) {
-    let answer = `Bye! Take care 👋`;
-    if (detectedLang === 'hinglish') answer = `Bye bhai, take care 👋`;
-    else if (detectedLang === 'bengali') answer = `বিদায়! ভালো থাকবেন 👋`;
+    let answer = `Bye, take care 👋`;
 
     return {
       route: 'FAREWELL',
@@ -209,30 +235,35 @@ export function routeQuery(
     };
   }
 
-  // 7. LANGUAGE INQUIRY
-  if (/\b(speak hindi|hindi aati|hinglish aati|hindi bol|bengali aati|language|hindi samajh)\b/i.test(q)) {
+  // 8. CAPABILITY QUESTION ("What can you help me with?", "Tu kya kya bata sakta hai?")
+  if (/\b(what can you do|kya kar sakte ho|kya kya bata sakte|capabilities|what do you know|help me with|tu kya karta)\b/i.test(q)) {
+    let answer = `Campus se related almost kuch bhi pooch sakte ho. Departments, hostels, scholarships, exams, offices, locations ya koi problem ho toh batao.`;
+    if (detectedLang === 'english') {
+      answer = `I can help with departments, campus locations, university services, admissions, exams, scholarships, hostels, and figuring out where to go when you're stuck.`;
+    }
+
     return {
-      route: 'LANGUAGE_QUERY',
+      route: 'CAPABILITIES',
       requiresGemini: false,
       requiresWebSearch: false,
       deterministicResponse: {
-        answer: `Bilkul! Hindi, Hinglish, English, Bengali, Marathi, Tamil, Telugu — jis mein comfortable ho usmein baat kar sakte ho 😄`,
-        language: 'Hinglish',
-        intent: 'language_capabilities',
+        answer,
+        language: detectedLang,
+        intent: 'capabilities',
         intentCategory: 'CASUAL_CONVERSATION',
         display: { responsibleUnit: false, location: false, contact: false, documents: false, nextSteps: false, sources: false, relatedTopics: false }
       }
     };
   }
 
-  // 8. DIRECT LOCATION: Library (Multilingual)
+  // 9. LOCATION: Central Library
   if (
     q.includes('library') || q.includes('লাইব্রেরি') || q.includes('लायब्ररी') || 
     q.includes('நூலகம்') || q.includes('లైబ్రరీ') || q.includes('પુસ્તકાલય')
   ) {
     const loc = knowledgeService.getLocationById('loc-central-library')!;
-    let answer = `The Central Library is located centrally on the DHSGSU campus between the Arts and Science blocks. Want me to show you the location on the map?`;
-    if (detectedLang === 'hinglish') answer = `Central Library Arts aur Science faculty ke beech mein campus ke central area mein hai. Chaho toh location dikha du?`;
+    let answer = `Haan, Central Library campus mein hai. Exact location bhi dikha du?`;
+    if (detectedLang === 'english') answer = `The Central Library is on the campus between Arts and Science faculties. Want me to show you the location on the map?`;
     else if (detectedLang === 'hindi') answer = `केंद्रीय पुस्तकालय कला और विज्ञान संकाय के बीच स्थित है। क्या आप इसे मैप पर देखना चाहते हैं?`;
     else if (detectedLang === 'bengali') answer = `সেন্ট্রাল লাইব্রেরি আর্টস ও সায়েন্স ফ্যাকাল্টির মাঝে ক্যাম্পাসের কেন্দ্রীয় এলাকায় অবস্থিত। আপনি কি ম্যাপে দেখতে চান?`;
     else if (detectedLang === 'marathi') answer = `मध्यवर्ती ग्रंथालय (Central Library) कला आणि विज्ञान विद्याशाखेच्या मध्ये कॅम्पसमध्ये स्थित आहे. नकाशावर पाहायचे आहे का?`;
@@ -253,15 +284,15 @@ export function routeQuery(
     };
   }
 
-  // 9. PROBLEM: "Meri scholarship nahi aayi" (Turn 1)
+  // 10. PROBLEM: Scholarship
   if (
     q.includes('scholarship nahi aayi') || q.includes('scholarship pending') ||
     q.includes('scholarship ka paisa') || q.includes('scholarship kab milegi') ||
     (q.includes('scholarship') && (q.includes('problem') || q.includes('nahi mila') || q.includes('status') || q.includes('scene')))
   ) {
-    let answer = `Sure, I can help you figure that out. Has the scholarship already been approved, or is the application still pending on the portal?`;
-    if (detectedLang === 'hinglish') answer = `Haan, dekhte hain. Scholarship approve ho chuki hai ya abhi portal par pending dikha rahi hai?`;
-    else if (detectedLang === 'hindi') answer = `ज़रूर। क्या आपकी छात्रवृत्ति पोर्टल पर स्वीकृत (Approved) हो चुकी है, या अभी पेंडिंग है?`;
+    let answer = `Achha, scholarship approve ho chuki hai ya abhi pending hai?`;
+    if (detectedLang === 'english') answer = `Has your scholarship already been approved, or is the application still showing as pending?`;
+    else if (detectedLang === 'hindi') answer = `क्या आपकी छात्रवृत्ति स्वीकृत (Approved) हो चुकी है, या अभी पेंडिंग है?`;
 
     return {
       route: 'PROBLEM_TRIAGE',
@@ -278,7 +309,37 @@ export function routeQuery(
     };
   }
 
-  // 10. CURRENT / TIME-SENSITIVE -> Require Gemini + Search Grounding
+  // 11. FOLLOW-UP: "Where to go?" / "Haan kahan jana hai?"
+  const isAskingLocationFollowUp = 
+    /\b(kahan jana|kaha jana|where to go|where should i go|location batao|kahan hai|kidhar hai|কোথায় যেতে হবে|எங்கே செல்ல வேண்டும்)\b/i.test(q) ||
+    ((q === 'haan' || q === 'yes' || q.includes('batao') || q.includes('chalo') || q.includes('dikha') || q === 'হ্যাঁ') && 
+     (lastAssistantMsg.includes('where to go') || lastAssistantMsg.includes('location') || lastAssistantMsg.includes('kahan') || lastAssistantMsg.includes('dikha')));
+
+  if (isAskingLocationFollowUp) {
+    if (lastAssistantMsg.includes('scholarship') || lastUserMsg.includes('scholarship')) {
+      const office = knowledgeService.getOfficeById('office-scholarship-cell')!;
+      const loc = knowledgeService.getLocationById('loc-admin-block')!;
+      let answer = `Iske liye aapko **University Scholarship Cell** jaana hoga jo **Administrative Block (Room No. 12)** mein hai.`;
+      if (detectedLang === 'english') answer = `For this, visit the **University Scholarship & Fellowship Cell** in **Room No. 12, Main Administrative Block**.`;
+
+      return {
+        route: 'FOLLOW_UP',
+        requiresGemini: false,
+        requiresWebSearch: false,
+        deterministicResponse: {
+          answer,
+          language: detectedLang,
+          intent: 'scholarship_location',
+          intentCategory: 'LOCATION',
+          responsibleUnit: { name: office.name, type: 'office', location: office.location, officeHours: office.officeHours },
+          location: { name: loc.name, building: loc.building, floor: 'Ground Floor (Room No. 12)', landmark: loc.landmark, mapLink: loc.mapLink, coordinates: loc.coordinates },
+          display: { responsibleUnit: true, location: true, contact: false, documents: false, nextSteps: true, sources: true, relatedTopics: false }
+        }
+      };
+    }
+  }
+
+  // 12. CURRENT / TIME-SENSITIVE -> Gemini + Search Grounding
   if (
     /\b(latest|current|deadline|last date|aaj ka|circular|new notice|notification|kya date hai|update)\b/i.test(q) ||
     q.includes('admission last date') || q.includes('exam date')
@@ -290,7 +351,7 @@ export function routeQuery(
     };
   }
 
-  // 11. COMPLEX / UNCERTAIN -> Escalate to Gemini
+  // 13. COMPLEX / UNCERTAIN -> Escalate to Gemini
   return {
     route: 'COMPLEX_REASONING',
     requiresGemini: true,

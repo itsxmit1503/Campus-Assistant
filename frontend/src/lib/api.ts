@@ -39,8 +39,13 @@ export async function sendChatMessage(
   }
 }
 
-function detectClientLanguage(text: string, history: Array<{ role: 'user' | 'assistant'; content: string }> = []): 'hinglish' | 'hindi' | 'english' {
-  if (/[\u0900-\u097F]/.test(text)) return 'hindi';
+function detectClientLanguage(text: string, history: Array<{ role: 'user' | 'assistant'; content: string }> = []): 'hinglish' | 'hindi' | 'english' | 'bengali' | 'marathi' | 'tamil' {
+  if (/[\u0980-\u09FF]/.test(text)) return 'bengali';
+  if (/[\u0B80-\u0BFF]/.test(text)) return 'tamil';
+  if (/[\u0900-\u097F]/.test(text)) {
+    if (/\b(कुठे|आहे|नाही|काय)\b/.test(text)) return 'marathi';
+    return 'hindi';
+  }
 
   const hinglishMarkers = [
     'kuch', 'nahi', 'nhi', 'bas', 'checkout', 'check', 'rha', 'rhi', 'raha', 'rahi', 'hu', 'hoon', 'hai', 'hain',
@@ -49,7 +54,7 @@ function detectClientLanguage(text: string, history: Array<{ role: 'user' | 'ass
     'jaun', 'padega', 'milega', 'mili', 'aaya', 'aayi', 'paisa', 'scene', 'acha', 'achha', 'theek', 'thik',
     'haan', 'sahi', 'leke', 'saath', 'bhi', 'se', 'ko', 'me', 'mein', 'par', 'pe', 'toh', 'to', 'ho', 'gaya',
     'gayi', 'hoga', 'hogi', 'rakha', 'mera', 'meri', 'mere', 'tera', 'teri', 'tere', 'apna', 'apni', 'waise',
-    'chalo', 'dikha', 'du', 'do'
+    'chalo', 'dikha', 'du', 'do', 'bol', 'bolo', 'haal', 'badhiya'
   ];
 
   const words = text.toLowerCase().split(/[\s,?.!]+/);
@@ -70,20 +75,27 @@ function getLocalKnowledgeAnswer(
 ): StructuredAnswer {
   const q = query.toLowerCase().trim();
   const detectedLang = detectClientLanguage(query, conversationHistory);
-  const isHinglish = detectedLang === 'hinglish';
-  const isHindi = detectedLang === 'hindi';
 
   const lastUserMsg = conversationHistory.filter(m => m.role === 'user').slice(-2, -1)[0]?.content.toLowerCase() || '';
   const lastAssistantMsg = conversationHistory.filter(m => m.role === 'assistant').slice(-1)[0]?.content.toLowerCase() || '';
 
-  // 1. GREETING
-  if (/^(hey|hello|hi|hiya|namaste|what's up|good morning|hey there)(\s|!|\.|\?)*$/i.test(q)) {
-    let answer = `Hey! 👋 How can I help you around DHSGSU?`;
-    if (isHindi) answer = `नमस्ते! 👋 DHSGSU कैंपस में आपकी क्या सहायता करूँ?`;
-    else if (isHinglish) answer = `Hey! 👋 Batao, campus mein kis cheez mein help chahiye?`;
-
+  // 1. PLAYFUL COMMANDS / CHAT ("hello bol", "bol na", "kya haal")
+  if (/\b(hello bol|bol na|bol re|kuch bol|kya haal|kya hal|aur bata|aur bhai|kya scene)\b/i.test(q)) {
+    let answer = `Hello 😄`;
+    if (q.includes('kya haal') || q.includes('aur bata')) answer = `Sab badhiya! Batao 😄`;
     return {
       answer,
+      language: detectedLang,
+      intent: 'casual_social',
+      intentCategory: 'CASUAL_CONVERSATION',
+      display: { responsibleUnit: false, location: false, contact: false, documents: false, nextSteps: false, sources: false, relatedTopics: false }
+    };
+  }
+
+  // 2. GREETINGS
+  if (/^(hey|hello|hi|hiya|namaste|what's up|good morning|hey there)(\s|!|\.|\?)*$/i.test(q)) {
+    return {
+      answer: `Hey! 👋`,
       language: detectedLang,
       intent: 'greeting',
       intentCategory: 'GREETING',
@@ -91,14 +103,31 @@ function getLocalKnowledgeAnswer(
     };
   }
 
-  // 2. CASUAL TESTING / CHECKOUT
+  // 3. ACKNOWLEDGEMENTS / THINKING
+  if (/^(hmm|hmmm|hmmmm|acha|achha|ok|okay|theek hai|thik hai|theek|got it|sahi hai|fine|cool|alright|nice|great|haan)(\s|!|\.|\?)*$/i.test(q)) {
+    let answer = `😄`;
+    if (q === 'acha' || q === 'achha') answer = `haan 😄`;
+    else if (q === 'theek hai' || q === 'thik hai' || q === 'theek') answer = `Theek hai 👍`;
+    else if (q === 'ok' || q === 'okay' || q === 'cool') answer = `👍`;
+
+    return {
+      answer,
+      language: detectedLang,
+      intent: 'acknowledgement',
+      intentCategory: 'CASUAL_CONVERSATION',
+      display: { responsibleUnit: false, location: false, contact: false, documents: false, nextSteps: false, sources: false, relatedTopics: false }
+    };
+  }
+
+  // 4. CASUAL TESTING
   if (
     /\b(checkout|check|test|testing|chal rha|chal raha|chl rha|chl raha|dekh rha|dekh raha|dekhte|working|kaam kar|aise hi)\b/i.test(q) ||
     q.includes('kuch nahi bas') || q.includes('kuch nhi bas')
   ) {
-    let answer = `Haha, yep, it's working smoothly 😄\nWhenever you're ready, feel free to ask anything about the campus.`;
-    if (isHindi) answer = `हाँ, बिल्कुल चालू है 😄 जब भी कुछ पूछना हो, निसंकोच बताइएगा।`;
-    else if (isHinglish) answer = `Haha, haan bhai, bilkul chal raha hai 😄\nJab bhi campus se juda kuch poochna ho, bas bol dena.`;
+    let answer = `Haha, fair enough 😄`;
+    if (q.includes('chal raha') || q.includes('chl rha') || q.includes('checkout')) {
+      answer = `Haha, haan, chal raha hai 😄`;
+    }
 
     return {
       answer,
@@ -109,21 +138,10 @@ function getLocalKnowledgeAnswer(
     };
   }
 
-  // 3. ACKNOWLEDGEMENTS
-  if (/^(acha|achha|ok|okay|theek hai|thik hai|got it|sahi hai|fine|cool|alright|hmm|accha)(\s|!|\.|\?)*$/i.test(q)) {
-    return {
-      answer: q === 'acha' || q === 'achha' ? `Haan 😄` : `👍`,
-      language: detectedLang,
-      intent: 'acknowledgement',
-      intentCategory: 'CASUAL_CONVERSATION',
-      display: { responsibleUnit: false, location: false, contact: false, documents: false, nextSteps: false, sources: false, relatedTopics: false }
-    };
-  }
-
-  // 4. THANKS
+  // 5. THANKS
   if (/\b(thanks|thank you|thx|dhanyawad|shukriya)\b/i.test(q)) {
     return {
-      answer: isHinglish ? `Anytime bhai! 😊 Kabhi bhi kuch pooch lena.` : `You're welcome! 😊`,
+      answer: `Anytime 😄`,
       language: detectedLang,
       intent: 'thanks',
       intentCategory: 'CASUAL_CONVERSATION',
@@ -131,48 +149,11 @@ function getLocalKnowledgeAnswer(
     };
   }
 
-  // 5. PROBLEM: Scholarship
-  if (q.includes('scholarship') && (q.includes('nahi aayi') || q.includes('pending') || q.includes('paisa') || q.includes('kya karu') || q.includes('scene'))) {
-    let answer = `Sure, I can help you figure that out. Has the scholarship already been approved, or is the application still pending on the portal?`;
-    if (isHinglish) answer = `Haan, dekhte hain. Scholarship approve ho chuki hai ya abhi portal par pending dikha rahi hai?`;
-    else if (isHindi) answer = `ज़रूर। क्या आपकी छात्रवृत्ति पोर्टल पर स्वीकृत (Approved) हो चुकी है, या अभी पेंडिंग है?`;
-
-    return {
-      answer,
-      language: detectedLang,
-      intent: 'scholarship_triage',
-      intentCategory: 'PROBLEM_SOLVING',
-      display: { responsibleUnit: false, location: false, contact: false, documents: false, nextSteps: false, sources: false, relatedTopics: false }
-    };
-  }
-
-  // 6. FOLLOW-UP: "Approved hai" / "Kahan jana hai"
-  if (
-    q.includes('approved') || q.includes('approve ho gaya') || q.includes('kahan jana') || q.includes('kaha jana') || q.includes('where to go') ||
-    ((q === 'haan' || q === 'yes') && (lastAssistantMsg.includes('where to go') || lastAssistantMsg.includes('kahan jaana')))
-  ) {
-    const office = officesData.find(o => o.id === 'office-scholarship-cell')!;
-    const loc = locationsData.find(l => l.id === 'loc-admin-block')!;
-    let answer = `For this, visit the **University Scholarship Cell** located in **Room No. 12, Main Administrative Block**.`;
-    if (isHinglish) answer = `Iske liye aapko **University Scholarship Cell (Administrative Block, Room No. 12)** jaana hoga.`;
-    else if (isHindi) answer = `इसके लिए आपको **University Scholarship Cell (प्रशासनिक भवन, कमरा नंबर 12)** में जाना होगा।`;
-
-    return {
-      answer,
-      language: detectedLang,
-      intent: 'scholarship_location',
-      intentCategory: 'LOCATION',
-      responsibleUnit: { name: office.name, type: 'office', location: office.location },
-      location: { name: loc.name, building: loc.building, floor: 'Ground Floor (Room 12)', landmark: loc.landmark, mapLink: loc.mapLink },
-      display: { responsibleUnit: true, location: true, contact: false, documents: false, nextSteps: true, sources: true, relatedTopics: false }
-    };
-  }
-
-  // 7. LOCATION: Library
-  if (q.includes('library kaha') || q.includes('library kahan') || q.includes('library kidhar') || q.includes('where is the library')) {
+  // 6. LOCATION: Library
+  if (q.includes('library') || q.includes('লাইব্রেরি') || q.includes('लायब्ररी')) {
     const loc = locationsData.find(l => l.id === 'loc-central-library')!;
-    let answer = `The Central Library is on the DHSGSU campus (between Arts and Science blocks). Want me to show you the location on the map?`;
-    if (isHinglish) answer = `Central Library Arts aur Science blocks ke beech mein campus ke central area mein hai. Chaho toh location dikha du?`;
+    let answer = `Haan, Central Library campus mein hai. Exact location bhi dikha du?`;
+    if (detectedLang === 'english') answer = `The Central Library is on campus between Arts and Science faculties. Want me to show you the location on the map?`;
 
     return {
       answer,
@@ -184,13 +165,22 @@ function getLocalKnowledgeAnswer(
     };
   }
 
-  // Default clean conversational response
+  // 7. PROBLEM: Scholarship
+  if (q.includes('scholarship') && (q.includes('nahi aayi') || q.includes('pending') || q.includes('paisa') || q.includes('scene'))) {
+    return {
+      answer: `Achha, scholarship approve ho chuki hai ya abhi pending hai?`,
+      language: detectedLang,
+      intent: 'scholarship_triage',
+      intentCategory: 'PROBLEM_SOLVING',
+      display: { responsibleUnit: false, location: false, contact: false, documents: false, nextSteps: false, sources: false, relatedTopics: false }
+    };
+  }
+
+  // Natural Human Help-Desk Fallback (Never robotic)
   return {
-    answer: isHinglish
-      ? `Haan, batao campus mein kis cheez ke baare mein janna hai?`
-      : `I can help you around DHSGSU. What would you like to know?`,
+    answer: detectedLang === 'english' ? `Sure, go ahead 😄` : `Haan bolo 😄`,
     language: detectedLang,
-    intent: 'general_assistance',
+    intent: 'casual_chat',
     intentCategory: 'CASUAL_CONVERSATION',
     display: { responsibleUnit: false, location: false, contact: false, documents: false, nextSteps: false, sources: false, relatedTopics: false }
   };

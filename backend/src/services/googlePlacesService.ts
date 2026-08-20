@@ -19,8 +19,11 @@ export interface GooglePlaceResult {
   source: 'google_places_live' | 'verified_places_directory' | 'unverified_query';
 }
 
-function buildOfficialMapsUrl(query: string): string {
-  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query + ' Dr Harisingh Gour Vishwavidyalaya Sagar MP')}`;
+function buildOfficialMapsUrl(query: string, lat?: number, lng?: number): string {
+  if (lat && lng) {
+    return `https://www.google.com/maps?q=${lat},${lng}`;
+  }
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query + ', Dr. Harisingh Gour Vishwavidyalaya, Sagar, Madhya Pradesh 470003')}`;
 }
 
 /**
@@ -36,7 +39,7 @@ const VERIFIED_CAMPUS_PLACES: Record<string, Omit<GooglePlaceResult, 'source'>> 
     building: 'Department of Biotechnology Building',
     landmark: 'Near Savitri Bai Phule Bhawan & School of Education, Upper Campus',
     location: { latitude: 23.8341, longitude: 78.7753 },
-    googleMapsUri: buildOfficialMapsUrl('Department of Biotechnology'),
+    googleMapsUri: buildOfficialMapsUrl('Department of Biotechnology', 23.8341, 78.7753),
     websiteUri: 'https://dhsgsu.edu.in/index.php/en/academics/schools-departments/school-of-biological-sciences',
     phoneNumber: '07582-265818',
     verified: true

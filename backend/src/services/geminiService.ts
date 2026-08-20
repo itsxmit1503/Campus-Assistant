@@ -341,6 +341,15 @@ ${historySummary ? `Recent Conversation History:\n${historySummary}\n` : ''}Curr
             });
           }
 
+          // ── Strict Display Flag Grounding ─────────────────────────────────
+          const isExplicitLocationQuery = /\b(where|kaha|kahan|kidhar|location|address|building|map|campus|pahuchu|rasta|directions?|reach)\b/i.test(cleanMsg);
+          if (!isExplicitLocationQuery) {
+            if (parsed.display) {
+              parsed.display.location = false;
+            }
+            parsed.location = null;
+          }
+
           const isFactual = parsed.intentCategory && !['CASUAL_CONVERSATION', 'GREETING'].includes(parsed.intentCategory);
           const ttl = isFactual ? 30 * 60 * 1000 : 5 * 60 * 1000;
           this.responseCache.set(cacheKey, { answer: parsed, expiry: Date.now() + ttl });

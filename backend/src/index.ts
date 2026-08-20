@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import cors from 'cors';
 import { config } from './config/env.js';
 import { chatRouter } from './routes/chat.js';
@@ -21,7 +21,7 @@ app.use('/api/chat', chatRouter);
 app.use('/api/directory', directoryRouter);
 
 // Root route
-app.get('/', (_req, res) => {
+app.get('/', (_req: Request, res: Response) => {
   res.json({
     message: 'DHSGSU Sagar Campus Assistant Backend API is running.',
     healthEndpoint: '/api/health',

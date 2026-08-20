@@ -9,7 +9,7 @@ export async function sendChatMessage(
 ): Promise<StructuredAnswer> {
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 25000); // 25s timeout for Gemini + cold start
+    const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s timeout for Render cold start & Gemini processing
 
     const res = await fetch(`${API_BASE_URL}/api/chat`, {
       method: 'POST',

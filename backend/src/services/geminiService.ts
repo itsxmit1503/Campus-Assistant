@@ -7,7 +7,8 @@ import { routeQuery, detectLanguage } from './queryRouter.js';
 
 function cleanJsonResponse(rawText: string): any {
   let cleaned = rawText.trim();
-  // Strip markdown code fences if present anywhere
+  
+  // 1. Strip markdown code fences
   if (cleaned.includes('```')) {
     const match = cleaned.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
     if (match) {
@@ -17,19 +18,66 @@ function cleanJsonResponse(rawText: string): any {
     }
   }
 
-  // Try standard parse
+  // 2. Extract between first { and last }
+  const firstBrace = cleaned.indexOf('{');
+  const lastBrace = cleaned.lastIndexOf('}');
+  if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+    cleaned = cleaned.substring(firstBrace, lastBrace + 1);
+  }
+
+  // 3. Try standard parse
   try {
     return JSON.parse(cleaned);
-  } catch (e1) {
-    // If there is leading/trailing text outside the JSON object, extract between first { and last }
-    const firstBrace = cleaned.indexOf('{');
-    const lastBrace = cleaned.lastIndexOf('}');
-    if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
-      const jsonSubstr = cleaned.substring(firstBrace, lastBrace + 1);
-      return JSON.parse(jsonSubstr);
-    }
-    throw e1;
+  } catch {}
+
+  // 4. Try fixing single quotes to double quotes
+  try {
+    const doubleQuoted = cleaned
+      .replace(/'([^'\\]*(?:\\.[^'\\]*)*)'/g, '"$1"')
+      .replace(/,\s*([\]}])/g, '$1'); // remove trailing commas
+    return JSON.parse(doubleQuoted);
+  } catch {}
+
+  // 5. Try fixing unescaped newlines inside JSON strings
+  try {
+    const sanitized = cleaned.replace(/[\r\n]+/g, ' ');
+    return JSON.parse(sanitized);
+  } catch (err) {
+    throw err;
   }
+}
+
+/**
+ * Extracts ONLY the conversational answer text if JSON parsing fails,
+ * ensuring raw JSON syntax ({ "answer": ... }) is NEVER displayed in the chat UI.
+ */
+function extractAnswerText(rawText: string): string {
+  if (!rawText) return '';
+  const trimmed = rawText.trim();
+
+  // 1. Regex match for "answer": "..." or 'answer': '...'
+  const answerMatch = trimmed.match(/["']answer["']\s*:\s*["']([\s\S]*?)(?=(?:["']\s*,\s*["']|\n\s*["']|\}\s*$))/i);
+  if (answerMatch && answerMatch[1]) {
+    return answerMatch[1]
+      .replace(/\\n/g, '\n')
+      .replace(/\\"/g, '"')
+      .replace(/\\'/g, "'")
+      .trim();
+  }
+
+  // 2. If it's plain text without JSON markers, return directly
+  if (!trimmed.startsWith('{') && !trimmed.startsWith('```')) {
+    return trimmed;
+  }
+
+  // 3. Strip any JSON artifacts
+  return trimmed
+    .replace(/^\{[\s\S]*?["']answer["']\s*:\s*["']/i, '')
+    .replace(/["']\s*,[\s\S]*\}$/i, '')
+    .replace(/```(?:json)?/gi, '')
+    .replace(/```/g, '')
+    .replace(/^[{\s"]+|[}\s"]+$/g, '')
+    .trim();
 }
 
 /**
@@ -253,9 +301,9 @@ ${historySummary ? `Recent Conversation History:\n${historySummary}\n` : ''}Curr
         console.warn(`[CHAT] Strict JSON parse failed, extracting raw text directly from Gemini`);
         // If Gemini outputted plain text instead of strict JSON, use Gemini's actual text!
         if (text && text.trim().length > 0) {
-          const rawCleaned = text.replace(/```(?:json)?/gi, '').replace(/```/g, '').trim();
+          const cleanAnswer = extractAnswerText(text);
           const fallbackAnswer: StructuredAnswer = {
-            answer: rawCleaned,
+            answer: cleanAnswer,
             language: userLang,
             intent: 'gemini_text_response',
             intentCategory: 'CASUAL_CONVERSATION',

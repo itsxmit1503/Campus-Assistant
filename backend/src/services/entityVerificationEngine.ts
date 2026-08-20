@@ -70,7 +70,7 @@ export class EntityVerificationEngine {
         if (place) {
           d.googleMapsUrl = place.googleMapsUri;
           d.campus = place.campus as any;
-          d.building = place.building;
+          if (place.building) d.building = place.building;
           d.address = place.formattedAddress;
           d.landmark = place.landmark;
           d.coordinates = { lat: place.location.latitude, lng: place.location.longitude };
@@ -101,7 +101,7 @@ export class EntityVerificationEngine {
             entityId: `entity_dynamic_${cleanEntityName.toLowerCase().replace(/[^a-z0-9]/g, '_')}`,
             entityName: place.displayName,
             entityType: 'department',
-            verificationStatus: 'VERIFIED',
+            verificationStatus: place.verified ? 'VERIFIED' : 'PARTIALLY_VERIFIED',
             officialVerification: {
               verified: true,
               source: 'Official DHSGSU University Directory & Statute',
@@ -114,7 +114,7 @@ export class EntityVerificationEngine {
               address: place.formattedAddress,
               landmark: place.landmark,
               googleMaps: {
-                verified: true,
+                verified: place.verified,
                 placeId: place.placeId,
                 displayName: place.displayName,
                 formattedAddress: place.formattedAddress,
@@ -132,9 +132,9 @@ export class EntityVerificationEngine {
             },
             fieldSources: {
               name: { source: 'Official DHSGSU Directory', verified: true },
-              campus: { source: 'Google Places & Campus Estate Mapping', verified: true },
-              building: { source: 'Google Places Physical Listing', verified: true },
-              googleMaps: { source: 'Verified Google Places API', verified: true }
+              campus: { source: place.verified ? 'Google Places & Campus Estate Mapping' : 'DHSGSU Campus Zone', verified: place.verified },
+              building: { source: place.building ? 'Official Campus Listing' : 'Unspecified', verified: !!place.building },
+              googleMaps: { source: place.verified ? 'Verified Google Places API' : 'Google Maps Search Destination', verified: place.verified }
             }
           };
           entityRecords.push(dynamicRecord);
@@ -153,7 +153,7 @@ export class EntityVerificationEngine {
           if (place) {
             l.googleMapsUrl = place.googleMapsUri;
             l.campus = place.campus as any;
-            l.building = place.building;
+            if (place.building) l.building = place.building;
             l.landmark = place.landmark;
             l.coordinates = { lat: place.location.latitude, lng: place.location.longitude };
           }

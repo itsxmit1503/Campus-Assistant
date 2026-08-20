@@ -46,7 +46,7 @@ export class GeminiService {
         model: 'gemini-1.5-flash',
         generationConfig: {
           temperature: 0.35,
-          maxOutputTokens: 400,
+          maxOutputTokens: 500,
           responseMimeType: 'application/json'
         }
       });
@@ -58,19 +58,24 @@ export class GeminiService {
 
       const systemPrompt = `
 You are a real, friendly, knowledgeable person sitting at the Dr. Harisingh Gour Vishwavidyalaya (DHSGSU, Sagar) campus help desk.
-A student is having a natural conversation with you.
+A student is talking with you.
 
 FUNDAMENTAL HELP-DESK RULES:
-1. DO NOT TRY TO BE HELPFUL WHEN HELP IS NOT NEEDED.
-   - If the student is making casual chat, joking, or saying "hmm", "hello bol", "kuch nahi", respond naturally in 1 short line (e.g. "Hello 😄", "Haan bolo 😄").
-   - NEVER say "I can help you around DHSGSU. What would you like to know?" or list your capabilities unless explicitly asked "What can you do?".
-   - NEVER re-introduce yourself in ongoing chat.
-2. STRICT LANGUAGE MATCHING:
+1. DISTINGUISH TONE FROM INTENT:
+   - If the student is asking for university information (even in casual language like "bhai CS department kidhar hai?"), ANSWER THE ACTUAL QUESTION directly and naturally.
+   - DO NOT reply with "Haan bolo" or dismiss the question.
+   - If the request is broad ("mujhe CS department ke baare mein info chahiye"), provide a concise overview and ask what specific info they need.
+2. CASUAL MESSAGES WITHOUT INFORMATION:
+   - For pure social chat like "hmm", "hello bol", "bas check kar raha hu", respond naturally in 1 short line.
+   - NEVER say "I can help you around DHSGSU. What would you like to know?" or list capabilities unless asked.
+3. LANGUAGE MATCHING:
    - Match the student's language and style (Hinglish, Hindi, Bengali, Marathi, Tamil, Telugu, English, etc.).
    - NEVER default or translate to English when the student speaks Hinglish or an Indian language.
-3. PROGRESSIVE DISCLOSURE:
-   - All display flags ("display.location", "display.contact", "display.documents", "display.sources") must be FALSE unless the student explicitly asks for that specific piece of information.
-   - If the student has a problem, ask 1 natural clarifying question before suggesting offices.
+4. DISPLAY FLAGS:
+   - "display.location = true" ONLY if student asks where something is or asks for directions.
+   - "display.contact = true" ONLY if student asks for phone/email/number.
+   - "display.documents = true" ONLY if student asks what documents to bring.
+   - "display.sources = true" ONLY for verified factual university queries.
 
 TARGETED DHSGSU CONTEXT:
 ${targetedContext}
@@ -79,7 +84,7 @@ Detected Language Mode: ${userLang}
 
 Respond strictly in JSON:
 {
-  "answer": "Concise natural conversational response in student's language and tone.",
+  "answer": "Concise, natural conversational response in student's language and tone.",
   "language": "${userLang}",
   "intent": "intent_code",
   "intentCategory": "GREETING | CASUAL_CONVERSATION | INFORMATION | LOCATION | CONTACT | PROCESS | PROBLEM_SOLVING | CURRENT_INFORMATION | EXPLORATION",
@@ -135,19 +140,43 @@ Current Student Message: "${cleanMsg}"
 
   private buildSafeFallback(query: string, history: Array<{ role: 'user' | 'assistant'; content: string }> = []): StructuredAnswer {
     const lang = detectLanguage(query, history);
+    const { matchedDepartments, matchedOffices, matchedLocations, matchedServices } = knowledgeService.findRelevantContext(query);
 
-    let answer = `Haan bolo 😄`;
-    if (lang === 'english') {
-      answer = `Sure, go ahead 😄`;
-    } else if (lang === 'hindi') {
-      answer = `हाँ बताइए 😄`;
-    } else if (lang === 'bengali') {
-      answer = `হ্যাঁ বলুন 😄`;
-    } else if (lang === 'marathi') {
-      answer = `हो सांगा 😄`;
-    } else if (lang === 'tamil') {
-      answer = `சொல்லுங்கள் 😄`;
+    // If query matches any department
+    if (matchedDepartments.length > 0) {
+      const d = matchedDepartments[0];
+      return {
+        answer: lang === 'english'
+          ? `The ${d.name} is located at ${d.location}. It offers ${d.programmes.join(', ')}.`
+          : `**${d.name}** ${d.location} mein sthit hai. Yahan ${d.programmes.join(', ')} jaise programmes offer hote hain.`,
+        language: lang,
+        intent: 'department_fallback',
+        intentCategory: 'INFORMATION',
+        responsibleUnit: { name: d.name, type: 'department', location: d.location },
+        location: { name: d.building, building: d.building, mapLink: d.mapLink },
+        display: { responsibleUnit: true, location: true, contact: false, documents: false, nextSteps: false, sources: true, relatedTopics: false }
+      };
     }
+
+    // If query matches any location
+    if (matchedLocations.length > 0) {
+      const l = matchedLocations[0];
+      return {
+        answer: lang === 'english'
+          ? `**${l.name}** is located at ${l.building} (${l.landmark || 'Patharia Hills'}).`
+          : `**${l.name}** ${l.building} (${l.landmark || 'Patharia Hills'}) mein sthit hai.`,
+        language: lang,
+        intent: 'location_fallback',
+        intentCategory: 'LOCATION',
+        location: { name: l.name, building: l.building, landmark: l.landmark, mapLink: l.mapLink },
+        display: { responsibleUnit: false, location: true, contact: false, documents: false, nextSteps: false, sources: true, relatedTopics: false }
+      };
+    }
+
+    // Default friendly response
+    let answer = `Haan bolo 😄`;
+    if (lang === 'english') answer = `Sure, go ahead 😄`;
+    else if (lang === 'hindi') answer = `हाँ बताइए 😄`;
 
     return {
       answer,

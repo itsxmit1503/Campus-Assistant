@@ -75,88 +75,85 @@ function getLocalKnowledgeAnswer(
 ): StructuredAnswer {
   const q = query.toLowerCase().trim();
   const detectedLang = detectClientLanguage(query, conversationHistory);
+  const isEnglish = detectedLang === 'english';
+  const isHindi = detectedLang === 'hindi';
 
-  const lastUserMsg = conversationHistory.filter(m => m.role === 'user').slice(-2, -1)[0]?.content.toLowerCase() || '';
-  const lastAssistantMsg = conversationHistory.filter(m => m.role === 'assistant').slice(-1)[0]?.content.toLowerCase() || '';
+  // 1. DEPARTMENT OF COMPUTER SCIENCE / APPLICATIONS
+  if (/\b(computer science|computer|csa|cse|mca|cs department)\b/i.test(q)) {
+    const dept = departmentsData.find(d => d.id === 'dept-cs-applications')!;
+    const isLocation = /\b(kaha|kahan|kidhar|where|location|building|rasta|map|campus mein)\b/i.test(q);
+    const isHod = /\b(hod|head|dean|kaun hai|who is)\b/i.test(q);
+    const isCourses = /\b(course|courses|programme|programmes|degree)\b/i.test(q);
+    const isContact = /\b(contact|number|phone|email)\b/i.test(q);
 
-  // 1. PLAYFUL COMMANDS / CHAT ("hello bol", "bol na", "kya haal")
-  if (/\b(hello bol|bol na|bol re|kuch bol|kya haal|kya hal|aur bata|aur bhai|kya scene)\b/i.test(q)) {
-    let answer = `Hello 😄`;
-    if (q.includes('kya haal') || q.includes('aur bata')) answer = `Sab badhiya! Batao 😄`;
-    return {
-      answer,
-      language: detectedLang,
-      intent: 'casual_social',
-      intentCategory: 'CASUAL_CONVERSATION',
-      display: { responsibleUnit: false, location: false, contact: false, documents: false, nextSteps: false, sources: false, relatedTopics: false }
-    };
-  }
-
-  // 2. GREETINGS
-  if (/^(hey|hello|hi|hiya|namaste|what's up|good morning|hey there)(\s|!|\.|\?)*$/i.test(q)) {
-    return {
-      answer: `Hey! 👋`,
-      language: detectedLang,
-      intent: 'greeting',
-      intentCategory: 'GREETING',
-      display: { responsibleUnit: false, location: false, contact: false, documents: false, nextSteps: false, sources: false, relatedTopics: false }
-    };
-  }
-
-  // 3. ACKNOWLEDGEMENTS / THINKING
-  if (/^(hmm|hmmm|hmmmm|acha|achha|ok|okay|theek hai|thik hai|theek|got it|sahi hai|fine|cool|alright|nice|great|haan)(\s|!|\.|\?)*$/i.test(q)) {
-    let answer = `😄`;
-    if (q === 'acha' || q === 'achha') answer = `haan 😄`;
-    else if (q === 'theek hai' || q === 'thik hai' || q === 'theek') answer = `Theek hai 👍`;
-    else if (q === 'ok' || q === 'okay' || q === 'cool') answer = `👍`;
-
-    return {
-      answer,
-      language: detectedLang,
-      intent: 'acknowledgement',
-      intentCategory: 'CASUAL_CONVERSATION',
-      display: { responsibleUnit: false, location: false, contact: false, documents: false, nextSteps: false, sources: false, relatedTopics: false }
-    };
-  }
-
-  // 4. CASUAL TESTING
-  if (
-    /\b(checkout|check|test|testing|chal rha|chal raha|chl rha|chl raha|dekh rha|dekh raha|dekhte|working|kaam kar|aise hi)\b/i.test(q) ||
-    q.includes('kuch nahi bas') || q.includes('kuch nhi bas')
-  ) {
-    let answer = `Haha, fair enough 😄`;
-    if (q.includes('chal raha') || q.includes('chl rha') || q.includes('checkout')) {
-      answer = `Haha, haan, chal raha hai 😄`;
+    if (isLocation) {
+      return {
+        answer: isEnglish
+          ? `The ${dept.name} is located in the CSA Building on the Upper Campus near the Science Block.`
+          : `Department of Computer Science & Applications (CSA) Upper Campus mein Science Block ke paas sthit hai.`,
+        language: detectedLang,
+        intent: 'department_location',
+        intentCategory: 'LOCATION',
+        responsibleUnit: { name: dept.name, type: 'department', location: dept.location },
+        location: { name: dept.building, building: dept.building, landmark: 'Upper Campus near Science Block', mapLink: dept.mapLink },
+        display: { responsibleUnit: false, location: true, contact: false, documents: false, nextSteps: false, sources: true, relatedTopics: false }
+      };
     }
 
+    if (isHod) {
+      return {
+        answer: `${dept.name} ke Head (HOD) **${dept.hod}** hain. Unka office CSA Building mein hai.`,
+        language: detectedLang,
+        intent: 'department_hod',
+        intentCategory: 'INFORMATION',
+        responsibleUnit: { name: dept.name, type: 'department', location: dept.location },
+        display: { responsibleUnit: true, location: false, contact: false, documents: false, nextSteps: false, sources: true, relatedTopics: false }
+      };
+    }
+
+    if (isCourses) {
+      return {
+        answer: `${dept.name} mein yeh programmes offer hote hain: **${dept.programmes.join(', ')}**.`,
+        language: detectedLang,
+        intent: 'department_courses',
+        intentCategory: 'INFORMATION',
+        responsibleUnit: { name: dept.name, type: 'department', location: dept.location },
+        display: { responsibleUnit: true, location: false, contact: false, documents: false, nextSteps: false, sources: true, relatedTopics: false }
+      };
+    }
+
+    if (isContact) {
+      return {
+        answer: `${dept.name} ka contact: Phone: **${dept.contact?.phone || 'N/A'}**, Email: **${dept.contact?.email || 'N/A'}**.`,
+        language: detectedLang,
+        intent: 'department_contact',
+        intentCategory: 'CONTACT',
+        responsibleUnit: { name: dept.name, type: 'department', location: dept.location },
+        contact: { phone: dept.contact?.phone, email: dept.contact?.email, officialWebsite: dept.officialSourceUrl },
+        display: { responsibleUnit: true, location: false, contact: true, documents: false, nextSteps: false, sources: true, relatedTopics: false }
+      };
+    }
+
+    // Overview
     return {
-      answer,
+      answer: isEnglish
+        ? `Sure! For the **${dept.name}** (${dept.schoolName}), I can help with location, courses (${dept.programmes.join(', ')}), HOD, or contact details. What would you like to know?`
+        : `Haan, bilkul. **${dept.name}** ke baare mein location, courses (${dept.programmes.join(', ')}), HOD ya contact details me se kis cheez ke baare mein janna hai?`,
       language: detectedLang,
-      intent: 'casual_testing',
-      intentCategory: 'CASUAL_CONVERSATION',
-      display: { responsibleUnit: false, location: false, contact: false, documents: false, nextSteps: false, sources: false, relatedTopics: false }
+      intent: 'department_overview',
+      intentCategory: 'INFORMATION',
+      responsibleUnit: { name: dept.name, type: 'department', location: dept.location },
+      display: { responsibleUnit: true, location: false, contact: false, documents: false, nextSteps: false, sources: true, relatedTopics: false }
     };
   }
 
-  // 5. THANKS
-  if (/\b(thanks|thank you|thx|dhanyawad|shukriya)\b/i.test(q)) {
-    return {
-      answer: `Anytime 😄`,
-      language: detectedLang,
-      intent: 'thanks',
-      intentCategory: 'CASUAL_CONVERSATION',
-      display: { responsibleUnit: false, location: false, contact: false, documents: false, nextSteps: false, sources: false, relatedTopics: false }
-    };
-  }
-
-  // 6. LOCATION: Library
+  // 2. CENTRAL LIBRARY
   if (q.includes('library') || q.includes('লাইব্রেরি') || q.includes('लायब्ररी')) {
     const loc = locationsData.find(l => l.id === 'loc-central-library')!;
-    let answer = `Haan, Central Library campus mein hai. Exact location bhi dikha du?`;
-    if (detectedLang === 'english') answer = `The Central Library is on campus between Arts and Science faculties. Want me to show you the location on the map?`;
-
     return {
-      answer,
+      answer: isEnglish
+        ? `The Jawaharlal Nehru Central Library is located centrally on campus between Arts and Science faculties.`
+        : `Haan, Central Library campus mein Arts aur Science faculty ke beech mein sthit hai. Exact location map par dekhna chahte hain?`,
       language: detectedLang,
       intent: 'library_location',
       intentCategory: 'LOCATION',
@@ -165,7 +162,7 @@ function getLocalKnowledgeAnswer(
     };
   }
 
-  // 7. PROBLEM: Scholarship
+  // 3. SCHOLARSHIP
   if (q.includes('scholarship') && (q.includes('nahi aayi') || q.includes('pending') || q.includes('paisa') || q.includes('scene'))) {
     return {
       answer: `Achha, scholarship approve ho chuki hai ya abhi pending hai?`,
@@ -176,9 +173,49 @@ function getLocalKnowledgeAnswer(
     };
   }
 
-  // Natural Human Help-Desk Fallback (Never robotic)
+  // 4. CASUAL / SOCIAL
+  if (/\b(hello bol|bol na|bol re|kuch bol|kya haal|aur bata|aur bhai|kya scene)\b/i.test(q)) {
+    return {
+      answer: `Hello 😄`,
+      language: detectedLang,
+      intent: 'casual_social',
+      intentCategory: 'CASUAL_CONVERSATION',
+      display: { responsibleUnit: false, location: false, contact: false, documents: false, nextSteps: false, sources: false, relatedTopics: false }
+    };
+  }
+
+  if (/^(hey|hello|hi|hiya|namaste|what's up|good morning|hey there)(\s|!|\.|\?)*$/i.test(q)) {
+    return {
+      answer: `Hey! 👋`,
+      language: detectedLang,
+      intent: 'greeting',
+      intentCategory: 'GREETING',
+      display: { responsibleUnit: false, location: false, contact: false, documents: false, nextSteps: false, sources: false, relatedTopics: false }
+    };
+  }
+
+  if (/^(hmm|hmmm|acha|achha|ok|okay|theek hai|thik hai|theek|got it|haan)(\s|!|\.|\?)*$/i.test(q)) {
+    return {
+      answer: q === 'acha' || q === 'achha' ? `haan 😄` : `😄`,
+      language: detectedLang,
+      intent: 'acknowledgement',
+      intentCategory: 'CASUAL_CONVERSATION',
+      display: { responsibleUnit: false, location: false, contact: false, documents: false, nextSteps: false, sources: false, relatedTopics: false }
+    };
+  }
+
+  if (/\b(checkout|check|test|testing|chal rha|chal raha|chl rha|chl raha|dekh rha|dekh raha)\b/i.test(q)) {
+    return {
+      answer: `Haha, haan, chal raha hai 😄`,
+      language: detectedLang,
+      intent: 'casual_testing',
+      intentCategory: 'CASUAL_CONVERSATION',
+      display: { responsibleUnit: false, location: false, contact: false, documents: false, nextSteps: false, sources: false, relatedTopics: false }
+    };
+  }
+
   return {
-    answer: detectedLang === 'english' ? `Sure, go ahead 😄` : `Haan bolo 😄`,
+    answer: isEnglish ? `Sure, go ahead 😄` : `Haan bolo 😄`,
     language: detectedLang,
     intent: 'casual_chat',
     intentCategory: 'CASUAL_CONVERSATION',

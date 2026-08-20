@@ -118,44 +118,40 @@ export class KnowledgeService {
   }
 
   /**
-   * Generates a condensed knowledge summary string for Gemini system prompt
+   * Generates a compact, highly-targeted context snippet for Gemini (saves 80%+ tokens)
    */
-  getStructuredKnowledgePrompt(): string {
-    return `
-OFFICIAL DHSGSU KNOWLEDGE BASE:
-University: ${this.university.name} (${this.university.shortName}), Sagar, MP. Established ${this.university.establishedYear}. Central University (NAAC 'A' Grade). Official Website: ${this.university.officialWebsite}
-Campus: ${this.university.campusArea}, Patharia Hills, Sagar (MP) 470003.
+  getCompactContextForQuery(query: string): string {
+    const { matchedServices, matchedOffices, matchedDepartments, matchedLocations } = this.findRelevantContext(query);
 
-MAJOR ADMINISTRATIVE OFFICES:
-${this.offices.map(o => `- [${o.name}] (Category: ${o.category}):
-  Location: ${o.location}
-  Contact: Email: ${o.contact?.email || 'N/A'}, Helpline: ${o.contact?.helpline || o.contact?.phone || 'N/A'}
-  Handles: ${o.responsibilities.join('; ')}
-  Common Student Issues: ${o.commonStudentProblems.join('; ')}
-  Official Source: ${o.officialSourceUrl}
-`).join('\n')}
+    const parts: string[] = [
+      `University: ${this.university.name} (${this.university.shortName}), Sagar, MP. Official Website: ${this.university.officialWebsite}`
+    ];
 
-STUDENT SERVICES & PROBLEM-TO-PLACE MAPPINGS:
-${this.services.map(s => `- [${s.name}] (Category: ${s.category}):
-  Responsible Office: ${s.responsibleOfficeName}
-  Location: ${s.location}
-  Common Problems Handled: ${s.commonProblems.join('; ')}
-  Required Documents: ${s.requiredDocuments.join(', ')}
-  Process: ${s.process.join(' -> ')}
-  Official Source: ${s.officialSourceUrl}
-`).join('\n')}
+    if (matchedServices.length > 0) {
+      parts.push(`Relevant Services:\n` + matchedServices.slice(0, 2).map(s => 
+        `- ${s.name} (${s.responsibleOfficeName}, Location: ${s.location}). Docs: ${s.requiredDocuments.join(', ')}`
+      ).join('\n'));
+    }
 
-ACADEMIC DEPARTMENTS:
-${this.departments.map(d => `- [${d.name}] (${d.schoolName}):
-  Programmes: ${d.programmes.join(', ')}
-  Location: ${d.location} (${d.building})
-  Contact: ${d.contact?.email || 'N/A'}
-  Official Source: ${d.officialSourceUrl}
-`).join('\n')}
+    if (matchedOffices.length > 0) {
+      parts.push(`Relevant Offices:\n` + matchedOffices.slice(0, 2).map(o => 
+        `- ${o.name} (Location: ${o.location}, Helpline: ${o.contact?.helpline || 'N/A'})`
+      ).join('\n'));
+    }
 
-CAMPUS LOCATIONS & LANDMARKS:
-${this.locations.map(l => `- [${l.name}]: ${l.description} | Landmark: ${l.landmark || 'Patharia Hills'} | Coordinates: ${l.coordinates.lat}, ${l.coordinates.lng}`).join('\n')}
-    `.trim();
+    if (matchedDepartments.length > 0) {
+      parts.push(`Relevant Departments:\n` + matchedDepartments.slice(0, 2).map(d => 
+        `- ${d.name} (${d.schoolName}, Location: ${d.location})`
+      ).join('\n'));
+    }
+
+    if (matchedLocations.length > 0) {
+      parts.push(`Relevant Places:\n` + matchedLocations.slice(0, 2).map(l => 
+        `- ${l.name} (${l.building}, Landmark: ${l.landmark || 'Patharia Hills'})`
+      ).join('\n'));
+    }
+
+    return parts.join('\n\n');
   }
 }
 

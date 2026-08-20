@@ -101,10 +101,14 @@ export class EntityVerificationEngine {
 
     // ── STEP 3: Dynamic Google Places Discovery for Uncached Entities ───────────
     if (matchedDepartments.length === 0 && isPhysicalLocationQuery) {
-      // Extract candidate entity name from question
-      const cleanEntityName = query
+      // Extract candidate entity name from question (robust against all prefixes)
+      let cleanEntityName = query.trim();
+      cleanEntityName = cleanEntityName
+        .replace(/^(hey|hi|hello|please|plz|can you|could you|umm|tell me|show me|find|give me|provide me|i want to (know|find)|where is|where are)\s+/i, '')
+        .replace(/^(the\s+)?(location|address|building|place|map|details)\s+(of|for)\s+/i, '')
         .replace(/^(and\s+)?(where\s+is\s+(the\s+)?|location\s+of\s+|exact\s+location\s+of\s+|mujhe\s+|kaha\s+hai\s+|ka\s+address\s+|ki\s+location\s+)/i, '')
-        .replace(/\b(kaha|kahan|kidhar|hai|batao|chahiye|located|exact\s+location)\b/gi, '')
+        .replace(/\b(kaha|kahan|kidhar|hai|h|batao|bataiye|chahiye|located|situated|exact\s+location|ka\s+rasta|directions?|map)\b/gi, '')
+        .replace(/[?!.,;:]/g, '')
         .trim();
 
       if (cleanEntityName.length > 2) {

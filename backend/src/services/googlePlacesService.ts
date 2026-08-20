@@ -28,13 +28,84 @@ function buildOfficialMapsUrl(query: string): string {
  * Uses verified campus locations and guaranteed official Google Maps Search destinations.
  */
 const VERIFIED_CAMPUS_PLACES: Record<string, Omit<GooglePlaceResult, 'source'>> = {
+  'biotechnology': {
+    placeId: 'dhsgsu_dept_biotechnology',
+    displayName: 'Department of Biotechnology, DHSGSU',
+    formattedAddress: 'Department of Biotechnology, Patharia Hills, Dr. Harisingh Gour Vishwavidyalaya, Sagar, Madhya Pradesh 470003',
+    campus: 'Upper Campus (Patharia Hills)',
+    building: 'Department of Biotechnology Building',
+    landmark: 'Near Savitri Bai Phule Bhawan & School of Education, Upper Campus',
+    location: { latitude: 23.8341, longitude: 78.7753 },
+    googleMapsUri: buildOfficialMapsUrl('Department of Biotechnology'),
+    websiteUri: 'https://dhsgsu.edu.in/index.php/en/academics/schools-departments/school-of-biological-sciences',
+    phoneNumber: '07582-265818',
+    verified: true
+  },
+  'education': {
+    placeId: 'dhsgsu_dept_education',
+    displayName: 'School of Education (Department of Education), DHSGSU',
+    formattedAddress: 'Education Department New Building, Patharia Hills, Dr. Harisingh Gour Vishwavidyalaya, Sagar, Madhya Pradesh 470003',
+    campus: 'Upper Campus (Patharia Hills)',
+    building: 'Education Department (School of Education) New Building',
+    landmark: 'Adjacent to Savitri Bai Phule Bhawan & Biotechnology Department, Patharia Hills',
+    location: { latitude: 23.8343, longitude: 78.7755 },
+    googleMapsUri: buildOfficialMapsUrl('School of Education Department of Education'),
+    websiteUri: 'https://dhsgsu.edu.in/index.php/en/academics/schools-departments/school-of-educational-studies',
+    verified: true
+  },
+  'savitri bai phule': {
+    placeId: 'dhsgsu_savitri_bai_phule_bhawan',
+    displayName: 'Savitri Bai Phule Bhawan, DHSGSU',
+    formattedAddress: 'Savitri Bai Phule Bhawan, Patharia Hills, Dr. Harisingh Gour Vishwavidyalaya, Sagar, Madhya Pradesh 470003',
+    campus: 'Upper Campus (Patharia Hills)',
+    building: 'Savitri Bai Phule Bhawan',
+    landmark: 'Near Department of Biotechnology & School of Education, Patharia Hills',
+    location: { latitude: 23.8342, longitude: 78.7756 },
+    googleMapsUri: buildOfficialMapsUrl('Savitri Bai Phule bhawan'),
+    verified: true
+  },
+  'aacharya shankar': {
+    placeId: 'dhsgsu_aacharya_shankar_bhawan',
+    displayName: 'Aacharya Shankar Bhawan, DHSGSU',
+    formattedAddress: 'Aacharya Shankar Bhawan, Patharia Hills, Dr. Harisingh Gour Vishwavidyalaya, Sagar, Madhya Pradesh 470003',
+    campus: 'Upper Campus (Patharia Hills)',
+    building: 'Aacharya Shankar Bhawan',
+    landmark: 'Near Department of Music & Central Bank of India, Patharia Hills',
+    location: { latitude: 23.8350, longitude: 78.7752 },
+    googleMapsUri: buildOfficialMapsUrl('Aacharya Shankar Bhawan'),
+    verified: true
+  },
+  'botany': {
+    placeId: 'dhsgsu_dept_botany',
+    displayName: 'Department of Botany, DHSGSU',
+    formattedAddress: 'Department of Botany, Life Sciences Complex, Patharia Hills, Dr. Harisingh Gour Vishwavidyalaya, Sagar, Madhya Pradesh 470003',
+    campus: 'Upper Campus (Patharia Hills)',
+    building: 'Department of Botany Building',
+    landmark: 'Near Botanical Garden & Life Sciences Complex, Patharia Hills',
+    location: { latitude: 23.8364, longitude: 78.7770 },
+    googleMapsUri: buildOfficialMapsUrl('Department of Botany Botanical Garden'),
+    websiteUri: 'https://dhsgsu.edu.in/index.php/en/academics/schools-departments/school-of-biological-sciences',
+    verified: true
+  },
+  'microbiology': {
+    placeId: 'dhsgsu_dept_microbiology',
+    displayName: 'Department of Microbiology, DHSGSU',
+    formattedAddress: 'Department of Microbiology, Life Sciences Complex, Patharia Hills, Dr. Harisingh Gour Vishwavidyalaya, Sagar, Madhya Pradesh 470003',
+    campus: 'Upper Campus (Patharia Hills)',
+    building: 'Life Sciences Complex',
+    landmark: 'Near Biotechnology & Zoology Departments, Patharia Hills',
+    location: { latitude: 23.8345, longitude: 78.7758 },
+    googleMapsUri: buildOfficialMapsUrl('Department of Microbiology'),
+    websiteUri: 'https://dhsgsu.edu.in/index.php/en/academics/schools-departments/school-of-biological-sciences',
+    verified: true
+  },
   'music': {
     placeId: 'dhsgsu_dept_music_performing_arts',
     displayName: 'Department of Music (Performing Arts), DHSGSU',
     formattedAddress: 'Department of Music, Arts & Performing Arts Complex, Patharia Hills, Dr. Harisingh Gour Vishwavidyalaya, Sagar, Madhya Pradesh 470003',
     campus: 'Upper Campus (Patharia Hills)',
     building: 'Arts & Performing Arts Complex',
-    landmark: 'Near Humanities Block & Central Library, Patharia Hills',
+    landmark: 'Near Aacharya Shankar Bhawan & Central Bank of India, Patharia Hills',
     location: { latitude: 23.8349, longitude: 78.7758 },
     googleMapsUri: buildOfficialMapsUrl('Department of Music Performing Arts'),
     websiteUri: 'https://dhsgsu.edu.in/index.php/en/academics/schools-departments/school-of-performing-arts',

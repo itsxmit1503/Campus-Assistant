@@ -179,25 +179,32 @@ CORE CONVERSATIONAL & FACTUAL RULES
      • Provide a well-structured summary: School, Campus & Building, HOD, Programmes, Official Email/Phone.
      • Keep it concise and readable with bullet points where appropriate.
 
-5. LANGUAGE MIRRORING — CRITICAL:
+5. MULTI-PART REQUESTS — MANDATORY FULL COMPLETENESS:
+   - If a student asks for MULTIPLE pieces of information in a single message (e.g. "contact details and location", "HOD aur email", "address, phone aur map"):
+     • You MUST satisfy EVERY single requested piece of information in that same response.
+     • NEVER stop after answering only one part.
+     • Enable all corresponding display flags (e.g., if asking for location AND contact, set BOTH "display.location = true" AND "display.contact = true").
+
+6. LANGUAGE MIRRORING — CRITICAL:
    - Detect the student's language from their message and respond in that same language.
    - English → English | Hindi → Hindi | Hinglish → Hinglish | Bengali → Bengali | Marathi → Marathi | etc.
    - Keep official department and office names in their recognizable form for physical navigation.
 
-6. CONVERSATION CONTEXT AND FOLLOW-UPS:
+7. CONVERSATION CONTEXT AND FOLLOW-UPS:
    - Study conversation history carefully.
    - Resolve follow-up references using context (e.g., "exact location?", "kis campus mein hai?", "HOD kaun hai?", "map bhej do" refer to the active department/topic).
 
-7. NO HALLUCINATIONS:
+8. NO HALLUCINATIONS:
    - Use ONLY verified information from the DHSGSU CONTEXT section below.
    - If a specific phone number or detail is not present in the context, explicitly say it is currently not listed in university records.
 
-8. STRUCTURED DATA FLAGS:
+9. STRUCTURED DATA FLAGS:
    - "display.location = true" if student asks about location, directions, campus, or maps.
    - "display.contact = true" if student asks for phone/email/contact.
    - "display.documents = true" if documents are needed.
    - "display.responsibleUnit = true" for department/office overviews.
    - "display.sources = true" for verified university factual answers.
+   - "display.relatedTopics = false" (do not clutter direct factual answers with exploration chips unless relevant).
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 VERIFIED DHSGSU CAMPUS CONTEXT (USE THIS — DO NOT INVENT)
@@ -261,7 +268,7 @@ ${historySummary ? `Recent Conversation History:\n${historySummary}\n` : ''}Curr
         model: 'gemini-3.5-flash',
         generationConfig: {
           temperature: 0.4,
-          maxOutputTokens: 900,
+          maxOutputTokens: 2048,
           responseMimeType: 'application/json'
         }
       });
@@ -335,21 +342,78 @@ ${historySummary ? `Recent Conversation History:\n${historySummary}\n` : ''}Curr
     // ── Department match ─────────────────────────────────────────────────────
     if (matchedDepartments.length > 0) {
       const d = matchedDepartments[0];
-      const isLocationReq = /\b(kaha|kahan|kidhar|where|location|building|map)\b/i.test(query);
+      const isLocationReq = /\b(kaha|kahan|kidhar|where|location|building|map|address|campus|pahuchu|rasta)\b/i.test(query);
       const isHodReq = /\b(hod|head|kaun hai|who is|adhyaksh)\b/i.test(query);
-      const isContactReq = /\b(contact|number|phone|email)\b/i.test(query);
-      const isCoursesReq = /\b(course|courses|programme|programmes|degree|branch)\b/i.test(query);
+      const isContactReq = /\b(contact|number|phone|email|sampark)\b/i.test(query);
+      const isCoursesReq = /\b(course|courses|programme|programmes|degree|branch|eligibility|admission)\b/i.test(query);
+      const isOverviewReq = /\b(details|overview|baare mein|about|tell me|profile|all|sab|complete)\b/i.test(query);
 
       const deptCampus = d.campus || (d.id === 'dept-cs-applications' ? 'Valley Campus' : 'Upper Campus (Patharia Hills)');
       const deptAddress = d.address || `${d.building}, ${d.location}`;
       const deptMapsUrl = d.googleMapsUrl || d.mapLink || `https://maps.google.com/?q=${encodeURIComponent(d.name + ' DHSGSU Sagar')}`;
 
+      // Count how many specific aspects are requested
+      const requestedAspects = [
+        isLocationReq && 'location',
+        isContactReq && 'contact',
+        isHodReq && 'hod',
+        isCoursesReq && 'courses'
+      ].filter(Boolean) as string[];
+
+      // Multi-intent or Overview Request
+      if (isOverviewReq || requestedAspects.length > 1 || requestedAspects.length === 0) {
+        let answerText = isEnglish
+          ? `**${d.name}** (${d.schoolName})\n\n📍 **Campus:** ${deptCampus}\n🏢 **Building:** ${d.building}`
+          : `**${d.name}** (${d.schoolName})\n\n📍 **Campus:** ${deptCampus}\n🏢 **Building:** ${d.building}`;
+
+        if (isHodReq || isOverviewReq || requestedAspects.length === 0) {
+          answerText += `\n👤 **HOD:** ${d.hod || 'N/A'}`;
+        }
+        if (isCoursesReq || isOverviewReq || requestedAspects.length === 0) {
+          answerText += `\n🎓 **Programmes:** ${d.programmes.join(', ')}`;
+        }
+        if (isContactReq || isOverviewReq || requestedAspects.length === 0) {
+          answerText += `\n📞 **Phone:** ${d.contact?.phone || 'N/A'}\n✉️ **Email:** ${d.contact?.email || 'N/A'}`;
+        }
+
+        return {
+          answer: answerText,
+          language: lang,
+          intent: 'department_overview',
+          intentCategory: 'INFORMATION',
+          responsibleUnit: { name: d.name, type: 'department', location: d.location },
+          location: {
+            name: d.name,
+            campus: deptCampus,
+            building: d.building,
+            address: deptAddress,
+            landmark: d.landmark || deptCampus,
+            mapLink: deptMapsUrl,
+            googleMapsUrl: deptMapsUrl,
+            coordinates: d.coordinates
+          },
+          contact: { phone: d.contact?.phone, email: d.contact?.email, officialWebsite: d.officialSourceUrl },
+          display: {
+            responsibleUnit: true,
+            location: isLocationReq || isOverviewReq || requestedAspects.length === 0,
+            contact: isContactReq || isOverviewReq || requestedAspects.length === 0,
+            documents: false,
+            nextSteps: false,
+            sources: true,
+            relatedTopics: false
+          }
+        };
+      }
+
+      // Single specific aspect requests:
       if (isLocationReq) {
         return {
           answer: isEnglish
             ? `The **${d.name}** is located at **${deptCampus}** (${d.building}).`
             : `**${d.name}** **${deptCampus}** (${d.building}) mein sthit hai.`,
-          language: lang, intent: 'department_location', intentCategory: 'LOCATION',
+          language: lang,
+          intent: 'department_location',
+          intentCategory: 'LOCATION',
           responsibleUnit: { name: d.name, type: 'department', location: d.location },
           location: {
             name: d.name,
@@ -364,59 +428,45 @@ ${historySummary ? `Recent Conversation History:\n${historySummary}\n` : ''}Curr
           display: { responsibleUnit: false, location: true, contact: false, documents: false, nextSteps: false, sources: true, relatedTopics: false }
         };
       }
+
       if (isHodReq) {
         return {
           answer: isEnglish
             ? `The Head of the **${d.name}** is **${d.hod || 'not currently available in records'}**.`
             : `**${d.name}** ke Head (HOD) **${d.hod || 'records mein available nahi hai'}** hain.`,
-          language: lang, intent: 'department_hod', intentCategory: 'INFORMATION',
+          language: lang,
+          intent: 'department_hod',
+          intentCategory: 'INFORMATION',
           responsibleUnit: { name: d.name, type: 'department', location: d.location },
           display: { responsibleUnit: true, location: false, contact: false, documents: false, nextSteps: false, sources: true, relatedTopics: false }
         };
       }
+
       if (isContactReq) {
         return {
           answer: isEnglish
             ? `Contact for **${d.name}**: Phone: **${d.contact?.phone || 'N/A'}**, Email: **${d.contact?.email || 'N/A'}**.`
             : `**${d.name}** ka contact — Phone: **${d.contact?.phone || 'N/A'}**, Email: **${d.contact?.email || 'N/A'}**.`,
-          language: lang, intent: 'department_contact', intentCategory: 'CONTACT',
+          language: lang,
+          intent: 'department_contact',
+          intentCategory: 'CONTACT',
           contact: { phone: d.contact?.phone, email: d.contact?.email, officialWebsite: d.officialSourceUrl },
           display: { responsibleUnit: true, location: false, contact: true, documents: false, nextSteps: false, sources: true, relatedTopics: false }
         };
       }
+
       if (isCoursesReq) {
         return {
           answer: isEnglish
             ? `The **${d.name}** offers: **${d.programmes.join(', ')}**.`
             : `**${d.name}** mein yeh programmes hain: **${d.programmes.join(', ')}**.`,
-          language: lang, intent: 'department_courses', intentCategory: 'INFORMATION',
+          language: lang,
+          intent: 'department_courses',
+          intentCategory: 'INFORMATION',
           responsibleUnit: { name: d.name, type: 'department', location: d.location },
           display: { responsibleUnit: true, location: false, contact: false, documents: false, nextSteps: false, sources: true, relatedTopics: false }
         };
       }
-
-      // Full department overview
-      const overview = isEnglish
-        ? `**${d.name}** (${d.schoolName})\n\n📍 **Campus:** ${deptCampus}\n🏢 **Building:** ${d.building}\n👤 **HOD:** ${d.hod || 'N/A'}\n🎓 **Programmes:** ${d.programmes.join(', ')}\n📞 **Phone:** ${d.contact?.phone || 'N/A'}\n✉️ **Email:** ${d.contact?.email || 'N/A'}`
-        : `**${d.name}** (${d.schoolName})\n\n📍 **Campus:** ${deptCampus}\n🏢 **Building:** ${d.building}\n👤 **HOD:** ${d.hod || 'N/A'}\n🎓 **Programmes:** ${d.programmes.join(', ')}\n📞 **Phone:** ${d.contact?.phone || 'N/A'}\n✉️ **Email:** ${d.contact?.email || 'N/A'}`;
-
-      return {
-        answer: overview,
-        language: lang, intent: 'department_overview', intentCategory: 'INFORMATION',
-        responsibleUnit: { name: d.name, type: 'department', location: d.location },
-        location: {
-          name: d.name,
-          campus: deptCampus,
-          building: d.building,
-          address: deptAddress,
-          landmark: d.landmark || deptCampus,
-          mapLink: deptMapsUrl,
-          googleMapsUrl: deptMapsUrl,
-          coordinates: d.coordinates
-        },
-        contact: { phone: d.contact?.phone, email: d.contact?.email, officialWebsite: d.officialSourceUrl },
-        display: { responsibleUnit: true, location: true, contact: true, documents: false, nextSteps: false, sources: true, relatedTopics: false }
-      };
     }
 
     // ── Location match ───────────────────────────────────────────────────────

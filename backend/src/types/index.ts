@@ -36,13 +36,28 @@ export interface StructuredAnswer {
     name: string;
     category: string;
   } | null;
+  entity?: {
+    name: string;
+    type: 'department' | 'office' | 'location' | 'service';
+  } | null;
+  details?: {
+    school?: string;
+    programmes?: string[];
+    head?: string;
+    email?: string;
+    phone?: string;
+    website?: string;
+  } | null;
   responsibleUnit?: ResponsibleUnit | null;
   location?: {
     name: string;
+    campus?: string;
     building?: string;
     floor?: string;
+    address?: string;
     landmark?: string;
     mapLink?: string;
+    googleMapsUrl?: string;
     coordinates?: { lat: number; lng: number };
   } | null;
   contact?: {
@@ -121,13 +136,18 @@ export interface Department {
   description: string;
   hod?: string;
   programmes: string[];
+  campus: 'Valley Campus' | 'Upper Campus (Patharia Hills)' | string;
   location: string;
   building: string;
+  address?: string;
+  landmark?: string;
   contact?: {
     email?: string;
     phone?: string;
   };
   mapLink?: string;
+  googleMapsUrl?: string;
+  coordinates?: { lat: number; lng: number };
   officialSourceUrl: string;
   services: string[];
   verified: boolean;
@@ -174,6 +194,7 @@ export interface CampusLocation {
   id: string;
   name: string;
   type: 'administrative' | 'academic' | 'library' | 'hostel' | 'medical' | 'sports' | 'facility' | 'gate';
+  campus?: 'Valley Campus' | 'Upper Campus (Patharia Hills)' | string;
   building: string;
   description: string;
   landmark?: string;
@@ -183,6 +204,7 @@ export interface CampusLocation {
     lng: number;
   };
   mapLink: string;
+  googleMapsUrl?: string;
   relatedOffices?: string[];
   relatedDepartments?: string[];
 }

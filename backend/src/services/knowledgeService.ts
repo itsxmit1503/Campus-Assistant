@@ -187,7 +187,7 @@ export class KnowledgeService {
 
     const parts: string[] = [
       `University: ${this.university.name} (${this.university.shortName}, est. ${this.university.establishedYear}), Sagar, MP. Official: ${this.university.officialWebsite}`,
-      `Campus Structure: 11 Schools, ${this.departments.length} Academic Departments, Central Library, Pariksha Bhawan, Administrative Block, Health Centre, Hostels on Patharia Hills Campus.`
+      `Campus Structure: 11 Schools, ${this.departments.length} Academic Departments across Valley Campus & Upper Campus (Patharia Hills).`
     ];
 
     if (matchedDepartments.length > 0) {
@@ -195,11 +195,14 @@ export class KnowledgeService {
         `• Department: ${d.name}
   - School: ${d.schoolName}
   - Description: ${d.description}
-  - Location/Building: ${d.location || d.building}
-  - Head of Department (HOD): ${d.hod}
+  - Campus: ${d.campus || (d.id === 'dept-cs-applications' ? 'Valley Campus' : 'Upper Campus (Patharia Hills)')}
+  - Building: ${d.building}
+  - Exact Address: ${d.address || `${d.building}, ${d.location}`}
+  - Landmark: ${d.landmark || (d.id === 'dept-cs-applications' ? 'Valley Campus (Gour Nagar)' : 'Patharia Hills')}
+  - Head of Department (HOD): ${d.hod || 'Head of Department'}
   - Programmes/Courses: ${d.programmes.join(', ')}
   - Contact Phone: ${d.contact?.phone || 'N/A'}, Email: ${d.contact?.email || 'N/A'}
-  - Map Link: ${d.mapLink || 'N/A'}
+  - Google Maps URL: ${d.googleMapsUrl || d.mapLink || 'N/A'}
   - Official URL: ${d.officialSourceUrl || 'N/A'}`
       ).join('\n\n'));
     }
@@ -210,16 +213,18 @@ export class KnowledgeService {
   - Location: ${o.location} (${o.building}, Floor: ${o.floor || 'Ground'})
   - Office Hours: ${o.officeHours}
   - Contact: Phone ${o.contact?.phone || 'N/A'}, Helpline ${o.contact?.helpline || 'N/A'}, Email ${o.contact?.email || 'N/A'}
-  - Responsibilities: ${o.responsibilities.join('; ')}`
+  - Responsibilities: ${o.responsibilities.join('; ')}
+  - Official URL: ${o.officialSourceUrl || 'N/A'}`
       ).join('\n\n'));
     }
 
     if (matchedLocations.length > 0) {
       parts.push(`MATCHED CAMPUS LOCATIONS:\n` + matchedLocations.map(l => 
         `• Location: ${l.name}
+  - Campus: ${l.campus || (l.id === 'loc-csa-building' ? 'Valley Campus' : 'Upper Campus (Patharia Hills)')}
   - Building: ${l.building}
   - Landmark: ${l.landmark || 'Patharia Hills Campus'}
-  - Map Link: ${l.mapLink || 'N/A'}`
+  - Google Maps URL: ${l.googleMapsUrl || l.mapLink || 'N/A'}`
       ).join('\n\n'));
     }
 

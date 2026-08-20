@@ -67,13 +67,21 @@ const DepartmentSchema = new Schema({
   description: { type: String },
   hod: { type: String },
   programmes: [{ type: String }],
+  campus: { type: String, default: 'Upper Campus (Patharia Hills)' },
   location: { type: String },
   building: { type: String },
+  address: { type: String },
+  landmark: { type: String },
   contact: {
     email: String,
     phone: String
   },
   mapLink: { type: String },
+  googleMapsUrl: { type: String },
+  coordinates: {
+    lat: Number,
+    lng: Number
+  },
   officialSourceUrl: { type: String, required: true },
   services: [{ type: String }],
   verified: { type: Boolean, default: true }

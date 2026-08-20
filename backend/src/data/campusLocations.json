@@ -48,15 +48,17 @@
     "id": "loc-csa-building",
     "name": "Computer Science & Applications (CSA) Building",
     "type": "academic",
-    "building": "CSA & IT Complex",
-    "description": "Houses Department of Computer Science & Applications (MCA, M.Sc., Ph.D.), computer labs, software engineering center, and server rooms.",
-    "landmark": "Near Central Library & Applied Science Block",
+    "campus": "Valley Campus",
+    "building": "Computer Science & Applications Building",
+    "description": "Houses Department of Computer Science & Applications (MCA, M.Sc., Ph.D.), modern computing labs, software engineering center, and server rooms in the Valley Campus.",
+    "landmark": "Valley Campus (Gour Nagar), Dr. Harisingh Gour Vishwavidyalaya",
     "floor": "Ground & 1st Floor",
     "coordinates": {
       "lat": 23.8361,
       "lng": 78.7772
     },
-    "mapLink": "https://maps.google.com/?q=Department+of+Computer+Science+DHSGSU+Sagar",
+    "mapLink": "https://maps.google.com/?q=Department+of+Computer+Science+and+Applications+DHSGSU+Valley+Campus+Sagar",
+    "googleMapsUrl": "https://maps.google.com/?q=Department+of+Computer+Science+and+Applications+DHSGSU+Valley+Campus+Sagar",
     "relatedDepartments": ["dept-cs-applications"]
   },
   {

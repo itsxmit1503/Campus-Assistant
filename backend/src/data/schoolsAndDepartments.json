@@ -58,13 +58,21 @@
       "description": "Offers postgraduate and research degrees including Master of Computer Applications (MCA), M.Sc. (Computer Science), and Ph.D. Equipped with modern software and networking labs.",
       "hod": "Head, Department of Computer Science & Applications",
       "programmes": ["MCA (Master of Computer Applications)", "M.Sc. (Computer Science)", "Ph.D. in Computer Science"],
-      "location": "CSA Building, Upper Campus (near Central Library & Science Block)",
+      "campus": "Valley Campus",
+      "location": "CSA Building, Valley Campus, Dr. Harisingh Gour Vishwavidyalaya",
       "building": "Computer Science & Applications Building",
+      "address": "Department of Computer Science & Applications, Valley Campus, Dr. Harisingh Gour Vishwavidyalaya, Sagar, Madhya Pradesh 470003",
+      "landmark": "Valley Campus (Gour Nagar), DHSGSU",
       "contact": {
         "email": "csa@dhsgsu.edu.in",
         "phone": "07582-265840"
       },
-      "mapLink": "https://maps.google.com/?q=Department+of+Computer+Science+DHSGSU+Sagar",
+      "mapLink": "https://maps.google.com/?q=Department+of+Computer+Science+and+Applications+DHSGSU+Valley+Campus+Sagar",
+      "googleMapsUrl": "https://maps.google.com/?q=Department+of+Computer+Science+and+Applications+DHSGSU+Valley+Campus+Sagar",
+      "coordinates": {
+        "lat": 23.8361,
+        "lng": 78.7772
+      },
       "officialSourceUrl": "https://dhsgsu.edu.in/index.php/en/academics/schools-departments/school-of-engineering-technology",
       "services": ["MCA Lab Access", "Project Guidelines", "Academic Timetable", "Seminar Approvals"],
       "verified": true
@@ -77,12 +85,20 @@
       "description": "One of the premier and oldest physics departments in central India, offering B.Sc., M.Sc. Physics, and doctoral research in Condensed Matter Physics, Materials Science, and Nuclear Physics.",
       "hod": "Head, Department of Physics",
       "programmes": ["B.Sc. Physics", "M.Sc. Physics", "Ph.D. Physics"],
-      "location": "Science Block, DHSGSU Campus",
+      "campus": "Upper Campus (Patharia Hills)",
+      "location": "Science Block, Upper Campus, Patharia Hills",
       "building": "Department of Physics Building",
+      "address": "Department of Physics, Science Complex, Patharia Hills, Dr. Harisingh Gour Vishwavidyalaya, Sagar, Madhya Pradesh 470003",
+      "landmark": "Near Central Library & Applied Science Block",
       "contact": {
         "email": "physics@dhsgsu.edu.in"
       },
       "mapLink": "https://maps.google.com/?q=Department+of+Physics+DHSGSU+Sagar",
+      "googleMapsUrl": "https://maps.google.com/?q=Department+of+Physics+DHSGSU+Sagar",
+      "coordinates": {
+        "lat": 23.8358,
+        "lng": 78.7768
+      },
       "officialSourceUrl": "https://dhsgsu.edu.in/index.php/en/academics/schools-departments/school-of-applied-sciences",
       "services": ["Physics Laboratory", "Research Instrumentation Access"],
       "verified": true
@@ -95,12 +111,20 @@
       "description": "Offering advanced academic training and cutting-edge research in Organic, Inorganic, Physical, and Analytical Chemistry.",
       "hod": "Head, Department of Chemistry",
       "programmes": ["B.Sc. Chemistry", "M.Sc. Chemistry", "Ph.D. Chemistry"],
-      "location": "Chemistry Block, Science Complex",
+      "campus": "Upper Campus (Patharia Hills)",
+      "location": "Chemistry Block, Science Complex, Patharia Hills",
       "building": "Chemistry Department Building",
+      "address": "Department of Chemistry, Science Complex, Patharia Hills, Dr. Harisingh Gour Vishwavidyalaya, Sagar, Madhya Pradesh 470003",
+      "landmark": "Science Complex, Patharia Hills",
       "contact": {
         "email": "chemistry@dhsgsu.edu.in"
       },
       "mapLink": "https://maps.google.com/?q=Department+of+Chemistry+DHSGSU+Sagar",
+      "googleMapsUrl": "https://maps.google.com/?q=Department+of+Chemistry+DHSGSU+Sagar",
+      "coordinates": {
+        "lat": 23.8362,
+        "lng": 78.7765
+      },
       "officialSourceUrl": "https://dhsgsu.edu.in/index.php/en/academics/schools-departments/school-of-applied-sciences",
       "services": ["Chemical Lab Facility", "Instrumental Analysis Service"],
       "verified": true
@@ -113,12 +137,20 @@
       "description": "Offers Master of Business Administration (MBA) and doctoral research in Human Resources, Marketing, Finance, and International Business.",
       "hod": "Head, Department of Business Management",
       "programmes": ["MBA (Master of Business Administration)", "Ph.D. in Management"],
-      "location": "Management Building, Near Administrative Block",
+      "campus": "Upper Campus (Patharia Hills)",
+      "location": "Management Building, Near Administrative Block, Patharia Hills",
       "building": "Institute of Management Studies Building",
+      "address": "Department of Business Management, Near Administrative Block, Patharia Hills, Dr. Harisingh Gour Vishwavidyalaya, Sagar, Madhya Pradesh 470003",
+      "landmark": "Near Main Administrative Block (Prashasnik Bhawan)",
       "contact": {
         "email": "mba@dhsgsu.edu.in"
       },
       "mapLink": "https://maps.google.com/?q=Department+of+Business+Management+DHSGSU+Sagar",
+      "googleMapsUrl": "https://maps.google.com/?q=Department+of+Business+Management+DHSGSU+Sagar",
+      "coordinates": {
+        "lat": 23.8342,
+        "lng": 78.7755
+      },
       "officialSourceUrl": "https://dhsgsu.edu.in/index.php/en/academics/schools-departments/school-of-commerce-management",
       "services": ["Management Seminars", "Internship Placement Coordination"],
       "verified": true
@@ -131,12 +163,20 @@
       "description": "Offers BA-LLB (Hons), LL.B., LL.M., and Ph.D. in Law with moot court training and legal aid clinics.",
       "hod": "Head, Department of Law",
       "programmes": ["BA-LL.B. (Hons)", "LL.B. (3 Years)", "LL.M.", "Ph.D. in Law"],
-      "location": "Law Building, DHSGSU Campus",
+      "campus": "Upper Campus (Patharia Hills)",
+      "location": "Law Building, Patharia Hills Campus",
       "building": "Law Faculty Building",
+      "address": "Department of Law, Law Faculty Building, Patharia Hills, Dr. Harisingh Gour Vishwavidyalaya, Sagar, Madhya Pradesh 470003",
+      "landmark": "Patharia Hills Campus, DHSGSU",
       "contact": {
         "email": "law@dhsgsu.edu.in"
       },
       "mapLink": "https://maps.google.com/?q=Department+of+Law+DHSGSU+Sagar",
+      "googleMapsUrl": "https://maps.google.com/?q=Department+of+Law+DHSGSU+Sagar",
+      "coordinates": {
+        "lat": 23.8335,
+        "lng": 78.7760
+      },
       "officialSourceUrl": "https://dhsgsu.edu.in/index.php/en/academics/schools-departments/school-of-law",
       "services": ["Moot Court Training", "Free Legal Aid Clinic"],
       "verified": true
@@ -149,12 +189,20 @@
       "description": "Renowned for plant taxonomy, biotechnology, ethnobotany and maintaining the University Botanical Garden and Herbarium.",
       "hod": "Head, Department of Botany",
       "programmes": ["B.Sc. Botany", "M.Sc. Botany", "Ph.D. Botany"],
-      "location": "Life Sciences Complex, DHSGSU Campus",
+      "campus": "Upper Campus (Patharia Hills)",
+      "location": "Life Sciences Complex, Patharia Hills Campus",
       "building": "Botany Department Building",
+      "address": "Department of Botany, Life Sciences Complex, Patharia Hills, Dr. Harisingh Gour Vishwavidyalaya, Sagar, Madhya Pradesh 470003",
+      "landmark": "Near Botanical Garden, Patharia Hills",
       "contact": {
         "email": "botany@dhsgsu.edu.in"
       },
       "mapLink": "https://maps.google.com/?q=Department+of+Botany+DHSGSU+Sagar",
+      "googleMapsUrl": "https://maps.google.com/?q=Department+of+Botany+DHSGSU+Sagar",
+      "coordinates": {
+        "lat": 23.8368,
+        "lng": 78.7775
+      },
       "officialSourceUrl": "https://dhsgsu.edu.in/index.php/en/academics/schools-departments/school-of-biological-sciences",
       "services": ["Botanical Garden Access", "Herbarium Consultation"],
       "verified": true

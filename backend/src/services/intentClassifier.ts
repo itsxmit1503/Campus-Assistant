@@ -327,15 +327,15 @@ export function classifyAndSolveDeterministic(
     const loc = knowledgeService.getLocationById('loc-csa-building')!;
     return {
       answer: isHindi
-        ? `MCA पाठ्यक्रम **कंप्यूटर साइंस एंड एप्लीकेशंस विभाग (CSA Department)** द्वारा संचालित होता है। यह अपर कैंपस में सेंट्रल लाइब्रेरी और साइंस ब्लॉक के पास स्थित है।`
-        : `The MCA programme is run by the **Department of Computer Science & Applications (CSA)**, located in the CSA Building on the Upper Campus near the Science Block.`,
+        ? `MCA पाठ्यक्रम **कंप्यूटर साइंस एंड एप्लीकेशंस विभाग (CSA Department)** द्वारा संचालित होता है। यह **Valley Campus** में स्थित है।`
+        : `The MCA programme is run by the **Department of Computer Science & Applications (CSA)**, located in the **Valley Campus**.`,
       language: isHindi ? 'Hindi' : 'English',
       intent: 'mca_department_location',
       intentCategory: 'LOCATION',
       location: {
         name: dept.building,
         building: dept.building,
-        landmark: 'Patharia Hills Campus',
+        landmark: 'Valley Campus (Gour Nagar)',
         mapLink: dept.mapLink,
         coordinates: loc.coordinates
       },

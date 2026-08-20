@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import { config } from '../config/env.js';
 import { StructuredAnswer, ChatRequest } from '../types/index.js';
 import { knowledgeService } from './knowledgeService.js';
+import { entityVerificationEngine } from './entityVerificationEngine.js';
 import { routeQuery, detectLanguage } from './queryRouter.js';
 
 function cleanJsonResponse(rawText: string): any {
@@ -137,11 +138,11 @@ export class GeminiService {
       return this.buildSafeFallback(cleanMsg, conversationHistory);
     }
 
-    // ── STEP 4: Retrieve relevant university context from knowledge base ──────
-    console.log(`[CHAT] Knowledge retrieval started`);
-    const targetedContext = knowledgeService.getCompactContextForQuery(cleanMsg, conversationHistory);
+    // ── STEP 4: Official Source-First & Physical Entity Verification ───────────
+    const verifiedReqContext = entityVerificationEngine.verifyQuery(cleanMsg, conversationHistory);
+    const targetedContext = verifiedReqContext.verificationSummaryText;
     const userLang = detectLanguage(cleanMsg, conversationHistory);
-    console.log(`[CHAT] Knowledge context prepared (detected language: ${userLang})`);
+    console.log(`[CHAT] Verified knowledge context prepared (detected language: ${userLang})`);
 
     // ── STEP 5: Prepare conversation history for Gemini ───────────────────────
     const boundedHistory = conversationHistory.slice(-8);

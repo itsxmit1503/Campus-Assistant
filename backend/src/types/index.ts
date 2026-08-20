@@ -24,7 +24,16 @@ export interface DisplayFlags {
   relatedTopics?: boolean;
 }
 
-export type LocationVerificationStatus = 'VERIFIED' | 'PARTIALLY_VERIFIED' | 'UNVERIFIED' | 'UNKNOWN';
+export type VerificationState = 'VERIFIED' | 'PARTIALLY_VERIFIED' | 'CONFLICT' | 'UNVERIFIED' | 'UNKNOWN';
+export type LocationVerificationStatus = VerificationState;
+
+export interface FieldSource {
+  field: string;
+  value: any;
+  source: string;
+  sourceUrl?: string;
+  verified: boolean;
+}
 
 export interface LocationInfo {
   name: string;
@@ -38,8 +47,49 @@ export interface LocationInfo {
   googleMapsPlaceId?: string;
   coordinates?: { lat: number; lng: number };
   source?: string;
-  verificationStatus?: LocationVerificationStatus;
+  verificationStatus?: VerificationState;
   verified?: boolean;
+}
+
+export interface VerifiedEntityRecord {
+  entityId: string;
+  entityName: string;
+  entityType: 'department' | 'office' | 'hostel' | 'library' | 'facility' | 'school' | 'campus' | 'service';
+  verificationStatus: VerificationState;
+  officialVerification: {
+    verified: boolean;
+    source: string;
+    sourceUrl: string;
+  };
+  location?: {
+    campus: 'Valley Campus' | 'Upper Campus (Patharia Hills)' | string;
+    building?: string;
+    floor?: string;
+    address?: string;
+    landmark?: string;
+    googleMaps?: {
+      verified: boolean;
+      placeId?: string;
+      displayName?: string;
+      formattedAddress?: string;
+      latitude?: number;
+      longitude?: number;
+      googleMapsUri?: string;
+    };
+  };
+  contact?: {
+    phone?: string;
+    email?: string;
+    website?: string;
+    officeHours?: string;
+  };
+  details?: {
+    schoolName?: string;
+    head?: string;
+    programmes?: string[];
+    description?: string;
+  };
+  fieldSources: Record<string, { source: string; verified: boolean }>;
 }
 
 export interface StructuredAnswer {

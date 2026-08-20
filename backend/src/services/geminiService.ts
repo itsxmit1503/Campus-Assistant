@@ -264,17 +264,34 @@ ${historySummary ? `Recent Conversation History:\n${historySummary}\n` : ''}Curr
     try {
       console.log(`[CHAT] Gemini request started`);
 
-      const model = this.genAI.getGenerativeModel({
-        model: 'gemini-3.5-flash',
-        generationConfig: {
-          temperature: 0.4,
-          maxOutputTokens: 2048,
-          responseMimeType: 'application/json'
-        }
-      });
+      let text = '';
+      const candidateModels = ['gemini-flash-latest', 'gemini-flash-lite-latest', 'gemini-3.5-flash-lite'];
 
-      const result = await model.generateContent(fullPrompt);
-      const text = result.response.text();
+      for (const modelName of candidateModels) {
+        try {
+          const model = this.genAI.getGenerativeModel({
+            model: modelName,
+            generationConfig: {
+              temperature: 0.4,
+              maxOutputTokens: 2048,
+              responseMimeType: 'application/json'
+            }
+          });
+
+          const result = await model.generateContent(fullPrompt);
+          text = result.response.text();
+          if (text && text.trim().length > 0) {
+            console.log(`[CHAT] Gemini response generated using model: ${modelName}`);
+            break;
+          }
+        } catch (modelErr: any) {
+          console.warn(`[CHAT] Model ${modelName} attempt failed (${modelErr?.message || modelErr}). Trying next available model...`);
+        }
+      }
+
+      if (!text || text.trim().length === 0) {
+        return this.buildSafeFallback(cleanMsg, conversationHistory);
+      }
 
       try {
         const parsed = cleanJsonResponse(text) as StructuredAnswer;

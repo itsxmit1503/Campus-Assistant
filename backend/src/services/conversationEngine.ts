@@ -32,18 +32,36 @@ export function detectLanguage(text: string, history: Array<{ role: 'user' | 'as
 
 export class ConversationEngine {
   /**
-   * Check if a message is purely conversational/social without any information intent
+   * Check if a message is purely conversational/social without any university information intent
    */
   resolvePurelyConversational(query: string, history: Array<{ role: 'user' | 'assistant'; content: string }> = []): StructuredAnswer | null {
     const q = query.toLowerCase().trim();
-    const detectedLang = detectLanguage(query);
+    const detectedLang = detectLanguage(query, history);
     const isEnglish = detectedLang === 'english';
     const isHindi = detectedLang === 'hindi';
 
-    // 1. Unspecified Opening ("kuch puchna hai", "ek baat puchu?", "can i ask something?")
-    if (/^(kuch puchna hai|ek baat puchu|ek sawal hai|can i ask something|may i ask|puch sakta hu)(\s|!|\.|\?)*$/i.test(q)) {
+    // 0. Safety Guard: If query contains any question or university topic, hand over to Gemini!
+    const universityKeywords = [
+      'department', 'school', 'physics', 'chemistry', 'maths', 'mathematics', 'computer', 'csa', 'cse', 'mca', 'mba',
+      'law', 'vidhi', 'library', 'pustakalaya', 'scholarship', 'chhatravritti', 'exam', 'pariksha', 'marksheet',
+      'hostel', 'chhatravas', 'warden', 'admission', 'fee', 'fees', 'dsw', 'registrar', 'kulsachiv', 'vc', 'hod',
+      'head', 'dean', 'faculty', 'professor', 'contact', 'number', 'email', 'helpline', 'location', 'building',
+      'kaha', 'kahan', 'kidhar', 'where', 'kab', 'when', 'total', 'kitne', 'kitna', 'how many', 'process', 'kaise',
+      'form', 'result', 'degree', 'programme', 'course', 'courses', 'syllabus', 'notice', 'circular', 'deadline',
+      'galat', 'correction', 'problem', 'dikkat', 'issue', 'pending', 'scene'
+    ];
+
+    if (universityKeywords.some(kw => {
+      const reg = new RegExp(`\\b${kw}\\b`, 'i');
+      return reg.test(q);
+    })) {
+      return null; // Not pure casual, send to Gemini with MongoDB context!
+    }
+
+    // 1. Unspecified Openers ("ek baat puchni thi", "kuch puchna hai", "ek sawal hai", "can i ask something?")
+    if (/^(ek baat puchni thi|kuch puchna hai|ek baat puchu|ek sawal hai|can i ask something|may i ask|puch sakta hu)(\s|!|\.|\?)*$/i.test(q)) {
       return {
-        answer: isEnglish ? `Sure, go ahead and ask! 😄` : isHindi ? `बिल्कुल, पूछिए! 😄` : `Bilkul, pucho! Jo bhi jaana hai batao 😄`,
+        answer: isEnglish ? `Sure, go ahead and ask! 😄` : isHindi ? `बिल्कुल, पूछिए! 😄` : `Haan, pucho 😄`,
         language: detectedLang,
         intent: 'conversation_opening',
         intentCategory: 'CASUAL_CONVERSATION',
@@ -51,15 +69,30 @@ export class ConversationEngine {
       };
     }
 
-    // 2. Playful Social Commands ("hello bol", "bol na", "kya haal", "sab badhiya", "aur bata")
-    if (/\b(hello bol|bol na|bol re|kuch bol|kya haal|kya hal|aur bata|aur bhai|kya chal raha|sab badhiya|kya scene)\b/i.test(q)) {
-      let answer = `Hello 😄`;
-      if (q.includes('kya haal') || q.includes('aur bata') || q.includes('sab badhiya')) answer = `Sab badhiya! Batao 😄`;
-      else if (q.includes('hello bol')) answer = `Hello 😄`;
-      else answer = `Haan bolo 😄`;
-
+    // 2. Playful Social Small Talk ("kya haal chaal?", "kya haal hai", "main bhi badhiya", "hello bol")
+    if (/\b(kya haal chaal|kya haal|kya hal|aur bata|aur bhai|kya chal raha|sab badhiya|kya scene)\b/i.test(q)) {
       return {
-        answer,
+        answer: `Bas badhiya 😄 Tum batao?`,
+        language: detectedLang,
+        intent: 'casual_social',
+        intentCategory: 'CASUAL_CONVERSATION',
+        display: { responsibleUnit: false, location: false, contact: false, documents: false, nextSteps: false, sources: false, relatedTopics: false }
+      };
+    }
+
+    if (/\b(main bhi badhiya|mai bhi badhiya|sab theek|sab badhiya|all good)\b/i.test(q)) {
+      return {
+        answer: `Nice 😄`,
+        language: detectedLang,
+        intent: 'casual_social',
+        intentCategory: 'CASUAL_CONVERSATION',
+        display: { responsibleUnit: false, location: false, contact: false, documents: false, nextSteps: false, sources: false, relatedTopics: false }
+      };
+    }
+
+    if (/\b(hello bol|bol na|bol re|kuch bol)\b/i.test(q)) {
+      return {
+        answer: `Hello 😄`,
         language: detectedLang,
         intent: 'casual_social',
         intentCategory: 'CASUAL_CONVERSATION',
@@ -84,8 +117,8 @@ export class ConversationEngine {
       };
     }
 
-    // 4. Acknowledgements / Minimal Feedback ("hmm", "hmmm", "acha", "ok", "theek hai", "got it")
-    if (/^(hmm|hmmm|hmmmm|acha|achha|ok|okay|theek hai|thik hai|theek|thik|got it|sahi hai|fine|cool|alright|nice|great|haan|sahi|होय|बरोबर|ठीक আছে|சரி)(\s|!|\.|\?)*$/i.test(q)) {
+    // 4. Acknowledgements ("hmm", "acha", "ok", "theek hai")
+    if (/^(hmm|hmmm|hmmmm|acha|achha|ok|okay|theek hai|thik hai|theek|thik|got it|sahi hai|fine|cool|alright|nice|great|haan|sahi|होय|बरोबर|ঠিক আছে|சரி)(\s|!|\.|\?)*$/i.test(q)) {
       let answer = `😄`;
       if (q.startsWith('hmm')) answer = `😄`;
       else if (q === 'acha' || q === 'achha') answer = `haan 😄`;
@@ -101,18 +134,13 @@ export class ConversationEngine {
       };
     }
 
-    // 5. Testing / Meta ("bas check kar raha hu", "just testing", "dekh raha tha")
+    // 5. Testing ("bas testing kar raha hu", "bas check kar raha tha", "just checking")
     if (
       /\b(checkout|check|test|testing|chal rha|chal raha|chl rha|chl raha|dekh rha|dekh raha|dekh raha tha|dekhte|working|kaam kar|aise hi|চেক|பரிசோதனை)\b/i.test(q) ||
       q.includes('kuch nahi bas') || q.includes('kuch nhi bas') || q.includes('just checking') || q.includes('just testing')
     ) {
-      let answer = `Haha, fair enough 😄`;
-      if (q.includes('chal raha') || q.includes('chl rha') || q.includes('working') || q.includes('checkout')) {
-        answer = `Haha, haan, chal raha hai 😄`;
-      }
-
       return {
-        answer,
+        answer: `Haha, theek hai 😄`,
         language: detectedLang,
         intent: 'casual_testing',
         intentCategory: 'CASUAL_CONVERSATION',
@@ -122,11 +150,8 @@ export class ConversationEngine {
 
     // 6. Nothing / Kuch nahi
     if (/^(kuch nahi|kuch nhi|nothing|nothing much|never mind|chodo|rehnde|no problem|कुछ नहीं|কিছু না|काही नाही|ஒன்றுமில்லை)(\s|!|\.|\?)*$/i.test(q)) {
-      let answer = `No worries 😄`;
-      if (isHindi) answer = `कोई बात नहीं 😄`;
-
       return {
-        answer,
+        answer: isHindi ? `कोई बात नहीं 😄` : `No worries 😄`,
         language: detectedLang,
         intent: 'casual_chat',
         intentCategory: 'CASUAL_CONVERSATION',
@@ -156,21 +181,7 @@ export class ConversationEngine {
       };
     }
 
-    // 9. Capability Query
-    if (/\b(what can you do|kya kar sakte ho|kya kya bata sakte|capabilities|what do you know|help me with|tu kya karta)\b/i.test(q)) {
-      let answer = `Campus se related almost kuch bhi pooch sakte ho. Departments, hostels, scholarships, exams, offices, locations ya koi problem ho toh batao.`;
-      if (isEnglish) answer = `I can help with departments, campus locations, university services, admissions, exams, scholarships, hostels, and figuring out where to go when you're stuck.`;
-
-      return {
-        answer,
-        language: detectedLang,
-        intent: 'capabilities',
-        intentCategory: 'CASUAL_CONVERSATION',
-        display: { responsibleUnit: false, location: false, contact: false, documents: false, nextSteps: false, sources: false, relatedTopics: false }
-      };
-    }
-
-    return null;
+    return null; // All other messages -> Gemini!
   }
 }
 

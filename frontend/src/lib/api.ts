@@ -39,7 +39,7 @@ export async function sendChatMessage(
   }
 }
 
-function detectClientLanguage(text: string, history: Array<{ role: 'user' | 'assistant'; content: string }> = []): 'hinglish' | 'hindi' | 'english' | 'bengali' | 'marathi' | 'tamil' {
+function detectClientLanguage(text: string): 'hinglish' | 'hindi' | 'english' | 'bengali' | 'marathi' | 'tamil' {
   if (/[\u0980-\u09FF]/.test(text)) return 'bengali';
   if (/[\u0B80-\u0BFF]/.test(text)) return 'tamil';
   if (/[\u0900-\u097F]/.test(text)) {
@@ -60,11 +60,6 @@ function detectClientLanguage(text: string, history: Array<{ role: 'user' | 'ass
   const words = text.toLowerCase().split(/[\s,?.!]+/);
   if (words.some(w => hinglishMarkers.includes(w))) return 'hinglish';
 
-  if (words.length <= 2 && history.length > 0) {
-    const last = history.filter(h => h.role === 'user').slice(-2, -1)[0]?.content.toLowerCase() || '';
-    if (last.split(/[\s,?.!]+/).some(w => hinglishMarkers.includes(w))) return 'hinglish';
-  }
-
   return 'english';
 }
 
@@ -74,80 +69,91 @@ function getLocalKnowledgeAnswer(
   conversationHistory: Array<{ role: 'user' | 'assistant'; content: string }> = []
 ): StructuredAnswer {
   const q = query.toLowerCase().trim();
-  const detectedLang = detectClientLanguage(query, conversationHistory);
+  const detectedLang = detectClientLanguage(query);
   const isEnglish = detectedLang === 'english';
   const isHindi = detectedLang === 'hindi';
 
-  // 1. DEPARTMENT OF COMPUTER SCIENCE / APPLICATIONS
-  if (/\b(computer science|computer|csa|cse|mca|cs department)\b/i.test(q)) {
-    const dept = departmentsData.find(d => d.id === 'dept-cs-applications')!;
-    const isLocation = /\b(kaha|kahan|kidhar|where|location|building|rasta|map|campus mein)\b/i.test(q);
-    const isHod = /\b(hod|head|dean|kaun hai|who is)\b/i.test(q);
-    const isCourses = /\b(course|courses|programme|programmes|degree)\b/i.test(q);
-    const isContact = /\b(contact|number|phone|email)\b/i.test(q);
+  // 1. Dynamic Department Search
+  for (const dept of departmentsData) {
+    const deptName = dept.name.toLowerCase();
+    const code = dept.id.replace('dept-', '').toLowerCase();
+    const keywords = [deptName, code];
 
-    if (isLocation) {
+    if (code === 'cs-applications') keywords.push('computer science', 'computer', 'csa', 'cse', 'mca', 'cs department');
+    if (code === 'physics') keywords.push('physics', 'bhautik');
+    if (code === 'chemistry') keywords.push('chemistry', 'rasayan');
+    if (code === 'law') keywords.push('law', 'vidhi', 'llb');
+    if (code === 'business-mgmt') keywords.push('business', 'management', 'mba');
+    if (code === 'mathematics') keywords.push('maths', 'mathematics');
+
+    if (keywords.some(kw => q.includes(kw))) {
+      const isLocation = /\b(kaha|kahan|kidhar|where|location|building|map)\b/i.test(q);
+      const isHod = /\b(hod|head|kaun hai|who is)\b/i.test(q);
+      const isCourses = /\b(course|courses|programme|programmes|degree)\b/i.test(q);
+      const isContact = /\b(contact|number|phone|email)\b/i.test(q);
+
+      if (isLocation) {
+        return {
+          answer: isEnglish
+            ? `The **${dept.name}** is located at ${dept.location || dept.building}.`
+            : `**${dept.name}** ${dept.location || dept.building} mein sthit hai.`,
+          language: detectedLang,
+          intent: 'department_location',
+          intentCategory: 'LOCATION',
+          responsibleUnit: { name: dept.name, type: 'department', location: dept.location },
+          location: { name: dept.building, building: dept.building, landmark: 'DHSGSU Campus', mapLink: dept.mapLink },
+          display: { responsibleUnit: false, location: true, contact: false, documents: false, nextSteps: false, sources: true, relatedTopics: false }
+        };
+      }
+
+      if (isHod) {
+        return {
+          answer: `**${dept.name}** ke Head (HOD) **${dept.hod}** hain.`,
+          language: detectedLang,
+          intent: 'department_hod',
+          intentCategory: 'INFORMATION',
+          responsibleUnit: { name: dept.name, type: 'department', location: dept.location },
+          display: { responsibleUnit: true, location: false, contact: false, documents: false, nextSteps: false, sources: true, relatedTopics: false }
+        };
+      }
+
+      if (isCourses) {
+        return {
+          answer: `**${dept.name}** mein yeh programmes offer hote hain: **${dept.programmes.join(', ')}**.`,
+          language: detectedLang,
+          intent: 'department_courses',
+          intentCategory: 'INFORMATION',
+          responsibleUnit: { name: dept.name, type: 'department', location: dept.location },
+          display: { responsibleUnit: true, location: false, contact: false, documents: false, nextSteps: false, sources: true, relatedTopics: false }
+        };
+      }
+
+      if (isContact) {
+        return {
+          answer: `**${dept.name}** ka contact: Phone: **${dept.contact?.phone || 'N/A'}**, Email: **${dept.contact?.email || 'N/A'}**.`,
+          language: detectedLang,
+          intent: 'department_contact',
+          intentCategory: 'CONTACT',
+          responsibleUnit: { name: dept.name, type: 'department', location: dept.location },
+          contact: { phone: dept.contact?.phone, email: dept.contact?.email, officialWebsite: dept.officialSourceUrl },
+          display: { responsibleUnit: true, location: false, contact: true, documents: false, nextSteps: false, sources: true, relatedTopics: false }
+        };
+      }
+
       return {
         answer: isEnglish
-          ? `The ${dept.name} is located in the CSA Building on the Upper Campus near the Science Block.`
-          : `Department of Computer Science & Applications (CSA) Upper Campus mein Science Block ke paas sthit hai.`,
+          ? `Sure! For the **${dept.name}** (${dept.schoolName}), I can help with location, courses (${dept.programmes.join(', ')}), HOD, or contact details. What would you like to know?`
+          : `Haan, bilkul. **${dept.name}** ke baare mein location, courses (${dept.programmes.join(', ')}), HOD ya contact details me se kis cheez ke baare mein janna hai?`,
         language: detectedLang,
-        intent: 'department_location',
-        intentCategory: 'LOCATION',
-        responsibleUnit: { name: dept.name, type: 'department', location: dept.location },
-        location: { name: dept.building, building: dept.building, landmark: 'Upper Campus near Science Block', mapLink: dept.mapLink },
-        display: { responsibleUnit: false, location: true, contact: false, documents: false, nextSteps: false, sources: true, relatedTopics: false }
-      };
-    }
-
-    if (isHod) {
-      return {
-        answer: `${dept.name} ke Head (HOD) **${dept.hod}** hain. Unka office CSA Building mein hai.`,
-        language: detectedLang,
-        intent: 'department_hod',
+        intent: 'department_overview',
         intentCategory: 'INFORMATION',
         responsibleUnit: { name: dept.name, type: 'department', location: dept.location },
         display: { responsibleUnit: true, location: false, contact: false, documents: false, nextSteps: false, sources: true, relatedTopics: false }
       };
     }
-
-    if (isCourses) {
-      return {
-        answer: `${dept.name} mein yeh programmes offer hote hain: **${dept.programmes.join(', ')}**.`,
-        language: detectedLang,
-        intent: 'department_courses',
-        intentCategory: 'INFORMATION',
-        responsibleUnit: { name: dept.name, type: 'department', location: dept.location },
-        display: { responsibleUnit: true, location: false, contact: false, documents: false, nextSteps: false, sources: true, relatedTopics: false }
-      };
-    }
-
-    if (isContact) {
-      return {
-        answer: `${dept.name} ka contact: Phone: **${dept.contact?.phone || 'N/A'}**, Email: **${dept.contact?.email || 'N/A'}**.`,
-        language: detectedLang,
-        intent: 'department_contact',
-        intentCategory: 'CONTACT',
-        responsibleUnit: { name: dept.name, type: 'department', location: dept.location },
-        contact: { phone: dept.contact?.phone, email: dept.contact?.email, officialWebsite: dept.officialSourceUrl },
-        display: { responsibleUnit: true, location: false, contact: true, documents: false, nextSteps: false, sources: true, relatedTopics: false }
-      };
-    }
-
-    // Overview
-    return {
-      answer: isEnglish
-        ? `Sure! For the **${dept.name}** (${dept.schoolName}), I can help with location, courses (${dept.programmes.join(', ')}), HOD, or contact details. What would you like to know?`
-        : `Haan, bilkul. **${dept.name}** ke baare mein location, courses (${dept.programmes.join(', ')}), HOD ya contact details me se kis cheez ke baare mein janna hai?`,
-      language: detectedLang,
-      intent: 'department_overview',
-      intentCategory: 'INFORMATION',
-      responsibleUnit: { name: dept.name, type: 'department', location: dept.location },
-      display: { responsibleUnit: true, location: false, contact: false, documents: false, nextSteps: false, sources: true, relatedTopics: false }
-    };
   }
 
-  // 2. CENTRAL LIBRARY
+  // 2. Central Library
   if (q.includes('library') || q.includes('লাইব্রেরি') || q.includes('लायब्ररी')) {
     const loc = locationsData.find(l => l.id === 'loc-central-library')!;
     return {
@@ -162,7 +168,7 @@ function getLocalKnowledgeAnswer(
     };
   }
 
-  // 3. SCHOLARSHIP
+  // 3. Scholarship
   if (q.includes('scholarship') && (q.includes('nahi aayi') || q.includes('pending') || q.includes('paisa') || q.includes('scene'))) {
     return {
       answer: `Achha, scholarship approve ho chuki hai ya abhi pending hai?`,
@@ -173,7 +179,17 @@ function getLocalKnowledgeAnswer(
     };
   }
 
-  // 4. CASUAL / SOCIAL
+  // 4. Casual Conversations
+  if (/^(kuch puchna hai|ek baat puchu|can i ask something)(\s|!|\.|\?)*$/i.test(q)) {
+    return {
+      answer: isEnglish ? `Sure, go ahead and ask! 😄` : `Bilkul, pucho! Jo bhi jaana hai batao 😄`,
+      language: detectedLang,
+      intent: 'conversation_opening',
+      intentCategory: 'CASUAL_CONVERSATION',
+      display: { responsibleUnit: false, location: false, contact: false, documents: false, nextSteps: false, sources: false, relatedTopics: false }
+    };
+  }
+
   if (/\b(hello bol|bol na|bol re|kuch bol|kya haal|aur bata|aur bhai|kya scene)\b/i.test(q)) {
     return {
       answer: `Hello 😄`,

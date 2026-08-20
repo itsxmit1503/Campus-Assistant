@@ -1,13 +1,14 @@
 {
   "name": "dhsgsu-campus-assistant-backend",
   "version": "1.0.0",
-  "description": "Production Express backend and AI integration for DHSGSU Campus Assistant",
+  "description": "Production Express backend, MongoDB Atlas integration and AI routing for DHSGSU Campus Assistant",
   "main": "dist/index.js",
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "seed": "tsx src/db/seed.ts"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.0",
@@ -17,6 +18,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "mongoose": "^8.10.1",
     "tsx": "^4.19.2",
     "typescript": "^5.7.3"
   }

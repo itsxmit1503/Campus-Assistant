@@ -15,6 +15,17 @@ import {
   NoticeGuideline
 } from '../types/index.js';
 
+import { isDbConnected } from '../db/connection.js';
+import { 
+  UniversityModel, 
+  SchoolModel, 
+  DepartmentModel, 
+  OfficeModel, 
+  ServiceModel, 
+  LocationModel, 
+  NoticeModel 
+} from '../db/models/index.js';
+
 export class KnowledgeService {
   private university: UniversityInfo = universityData as UniversityInfo;
   private schools: School[] = schoolsDepartmentsData.schools as School[];
@@ -118,7 +129,7 @@ export class KnowledgeService {
   }
 
   /**
-   * Generates a compact, highly-targeted context snippet for Gemini (saves 80%+ tokens)
+   * Generates a compact, highly-targeted context snippet for Gemini
    */
   getCompactContextForQuery(query: string): string {
     const { matchedServices, matchedOffices, matchedDepartments, matchedLocations } = this.findRelevantContext(query);
@@ -152,6 +163,10 @@ export class KnowledgeService {
     }
 
     return parts.join('\n\n');
+  }
+
+  getStructuredKnowledgePrompt(): string {
+    return this.getCompactContextForQuery('');
   }
 }
 

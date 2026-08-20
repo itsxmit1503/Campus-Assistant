@@ -34,36 +34,86 @@ export async function sendChatMessage(
     const data: StructuredAnswer = await res.json();
     return data;
   } catch (error) {
-    console.warn('[Frontend API] Express backend unreachable or timed out, executing client-side knowledge solver:', error);
-    return getLocalKnowledgeAnswer(message, language);
+    console.warn('[Frontend API] Express backend unreachable, executing client-side progressive solver:', error);
+    return getLocalKnowledgeAnswer(message, language, conversationHistory);
   }
 }
 
 /**
- * Client-side fallback solver matching deterministic DHSGSU intents
+ * Client-side fallback solver matching progressive DHSGSU intents
  */
-function getLocalKnowledgeAnswer(query: string, lang = 'auto'): StructuredAnswer {
+function getLocalKnowledgeAnswer(
+  query: string, 
+  lang = 'auto', 
+  conversationHistory: Array<{ role: 'user' | 'assistant'; content: string }> = []
+): StructuredAnswer {
   const q = query.toLowerCase().trim();
   const isHindi = /[\u0900-\u097F]/.test(query) || q.includes('kaha') || q.includes('kya') || q.includes('nahi') || q.includes('kaise');
 
-  // Scholarship
-  if (q.includes('scholarship') || q.includes('paisa') || q.includes('chhatravritti') || q.includes('taas') || q.includes('nsp')) {
-    const service = servicesData.find(s => s.id === 'service-scholarship-support')!;
-    const office = officesData.find(o => o.id === 'office-scholarship-cell')!;
-    const loc = locationsData.find(l => l.id === 'loc-admin-block')!;
+  const lastUserMsg = conversationHistory.filter(m => m.role === 'user').slice(-2, -1)[0]?.content.toLowerCase() || '';
+  const lastAssistantMsg = conversationHistory.filter(m => m.role === 'assistant').slice(-1)[0]?.content.toLowerCase() || '';
 
+  // 1. GREETING
+  if (/^(hey|hello|hi|hiya|namaste|what's up|good morning|hey there)(\s|!|\.|\?)*$/i.test(q)) {
+    return {
+      answer: isHindi ? `नमस्ते! 👋 DHSGSU कैंपस में आपकी क्या मदद करूँ?` : `Hey! 👋 How can I help you around DHSGSU?`,
+      language: isHindi ? 'Hindi' : 'English',
+      intent: 'greeting',
+      intentCategory: 'GREETING',
+      display: {
+        responsibleUnit: false,
+        location: false,
+        contact: false,
+        documents: false,
+        nextSteps: false,
+        sources: false,
+        relatedTopics: false
+      }
+    };
+  }
+
+  // 2. PROBLEM: "Meri scholarship nahi aayi" (Turn 1)
+  if (q.includes('scholarship') && (q.includes('nahi aayi') || q.includes('pending') || q.includes('paisa') || q.includes('kya karu'))) {
     return {
       answer: isHindi
-        ? `अगर आपकी छात्रवृत्ति (Scholarship) नहीं आई है, तो विश्वविद्यालय के **University Scholarship Cell (प्रशासनिक भवन, कमरा नं. 12)** या **DSW Office** में संपर्क करें।\n\nअपने आवेदन की प्रति, HOD अग्रेषण (endorsement) और बैंक पासबुक/NPCI विवरण के साथ कमरा नं 12 में जमा करें।`
-        : `If your scholarship has not been disbursed, visit the **University Scholarship & Fellowship Cell** located in **Room No. 12, Administrative Block** (in coordination with DSW Office).\n\nSubmit your endorsed MP Taas / NSP application form along with income & caste certificates.`,
+        ? `मैं आपकी मदद करता हूँ। क्या आपका स्कॉलरशिप फॉर्म पोर्टल (MP Taas / NSP) पर स्वीकृत (Approved) हो चुका है, या वेरिफिकेशन पेंडिंग है?`
+        : `I can help you figure that out. Is your scholarship application already approved on the portal, or is verification still pending?`,
       language: isHindi ? 'Hindi/Hinglish' : 'English',
-      intent: 'scholarship_issue',
-      service: { id: service.id, name: service.name, category: service.category },
+      intent: 'scholarship_triage',
+      intentCategory: 'PROBLEM_SOLVING',
+      display: {
+        responsibleUnit: false,
+        location: false,
+        contact: false,
+        documents: false,
+        nextSteps: false,
+        sources: false,
+        relatedTopics: false
+      }
+    };
+  }
+
+  // 3. FOLLOW-UP: "Approved hai" / "Kahan jana hai"
+  if (
+    q.includes('approved') || 
+    q.includes('kahan jana') || 
+    q.includes('kaha jana') || 
+    q.includes('where to go') ||
+    ((q === 'haan' || q === 'yes') && lastAssistantMsg.includes('where'))
+  ) {
+    const office = officesData.find(o => o.id === 'office-scholarship-cell')!;
+    const loc = locationsData.find(l => l.id === 'loc-admin-block')!;
+    return {
+      answer: isHindi
+        ? `इसके लिए आपको **University Scholarship Cell (प्रशासनिक भवन, कमरा नंबर 12)** में संपर्क करना होगा।`
+        : `For this, you should visit the **University Scholarship Cell** located in **Room No. 12, Main Administrative Block** (DSW Section).`,
+      language: isHindi ? 'Hindi' : 'English',
+      intent: 'scholarship_location',
+      intentCategory: 'LOCATION',
       responsibleUnit: {
         name: office.name,
         type: 'office',
-        location: office.location,
-        contact: office.contact?.phone || '07582-265810'
+        location: office.location
       },
       location: {
         name: loc.name,
@@ -72,142 +122,91 @@ function getLocalKnowledgeAnswer(query: string, lang = 'auto'): StructuredAnswer
         landmark: loc.landmark,
         mapLink: loc.mapLink
       },
-      contact: {
-        phone: office.contact?.phone,
-        email: office.contact?.email,
-        officialWebsite: service.officialSourceUrl
-      },
-      requiredDocuments: service.requiredDocuments,
-      nextSteps: service.process,
-      sources: [
-        {
-          title: 'DHSGSU Official Scholarship Portal',
-          url: service.officialSourceUrl,
-          sourceType: 'official',
-          verified: true
-        }
-      ],
-      relatedTopics: ['Dean Students Welfare', 'Fee Assistance', 'Bonafide Certificate'],
-      confidence: 'verified_official'
+      display: {
+        responsibleUnit: true,
+        location: true,
+        contact: false,
+        documents: false,
+        nextSteps: true,
+        sources: true,
+        relatedTopics: false
+      }
     };
   }
 
-  // Marksheet Correction
-  if (q.includes('marksheet') || q.includes('ankpatrika') || q.includes('correction') || q.includes('spelling')) {
-    const service = servicesData.find(s => s.id === 'service-marksheet-correction')!;
-    const office = officesData.find(o => o.id === 'office-exam-cell')!;
-    const loc = locationsData.find(l => l.id === 'loc-pariksha-bhawan')!;
-
-    return {
-      answer: isHindi
-        ? `मार्कशीट में सुधार हेतु **परीक्षा भवन (Pariksha Bhawan - Examination Cell)** में आवेदन देना होगा। विभागाध्यक्ष (HOD) से हस्ताक्षरित आवेदन और 10वीं की अंकसूची के साथ परीक्षा काउंटर पर संपर्क करें।`
-        : `For marksheet corrections or duplicate marksheets, the responsible office is the **Examination Cell** located in **Pariksha Bhawan**.\n\nSubmit a written application endorsed by your Department HOD and Class 10th certificate copy.`,
-      language: isHindi ? 'Hindi/Hinglish' : 'English',
-      intent: 'marksheet_correction',
-      service: { id: service.id, name: service.name, category: service.category },
-      responsibleUnit: {
-        name: office.name,
-        type: 'office',
-        location: office.location,
-        contact: office.contact?.helpline || '07582-264445'
-      },
-      location: {
-        name: loc.name,
-        building: loc.building,
-        floor: loc.floor,
-        landmark: loc.landmark,
-        mapLink: loc.mapLink
-      },
-      contact: {
-        helpline: office.contact?.helpline,
-        email: office.contact?.email,
-        officialWebsite: office.officialSourceUrl
-      },
-      requiredDocuments: service.requiredDocuments,
-      nextSteps: service.process,
-      sources: [
-        {
-          title: 'DHSGSU Examination Cell',
-          url: office.officialSourceUrl,
-          sourceType: 'official',
-          verified: true
-        }
-      ],
-      relatedTopics: ['Duplicate Marksheet', 'Degree Transcripts', 'Exam Form Resolution'],
-      confidence: 'verified_official'
-    };
-  }
-
-  // Library
-  if (q.includes('library') || q.includes('pustakalaya') || q.includes('book')) {
-    const service = servicesData.find(s => s.id === 'service-library-access')!;
+  // 4. DIRECT LOCATION: Library
+  if (q.includes('library kaha') || q.includes('library kahan') || q.includes('where is the library')) {
     const loc = locationsData.find(l => l.id === 'loc-central-library')!;
-
     return {
       answer: isHindi
-        ? `**जवाहरलाल नेहरू केंद्रीय पुस्तकालय (Jawaharlal Nehru Central Library)** कला व विज्ञान संकाय के बीच स्थित है। यह सुबह 8:00 से रात 8:00 बजे तक खुला रहता है।`
-        : `The **Jawaharlal Nehru Central Library** is centrally located on Patharia Hills between Faculty of Arts and Science Complex.\n\nOpen 8:00 AM - 8:00 PM on working days.`,
-      language: isHindi ? 'Hindi/Hinglish' : 'English',
-      intent: 'library_inquiry',
-      service: { id: service.id, name: service.name, category: service.category },
-      responsibleUnit: {
-        name: 'Jawaharlal Nehru Central Library',
-        type: 'office',
-        location: service.location
-      },
+        ? `**केंद्रीय पुस्तकालय (Central Library)** कला और विज्ञान संकाय के बीच केंद्रीय परिसर में स्थित है। यह सुबह 8:00 से रात 8:00 बजे तक खुलता है।`
+        : `The **Jawaharlal Nehru Central Library** is centrally located between Faculty of Arts and Science Complex on Patharia Hills. Open 8:00 AM - 8:00 PM on working days.`,
+      language: isHindi ? 'Hindi' : 'English',
+      intent: 'library_location',
+      intentCategory: 'LOCATION',
       location: {
         name: loc.name,
         building: loc.building,
         landmark: loc.landmark,
         mapLink: loc.mapLink
       },
-      requiredDocuments: service.requiredDocuments,
-      nextSteps: service.process,
-      sources: [
-        {
-          title: 'DHSGSU Central Library',
-          url: service.officialSourceUrl,
-          sourceType: 'official',
-          verified: true
-        }
-      ],
-      confidence: 'verified_official'
+      display: {
+        responsibleUnit: false,
+        location: true,
+        contact: false,
+        documents: false,
+        nextSteps: false,
+        sources: true,
+        relatedTopics: false
+      }
     };
   }
 
-  // Generic fallback
+  // 5. DIRECT LOCATION: MCA Department
+  if (q.includes('mca') && (q.includes('kaha') || q.includes('kahan') || q.includes('department'))) {
+    const dept = departmentsData.find(d => d.id === 'dept-cs-applications')!;
+    const loc = locationsData.find(l => l.id === 'loc-csa-building')!;
+    return {
+      answer: isHindi
+        ? `MCA विभाग **कंप्यूटर साइंस एंड एप्लीकेशंस (CSA Building)** में स्थित है, जो अपर कैंपस में साइंस ब्लॉक के पास है।`
+        : `The MCA programme is located in the **Computer Science & Applications (CSA) Building** on Upper Campus near the Science Block.`,
+      language: isHindi ? 'Hindi' : 'English',
+      intent: 'mca_location',
+      intentCategory: 'LOCATION',
+      location: {
+        name: dept.building,
+        building: dept.building,
+        landmark: 'Patharia Hills Campus',
+        mapLink: dept.mapLink
+      },
+      display: {
+        responsibleUnit: false,
+        location: true,
+        contact: false,
+        documents: false,
+        nextSteps: false,
+        sources: true,
+        relatedTopics: false
+      }
+    };
+  }
+
+  // Default clean conversational response
   return {
     answer: isHindi
-      ? `मैं डॉ. हरीसिंह गौर विश्वविद्यालय (DHSGSU) का डिजिटल कैंपस सहायक हूँ। आप छात्रवृत्ति, परीक्षा, हॉस्टल, लाइब्रेरी, मेडिकल व विभागों की जानकारी पूछ सकते हैं।`
-      : `I am your DHSGSU Campus Assistant. I can help guide you to the right department, administrative office, library, hostel, examination support, or scholarship cell.`,
-    language: isHindi ? 'Hindi/Hinglish' : 'English',
+      ? `मैं DHSGSU कैंपस सहायक हूँ। आप छात्रवृत्ति, अंकसूची, परीक्षा फॉर्म, हॉस्टल या विभाग संबंधी जो भी पूछना चाहें, निसंकोच बताएं।`
+      : `I am your DHSGSU Campus Assistant. Tell me what issue you're facing, and I'll guide you to the right place.`,
+    language: isHindi ? 'Hindi' : 'English',
     intent: 'general_assistance',
-    responsibleUnit: {
-      name: 'Main Administrative Block (Prashasnik Bhawan)',
-      type: 'office',
-      location: 'Patharia Hills, Sagar',
-      contact: '07582-265810'
-    },
-    location: {
-      name: 'Prashasnik Bhawan',
-      building: 'Administrative Block',
-      landmark: 'Patharia Hills Campus',
-      mapLink: 'https://maps.google.com/?q=Dr.+Harisingh+Gour+Vishwavidyalaya+Sagar'
-    },
-    contact: {
-      email: 'registrar@dhsgsu.edu.in',
-      helpline: '07582-265810',
-      officialWebsite: 'https://dhsgsu.edu.in/index.php/en/'
-    },
-    sources: [
-      {
-        title: 'DHSGSU Official Website',
-        url: 'https://dhsgsu.edu.in/index.php/en/',
-        sourceType: 'official',
-        verified: true
-      }
-    ],
-    relatedTopics: ['Scholarships', 'Examination Cell', 'Central Library', 'Hostels', 'Departments'],
-    confidence: 'general_guidance'
+    intentCategory: 'CASUAL_CONVERSATION',
+    display: {
+      responsibleUnit: false,
+      location: false,
+      contact: false,
+      documents: false,
+      nextSteps: false,
+      sources: false,
+      relatedTopics: false
+    }
   };
 }

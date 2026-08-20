@@ -14,10 +14,23 @@ export interface ResponsibleUnit {
   officeHours?: string;
 }
 
+export interface DisplayFlags {
+  responsibleUnit?: boolean;
+  location?: boolean;
+  contact?: boolean;
+  documents?: boolean;
+  nextSteps?: boolean;
+  sources?: boolean;
+  relatedTopics?: boolean;
+}
+
 export interface StructuredAnswer {
   answer: string;
   language: string;
   intent: string;
+  intentCategory?: 'GREETING' | 'CASUAL_CONVERSATION' | 'INFORMATION' | 'LOCATION' | 'CONTACT' | 'PROCESS' | 'PROBLEM_SOLVING' | 'CURRENT_INFORMATION' | 'EXPLORATION';
+  display?: DisplayFlags;
+  followUpQuestion?: string;
   service?: {
     id: string;
     name: string;

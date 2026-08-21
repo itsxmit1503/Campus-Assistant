@@ -13,8 +13,8 @@ interface ClientRateLimitRecord {
 
 const clientTracking = new Map<string, ClientRateLimitRecord>();
 
-// Clean up stale client records every 10 minutes
-setInterval(() => {
+// Clean up stale client records every 10 minutes (unref prevents blocking process exit)
+const cleanupTimer = setInterval(() => {
   const now = Date.now();
   for (const [key, record] of clientTracking.entries()) {
     if (record.timestamps.length === 0 || now - record.timestamps[record.timestamps.length - 1] > 10 * 60 * 1000) {
@@ -22,6 +22,9 @@ setInterval(() => {
     }
   }
 }, 10 * 60 * 1000);
+if (typeof cleanupTimer.unref === 'function') {
+  cleanupTimer.unref();
+}
 
 export class SpamProtectionService {
   /**

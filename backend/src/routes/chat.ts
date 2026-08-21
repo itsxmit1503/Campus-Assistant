@@ -1,12 +1,13 @@
 import { Router, Request, Response } from 'express';
 import { geminiService } from '../services/geminiService.js';
 import { conversationContextService } from '../services/conversationContextService.js';
+import { spamProtectionService } from '../services/spamProtectionService.js';
 import { ChatRequest } from '../types/index.js';
 
 export const chatRouter = Router();
 
 /**
- * POST /api/chat - Process a chat message with structured context, follow-up tracking, and persistence
+ * POST /api/chat - Process a chat message with structured context, anti-spam, follow-up tracking, and persistence
  */
 chatRouter.post('/', async (req: Request, res: Response): Promise<void> => {
   try {
@@ -22,10 +23,66 @@ chatRouter.post('/', async (req: Request, res: Response): Promise<void> => {
       ? conversationId.trim()
       : `conv_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 
-    // 1. Get or initialize session state
+    const clientIp = (req.headers['x-forwarded-for'] as string)?.split(',')[0] || req.socket.remoteAddress || effectiveConvId;
+
+    // ── 1. Anti-Spam Rate Limit Check ──────────────────────────────────────────
+    const rateLimit = spamProtectionService.checkRateLimit(clientIp);
+    if (rateLimit.isRateLimited) {
+      const isHindi = /[\u0900-\u097F]/.test(cleanMsg) || /\b(kaha|kya|hai|batao)\b/i.test(cleanMsg);
+      res.status(429).json({
+        answer: isHindi
+          ? `कृपया कुछ सेकंड प्रतीक्षा करें। आप बहुत तेजी से संदेश भेज रहे हैं (${rateLimit.retryAfterSeconds} सेकंड बाद पुनः प्रयास करें)।`
+          : `You are sending messages too quickly. Please wait ${rateLimit.retryAfterSeconds} seconds before sending another question.`,
+        language: isHindi ? 'hindi' : 'english',
+        intent: 'rate_limited',
+        intentCategory: 'CASUAL_CONVERSATION',
+        conversationId: effectiveConvId,
+        messageId: `rate_${Date.now()}`,
+        serverTimestamp: new Date().toISOString(),
+        display: {
+          responsibleUnit: false,
+          location: false,
+          contact: false,
+          documents: false,
+          nextSteps: false,
+          sources: false,
+          relatedTopics: false
+        }
+      });
+      return;
+    }
+
+    // ── 2. Get or initialize session state ─────────────────────────────────────
     const session = await conversationContextService.getOrCreateSession(effectiveConvId);
 
-    // 2. Persist user message
+    // ── 3. Check for Repeated Duplicate Queries ────────────────────────────────
+    const lastAssistantMsg = [...session.messages].reverse().find(m => m.role === 'assistant');
+    const repeatCheck = spamProtectionService.checkRepeatedQuery(
+      effectiveConvId,
+      cleanMsg,
+      lastAssistantMsg?.structuredData
+    );
+
+    if (repeatCheck.isRepeated && repeatCheck.customResponse) {
+      console.log(`[SPAM] Repeated query detected (Count: ${repeatCheck.repeatCount}) for "${cleanMsg}" — returning instant response`);
+      
+      const storedAssistant = await conversationContextService.appendMessage(
+        effectiveConvId,
+        'assistant',
+        repeatCheck.customResponse.answer,
+        repeatCheck.customResponse
+      );
+
+      res.json({
+        ...repeatCheck.customResponse,
+        conversationId: effectiveConvId,
+        messageId: storedAssistant.messageId,
+        serverTimestamp: storedAssistant.createdAt.toISOString()
+      });
+      return;
+    }
+
+    // ── 4. Persist user message ────────────────────────────────────────────────
     await conversationContextService.appendMessage(
       effectiveConvId,
       'user',
@@ -34,7 +91,7 @@ chatRouter.post('/', async (req: Request, res: Response): Promise<void> => {
       clientMessageId
     );
 
-    // 3. Resolve context and history (using provided history or stored session messages)
+    // ── 5. Resolve context and history ─────────────────────────────────────────
     const effectiveHistory = Array.isArray(conversationHistory) && conversationHistory.length > 0
       ? conversationHistory
       : session.messages.map(m => ({ role: m.role as 'user' | 'assistant', content: m.content }));
@@ -45,7 +102,7 @@ chatRouter.post('/', async (req: Request, res: Response): Promise<void> => {
       session.activeContext
     );
 
-    // 4. Process with Gemini & Official Verification Pipeline
+    // ── 6. Process with Gemini & Official Verification Pipeline ────────────────
     const answer = await geminiService.processChat({
       message: cleanMsg,
       conversationId: effectiveConvId,
@@ -53,7 +110,7 @@ chatRouter.post('/', async (req: Request, res: Response): Promise<void> => {
       language: language || 'auto'
     });
 
-    // 5. Update session active context based on returned structured data
+    // ── 7. Update session active context ───────────────────────────────────────
     if (answer.entity && answer.entity.name) {
       session.activeContext.activeEntityName = answer.entity.name;
       session.activeContext.activeEntityType = answer.entity.type as any;
@@ -63,7 +120,7 @@ chatRouter.post('/', async (req: Request, res: Response): Promise<void> => {
       session.activeContext.activeEntityType = resolvedContext.effectiveContext.activeEntityType;
     }
 
-    // 6. Persist assistant message
+    // ── 8. Persist assistant message ───────────────────────────────────────────
     const assistantStoredMsg = await conversationContextService.appendMessage(
       effectiveConvId,
       'assistant',
@@ -71,7 +128,7 @@ chatRouter.post('/', async (req: Request, res: Response): Promise<void> => {
       answer
     );
 
-    // 7. Return complete structured response with synchronization metadata
+    // ── 9. Return complete structured response with synchronization metadata ───
     res.json({
       ...answer,
       conversationId: effectiveConvId,

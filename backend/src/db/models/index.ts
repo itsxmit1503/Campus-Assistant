@@ -156,6 +156,30 @@ const NoticeSchema = new Schema({
   verified: { type: Boolean, default: true }
 }, { timestamps: true });
 
+// 8. Conversation & Message Persistence Schema
+const ChatMessageSubSchema = new Schema({
+  messageId: { type: String, required: true },
+  role: { type: String, enum: ['user', 'assistant', 'system'], required: true },
+  content: { type: String, required: true },
+  structuredData: { type: Schema.Types.Mixed },
+  createdAt: { type: Date, default: Date.now }
+}, { _id: false });
+
+const ConversationSchema = new Schema({
+  conversationId: { type: String, required: true, unique: true, index: true },
+  messages: [ChatMessageSubSchema],
+  activeContext: {
+    activeEntityId: { type: String },
+    activeEntityName: { type: String },
+    activeEntityType: { type: String },
+    activeTopicCategory: { type: String },
+    activeCourse: { type: String },
+    activeHostel: { type: String },
+    lastUpdated: { type: Date, default: Date.now }
+  },
+  expiresAt: { type: Date, default: () => new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), index: { expires: 0 } }
+}, { timestamps: true });
+
 export const UniversityModel = mongoose.models.University || mongoose.model('University', UniversitySchema);
 export const SchoolModel = mongoose.models.School || mongoose.model('School', SchoolSchema);
 export const DepartmentModel = mongoose.models.Department || mongoose.model('Department', DepartmentSchema);
@@ -163,3 +187,5 @@ export const OfficeModel = mongoose.models.Office || mongoose.model('Office', Of
 export const ServiceModel = mongoose.models.Service || mongoose.model('Service', ServiceSchema);
 export const LocationModel = mongoose.models.Location || mongoose.model('Location', LocationSchema);
 export const NoticeModel = mongoose.models.Notice || mongoose.model('Notice', NoticeSchema);
+export const ConversationModel = mongoose.models.Conversation || mongoose.model('Conversation', ConversationSchema);
+

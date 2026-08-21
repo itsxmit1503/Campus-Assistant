@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Mic, RefreshCw, Sparkles, User, Landmark } from 'lucide-react';
+import { Send, Mic, RefreshCw, Sparkles, User, Landmark, Trash2 } from 'lucide-react';
 import { ChatMessage, StructuredAnswer } from '../types';
-import { sendChatMessage } from '../lib/api';
+import { sendChatMessage, getChatHistory, clearChatConversation } from '../lib/api';
 import { useLanguage } from '../lib/languageContext';
 import StructuredAnswerCard from './StructuredAnswerCard';
 
@@ -27,12 +27,63 @@ export default function ChatInterface({ initialPrompt = '', className = '' }: Ch
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState(initialPrompt);
   const [loading, setLoading] = useState(false);
+  const [conversationId, setConversationId] = useState<string>('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
+
+  // 1. Initialize Conversation Session & Load Persisted Messages
+  useEffect(() => {
+    let savedConvId = '';
+    try {
+      savedConvId = localStorage.getItem('dhsgsu_chat_conversation_id') || '';
+      if (!savedConvId) {
+        savedConvId = `conv_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+        localStorage.setItem('dhsgsu_chat_conversation_id', savedConvId);
+      }
+      setConversationId(savedConvId);
+
+      // Load cached messages from localStorage for instant offline/fast load
+      const savedMessagesJson = localStorage.getItem('dhsgsu_cached_messages');
+      if (savedMessagesJson) {
+        const parsed = JSON.parse(savedMessagesJson);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setMessages(parsed);
+        }
+      }
+
+      // Sync latest history from backend asynchronously
+      getChatHistory(savedConvId).then(history => {
+        if (history && Array.isArray(history.messages) && history.messages.length > 0) {
+          const formatted: ChatMessage[] = history.messages.map(m => ({
+            id: m.messageId,
+            role: m.role,
+            content: m.content,
+            structuredData: m.structuredData,
+            timestamp: new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          }));
+          setMessages(formatted);
+          localStorage.setItem('dhsgsu_cached_messages', JSON.stringify(formatted));
+        }
+      });
+    } catch (e) {
+      console.warn('[ChatInterface] Local storage not accessible:', e);
+    }
+  }, []);
+
+  // 2. Persist messages locally on change
+  useEffect(() => {
+    try {
+      if (messages.length > 0) {
+        localStorage.setItem('dhsgsu_cached_messages', JSON.stringify(messages));
+      }
+    } catch (e) {
+      console.warn('[ChatInterface] Failed to save messages to local storage:', e);
+    }
+  }, [messages]);
 
   useEffect(() => {
     scrollToBottom();
@@ -48,8 +99,9 @@ export default function ChatInterface({ initialPrompt = '', className = '' }: Ch
     const query = (textToSend || input).trim();
     if (!query || loading) return;
 
+    const clientMsgId = `user_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
     const userMessage: ChatMessage = {
-      id: `user-${Date.now()}`,
+      id: clientMsgId,
       role: 'user',
       content: query,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
@@ -61,27 +113,39 @@ export default function ChatInterface({ initialPrompt = '', className = '' }: Ch
     setLoading(true);
 
     try {
-      // Build conversation history for context
+      // Build compact bounded conversation history (token-efficient)
       const history = newMessages.slice(-6).map(m => ({
         role: m.role,
         content: m.content
       }));
 
-      const structuredAnswer = await sendChatMessage(query, history, language);
+      const structuredAnswer = await sendChatMessage(
+        query,
+        conversationId,
+        history,
+        language,
+        clientMsgId
+      );
 
       const assistantMessage: ChatMessage = {
-        id: `assistant-${Date.now()}`,
+        id: structuredAnswer.messageId || `assistant_${Date.now()}`,
         role: 'assistant',
         content: structuredAnswer.answer,
         structuredData: structuredAnswer,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        timestamp: structuredAnswer.serverTimestamp
+          ? new Date(structuredAnswer.serverTimestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
 
-      setMessages(prev => [...prev, assistantMessage]);
+      setMessages(prev => {
+        // Prevent duplicate append if message already exists
+        if (prev.some(m => m.id === assistantMessage.id)) return prev;
+        return [...prev, assistantMessage];
+      });
     } catch (err) {
       console.error('[ChatInterface] Error during chat exchange:', err);
       const errorMessage: ChatMessage = {
-        id: `assistant-${Date.now()}`,
+        id: `err_${Date.now()}`,
         role: 'assistant',
         content: "I couldn't reach the campus assistant right now. Please try again.",
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
@@ -91,6 +155,25 @@ export default function ChatInterface({ initialPrompt = '', className = '' }: Ch
     } finally {
       setLoading(false);
       setTimeout(() => inputRef.current?.focus(), 100);
+    }
+  };
+
+  const handleClearConversation = async () => {
+    try {
+      const oldConvId = conversationId;
+      // 1. Clear server context & history
+      if (oldConvId) {
+        clearChatConversation(oldConvId);
+      }
+      // 2. Clear local storage
+      localStorage.removeItem('dhsgsu_cached_messages');
+      const newConvId = `conv_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+      localStorage.setItem('dhsgsu_chat_conversation_id', newConvId);
+      setConversationId(newConvId);
+      // 3. Clear UI state
+      setMessages([]);
+    } catch (e) {
+      setMessages([]);
     }
   };
 
@@ -116,17 +199,19 @@ export default function ChatInterface({ initialPrompt = '', className = '' }: Ch
             </div>
             <div className="text-[11px] text-campus-muted flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span>Online • Problem-to-Place Guide</span>
+              <span>Online • Grounded & Verified</span>
             </div>
           </div>
         </div>
 
         {messages.length > 0 && (
           <button
-            onClick={() => setMessages([])}
-            className="text-xs text-campus-muted hover:text-campus-text px-2.5 py-1 rounded border border-campus-border hover:bg-campus-surface transition-colors"
+            onClick={handleClearConversation}
+            className="text-xs text-campus-muted hover:text-red-500 px-2.5 py-1 rounded border border-campus-border hover:bg-campus-surface transition-colors flex items-center gap-1.5"
+            title="Clear conversation history and reset context"
           >
-            Clear Conversation
+            <Trash2 className="w-3.5 h-3.5" />
+            <span>Clear Conversation</span>
           </button>
         )}
       </div>
@@ -149,75 +234,58 @@ export default function ChatInterface({ initialPrompt = '', className = '' }: Ch
               <div className="text-[11px] font-semibold uppercase tracking-wider text-campus-muted mb-2 px-1">
                 Suggested Questions
               </div>
-              <div className="grid grid-cols-1 gap-2">
+              <div className="flex flex-wrap gap-2">
                 {SUGGESTED_PROMPTS.map((prompt, idx) => (
                   <button
                     key={idx}
                     onClick={() => handleSend(prompt)}
-                    className="text-left text-xs p-3 rounded-lg border border-campus-border bg-campus-surface hover:bg-campus-surfaceHover hover:border-campus-green text-campus-text transition-all flex items-center justify-between group"
+                    className="text-xs text-left px-3 py-2 rounded-lg bg-campus-surface border border-campus-border text-campus-muted hover:text-campus-text hover:border-campus-green transition-all shadow-subtle"
                   >
-                    <span>&ldquo;{prompt}&rdquo;</span>
-                    <span className="text-campus-muted group-hover:text-campus-green opacity-0 group-hover:opacity-100 transition-opacity">
-                      →
-                    </span>
+                    {prompt}
                   </button>
                 ))}
               </div>
             </div>
           </div>
         ) : (
-          messages.map((msg) => (
+          messages.map((msg, index) => (
             <div
-              key={msg.id}
+              key={msg.id || index}
               className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               {msg.role === 'assistant' && (
-                <div className="w-7 h-7 rounded-lg bg-campus-green text-white flex items-center justify-center flex-shrink-0 mt-0.5 text-xs font-bold">
+                <div className="w-7 h-7 rounded-md bg-campus-green text-white flex items-center justify-center font-bold text-xs flex-shrink-0 mt-0.5">
                   D
                 </div>
               )}
 
               <div
-                className={`max-w-[88%] sm:max-w-[80%] rounded-xl px-4 py-3 text-sm ${
+                className={`max-w-[85%] sm:max-w-[75%] rounded-2xl p-4 shadow-subtle ${
                   msg.role === 'user'
-                    ? 'bg-campus-green text-white rounded-br-none shadow-subtle'
-                    : 'bg-campus-surfaceAlt border border-campus-border rounded-bl-none text-campus-text'
+                    ? 'bg-campus-green text-white rounded-tr-none'
+                    : 'bg-campus-surface border border-campus-border text-campus-text rounded-tl-none'
                 }`}
               >
                 {msg.role === 'user' ? (
-                  <div className="whitespace-pre-line font-medium">{msg.content}</div>
+                  <div className="text-sm font-medium whitespace-pre-wrap">{msg.content}</div>
                 ) : msg.structuredData ? (
-                  <StructuredAnswerCard
-                    data={msg.structuredData}
-                    onSelectTopic={(topic) => handleSend(topic)}
-                  />
+                  <StructuredAnswerCard data={msg.structuredData} />
                 ) : (
-                  <div className="whitespace-pre-line">{msg.content}</div>
-                )}
-
-                {msg.error && (
-                  <div className="mt-3 pt-2 border-t border-red-200 dark:border-red-900/50 flex items-center gap-2">
-                    <button
-                      onClick={() => handleSend(messages[messages.length - 2]?.content || '')}
-                      className="inline-flex items-center gap-1 text-xs font-medium text-red-600 dark:text-red-400 hover:underline"
-                    >
-                      <RefreshCw className="w-3 h-3" /> Retry request
-                    </button>
-                  </div>
+                  <div className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</div>
                 )}
 
                 <div
-                  className={`text-[10px] mt-2 text-right ${
+                  className={`text-[10px] mt-2 flex items-center justify-end gap-1 ${
                     msg.role === 'user' ? 'text-emerald-100' : 'text-campus-muted'
                   }`}
                 >
-                  {msg.timestamp}
+                  <span>{msg.timestamp}</span>
                 </div>
               </div>
 
               {msg.role === 'user' && (
-                <div className="w-7 h-7 rounded-lg bg-campus-tagBg text-campus-text flex items-center justify-center flex-shrink-0 mt-0.5 text-xs font-medium border border-campus-border">
-                  <User className="w-3.5 h-3.5" />
+                <div className="w-7 h-7 rounded-md bg-campus-surface border border-campus-border text-campus-muted flex items-center justify-center font-bold text-xs flex-shrink-0 mt-0.5">
+                  <User className="w-4 h-4" />
                 </div>
               )}
             </div>
@@ -225,13 +293,17 @@ export default function ChatInterface({ initialPrompt = '', className = '' }: Ch
         )}
 
         {loading && (
-          <div className="flex items-start gap-3">
-            <div className="w-7 h-7 rounded-lg bg-campus-green text-white flex items-center justify-center flex-shrink-0 text-xs font-bold">
+          <div className="flex gap-3 justify-start">
+            <div className="w-7 h-7 rounded-md bg-campus-green text-white flex items-center justify-center font-bold text-xs flex-shrink-0 mt-0.5 animate-pulse">
               D
             </div>
-            <div className="rounded-xl px-4 py-3 bg-campus-surfaceAlt border border-campus-border rounded-bl-none text-xs text-campus-muted flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-campus-green animate-ping"></span>
-              <span>Checking university information...</span>
+            <div className="bg-campus-surface border border-campus-border rounded-2xl rounded-tl-none p-4 shadow-subtle flex items-center gap-2">
+              <div className="flex gap-1">
+                <span className="w-2 h-2 rounded-full bg-campus-green animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                <span className="w-2 h-2 rounded-full bg-campus-green animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                <span className="w-2 h-2 rounded-full bg-campus-green animate-bounce" style={{ animationDelay: '300ms' }}></span>
+              </div>
+              <span className="text-xs text-campus-muted ml-1">Verifying official records...</span>
             </div>
           </div>
         )}
@@ -239,45 +311,27 @@ export default function ChatInterface({ initialPrompt = '', className = '' }: Ch
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input bar */}
-      <div className="p-3 sm:p-4 border-t border-campus-border bg-campus-surface">
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleSend();
-          }}
-          className="flex items-center gap-2"
-        >
-          <div className="relative flex-1">
-            <input
-              ref={inputRef}
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="What do you need help with? (English, Hindi, Hinglish...)"
-              disabled={loading}
-              className="w-full pl-4 pr-10 py-3 text-sm rounded-xl border border-campus-border bg-campus-surface text-campus-text placeholder-campus-muted focus:outline-none focus:border-campus-green focus:ring-1 focus:ring-campus-green transition-all"
-            />
-            <button
-              type="button"
-              title="Voice input (Ready for upcoming release)"
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-campus-muted hover:text-campus-text transition-colors"
-              onClick={() => alert("Voice input preparation mode: Voice recognition will be enabled in upcoming release.")}
-            >
-              <Mic className="w-4 h-4" />
-            </button>
-          </div>
-
+      {/* Input area */}
+      <div className="p-3 sm:p-4 border-t border-campus-border bg-campus-surfaceAlt">
+        <div className="flex items-center gap-2">
+          <input
+            ref={inputRef}
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="What do you need help with? (English, Hindi, Hinglish...)"
+            disabled={loading}
+            className="flex-1 px-4 py-2.5 rounded-xl border border-campus-border bg-campus-surface text-sm text-campus-text placeholder-campus-muted focus:outline-none focus:border-campus-green transition-colors"
+          />
           <button
-            type="submit"
-            disabled={!input.trim() || loading}
-            aria-label="Send message"
-            className="px-4 py-3 rounded-xl bg-campus-green text-white hover:bg-campus-greenHover disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center justify-center font-medium shadow-subtle"
+            onClick={() => handleSend()}
+            disabled={loading || !input.trim()}
+            className="p-2.5 rounded-xl bg-campus-green text-white hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <Send className="w-4 h-4" />
           </button>
-        </form>
+        </div>
       </div>
     </div>
   );

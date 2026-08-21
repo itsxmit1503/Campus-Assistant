@@ -11,6 +11,7 @@ import { KnowledgeService, knowledgeService } from './knowledgeService.js';
 
 import { googlePlacesService } from './googlePlacesService.js';
 import { officialSourceFetcher } from './officialSourceFetcher.js';
+import { conversationContextService, ActiveConversationContext } from './conversationContextService.js';
 
 export interface VerifiedRequestContext {
   query: string;
@@ -21,6 +22,7 @@ export interface VerifiedRequestContext {
   exhaustiveSummary?: string;
   conflictsDetected: Array<{ field: string; entity: string; description: string }>;
   verificationSummaryText: string;
+  activeContext?: ActiveConversationContext;
 }
 
 export class EntityVerificationEngine {
@@ -39,7 +41,16 @@ export class EntityVerificationEngine {
   ): Promise<VerifiedRequestContext> {
     console.log(`\n[CHAT] User message: "${query}"`);
     const cleanQuery = query.trim().toLowerCase();
-    const isPhysicalLocationQuery = /\b(where|kaha|kahan|kidhar|location|address|building|map|campus|pahuchu|rasta)\b/i.test(query);
+
+    // ── STEP 0: Context & Follow-Up Resolution ─────────────────────────────────
+    const contextResolution = conversationContextService.resolveConversationContext(query, history);
+    const searchQuery = contextResolution.resolvedQuery;
+    if (contextResolution.isFollowUp) {
+      console.log(`[CONTEXT] Follow-up detected. Resolved query: "${searchQuery}" (Active entity: ${contextResolution.effectiveContext.activeEntityName || 'none'})`);
+    }
+
+    const isPhysicalLocationQuery = /\b(where|kaha|kahan|kidhar|location|address|building|map|campus|pahuchu|rasta)\b/i.test(query) ||
+      (contextResolution.isFollowUp && contextResolution.effectiveContext.activeTopicCategory === 'LOCATION');
 
     // ── STEP 1: Query Understanding & Information Type Identification ─────────
     let infoType = 'GENERAL_INFORMATION';
@@ -64,16 +75,16 @@ export class EntityVerificationEngine {
       exhaustiveSummary = this.buildExhaustiveCategoryData(exhaustive.category, conflictsDetected, entityRecords, identifiedEntities);
     }
 
-    // ── STEP 3: Dynamic Official Source Retrieval (Fees, Eligibility, Admissions) ──
-    const officialFact = await officialSourceFetcher.retrieveOfficialFacts(query);
+    // ── STEP 3: Dynamic Official Source Retrieval (Fees, Eligibility, Admissions, Hostels, Library) ──
+    const officialFact = await officialSourceFetcher.retrieveOfficialFacts(searchQuery);
     if (officialFact) {
       identifiedEntities.push(officialFact.entity);
-      exhaustiveSummary = (exhaustiveSummary ? exhaustiveSummary + '\n\n' : '') + `OFFICIAL DHSGSU VERIFIED PROGRAMME DATA:\n${officialFact.summary}`;
+      exhaustiveSummary = (exhaustiveSummary ? exhaustiveSummary + '\n\n' : '') + `OFFICIAL DHSGSU VERIFIED DATA:\n${officialFact.summary}`;
     }
 
-    // ── STEP 2: Specific Entity Resolution ─────────────────────────────────────
+    // ── STEP 4: Specific Entity Resolution ─────────────────────────────────────
     const { matchedDepartments, matchedOffices, matchedLocations, matchedServices } =
-      this.ks.findRelevantContext(query, history);
+      this.ks.findRelevantContext(searchQuery, []);
 
     // Resolve Departments
     for (const d of matchedDepartments) {

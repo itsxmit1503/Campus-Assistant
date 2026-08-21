@@ -134,8 +134,16 @@ export interface StructuredAnswer {
 
 export interface ChatRequest {
   message: string;
+  conversationId?: string;
+  clientMessageId?: string;
   conversationHistory?: Array<{ role: 'user' | 'assistant'; content: string }>;
   language?: string;
+}
+
+export interface ChatResponse extends StructuredAnswer {
+  conversationId: string;
+  messageId: string;
+  serverTimestamp: string;
 }
 
 export interface UniversityInfo {
